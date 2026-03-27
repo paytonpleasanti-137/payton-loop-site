@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Mind</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,700;1,400;1,600&family=Roboto+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --black:#0a0a0a;
+  --off:#f5f0e8;
+  --gold:#c9a84c;
+  --gold2:#e8c96a;
+  --dim:rgba(245,240,232,0.4);
+  --muted:rgba(245,240,232,0.25);
+  --serif:'EB Garamond',Georgia,serif;
+  --mono:'Roboto Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--black);
+  color:var(--off);
+  font-family:var(--serif);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* BG particles */
+.bg-canvas{
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,168,76,0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(201,168,76,0.03) 0%, transparent 60%);
+  pointer-events:none;z-index:0;
+}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  height:44px;
+  display:flex;align-items:center;
+  background:rgba(10,10,10,0.92);
+  border-bottom:1px solid rgba(201,168,76,0.12);
+  backdrop-filter:blur(12px);
+  padding:0 24px;
+  gap:0;
+}
+.nav-brand{
+  font-family:var(--mono);font-size:11px;letter-spacing:3px;
+  color:var(--gold);text-transform:uppercase;margin-right:auto;
+  text-decoration:none;
+}
+.nav-link{
+  font-family:var(--mono);font-size:9px;letter-spacing:2px;
+  color:var(--muted);text-transform:uppercase;
+  padding:0 14px;height:100%;display:flex;align-items:center;
+  text-decoration:none;border-left:1px solid rgba(255,255,255,0.05);
+  transition:color 0.15s;white-space:nowrap;
+}
+.nav-link:hover{color:var(--off)}
+
+/* HERO */
+.hero{
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:80px 24px 60px;
+  position:relative;z-index:1;
+  text-align:center;
+}
+
+.hero-eyebrow{
+  font-family:var(--mono);font-size:10px;letter-spacing:4px;
+  color:var(--gold);text-transform:uppercase;
+  margin-bottom:40px;
+  display:flex;align-items:center;gap:12px;
+}
+.hero-eyebrow::before,.hero-eyebrow::after{
+  content:'';display:block;width:40px;height:1px;background:var(--gold);opacity:0.4;
+}
+
+.quote-display{
+  max-width:800px;
+  margin:0 auto 40px;
+}
+
+.quote-text{
+  font-size:clamp(26px,5vw,48px);
+  font-weight:400;
+  line-height:1.4;
+  font-style:italic;
+  color:var(--off);
+  margin-bottom:24px;
+  transition:opacity 0.5s ease;
+}
+
+.quote-text::before{content:'\201C';color:var(--gold);opacity:0.6;font-size:0.9em}
+.quote-text::after {content:'\201D';color:var(--gold);opacity:0.6;font-size:0.9em}
+
+.quote-author{
+  font-family:var(--mono);font-size:11px;letter-spacing:3px;
+  color:var(--gold);text-transform:uppercase;
+  margin-bottom:8px;
+}
+.quote-category{
+  font-family:var(--mono);font-size:9px;letter-spacing:2px;
+  color:var(--muted);text-transform:uppercase;
+}
+
+.quote-controls{
+  display:flex;gap:16px;align-items:center;justify-content:center;
+  margin:40px 0;flex-wrap:wrap;
+}
+
+.btn-next{
+  background:var(--gold);color:var(--black);
+  border:none;
+  font-family:var(--mono);font-size:11px;letter-spacing:2px;
+  text-transform:uppercase;
+  padding:14px 32px;
+  cursor:pointer;
+  transition:background 0.2s,transform 0.1s;
+}
+.btn-next:hover{background:var(--gold2)}
+.btn-next:active{transform:scale(0.97)}
+
+.btn-filter{
+  background:transparent;color:var(--dim);
+  border:1px solid rgba(201,168,76,0.25);
+  font-family:var(--mono);font-size:9px;letter-spacing:2px;
+  text-transform:uppercase;padding:10px 20px;
+  cursor:pointer;transition:all 0.2s;white-space:nowrap;
+}
+.btn-filter:hover,.btn-filter.active{
+  border-color:var(--gold);color:var(--gold);
+  background:rgba(201,168,76,0.06);
+}
+
+.quote-counter{
+  font-family:var(--mono);font-size:10px;color:var(--muted);
+  letter-spacing:2px;
+}
+
+/* RULE LINE */
+.rule{
+  width:100%;max-width:600px;margin:40px auto;
+  height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  opacity:0.2;
+}
+
+/* QUOTE GRID */
+.grid-section{
+  max-width:1100px;margin:0 auto;
+  padding:60px 24px 80px;
+  position:relative;z-index:1;
+}
+
+.section-eyebrow{
+  display:flex;align-items:center;gap:16px;
+  margin-bottom:40px;
+}
+.section-eyebrow::after{
+  content:'';flex:1;height:1px;
+  background:linear-gradient(90deg,rgba(201,168,76,0.3),transparent);
+}
+.section-eyebrow span{
+  font-family:var(--mono);font-size:10px;letter-spacing:3px;
+  color:var(--gold);text-transform:uppercase;white-space:nowrap;
+}
+
+.quote-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:1px;
+  background:rgba(201,168,76,0.08);
+  border:1px solid rgba(201,168,76,0.08);
+}
+
+.quote-card{
+  background:var(--black);
+  padding:32px 28px;
+  cursor:pointer;
+  transition:background 0.2s;
+  position:relative;
+}
+.quote-card:hover{background:rgba(201,168,76,0.04)}
+.quote-card::before{
+  content:'';position:absolute;top:0;left:0;
+  width:3px;height:0;background:var(--gold);
+  transition:height 0.3s ease;
+}
+.quote-card:hover::before{height:100%}
+
+.card-cat{
+  font-family:var(--mono);font-size:8px;letter-spacing:3px;
+  color:var(--gold);text-transform:uppercase;
+  margin-bottom:14px;opacity:0.7;
+}
+
+.card-quote{
+  font-size:15px;font-style:italic;
+  color:var(--off);line-height:1.7;margin-bottom:14px;
+}
+
+.card-author{
+  font-family:var(--mono);font-size:9px;letter-spacing:2px;
+  color:var(--muted);text-transform:uppercase;
+}
+
+/* BOTTOM NAV */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:100;
+  height:44px;
+  display:flex;align-items:center;
+  background:rgba(10,10,10,0.95);
+  border-top:1px solid rgba(201,168,76,0.12);
+  backdrop-filter:blur(12px);
+  overflow-x:auto;
+}
+.bottom-nav::-webkit-scrollbar{display:none}
+.bn-link{
+  font-family:var(--mono);font-size:9px;letter-spacing:2px;
+  color:rgba(245,240,232,0.35);text-transform:uppercase;
+  padding:0 16px;height:100%;display:flex;align-items:center;
+  text-decoration:none;border-right:1px solid rgba(255,255,255,0.05);
+  white-space:nowrap;transition:color 0.15s;
+}
+.bn-link:hover{color:var(--off)}
+.bn-link.active{color:var(--gold)}
+
+@media(max-width:600px){
+  .quote-text{font-size:22px}
+  .quote-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="bg-canvas"></div>
+
+<nav>
+  <span class="nav-brand">&#9670; Daily Mind</span>
+  <a class="nav-link" href="#all">All</a>
+  <a class="nav-link" href="#resilience">Resilience</a>
+  <a class="nav-link" href="#wealth">Wealth</a>
+  <a class="nav-link" href="#identity">Identity</a>
+  <a class="nav-link" href="#revenge">Forward</a>
+</nav>
+
+<!-- HERO QUOTE DISPLAY -->
+<div class="hero">
+  <div class="hero-eyebrow">Daily Mind</div>
+  <div class="quote-display">
+    <div class="quote-text" id="hero-quote">Loading...</div>
+    <div class="quote-author" id="hero-author"></div>
+    <div class="quote-category" id="hero-cat"></div>
+  </div>
+  <div class="quote-controls">
+    <button class="btn-filter active" onclick="filterCat('all',this)">All</button>
+    <button class="btn-filter" onclick="filterCat('resilience',this)">Resilience</button>
+    <button class="btn-filter" onclick="filterCat('wealth',this)">Wealth</button>
+    <button class="btn-filter" onclick="filterCat('identity',this)">Identity</button>
+    <button class="btn-filter" onclick="filterCat('forward',this)">Forward</button>
+  </div>
+  <button class="btn-next" onclick="nextQuote()">Next Quote &rarr;</button>
+  <div class="quote-counter" id="quote-counter"></div>
+</div>
+
+<div class="rule"></div>
+
+<!-- QUOTE GRID -->
+<div class="grid-section" id="all">
+  <div class="section-eyebrow"><span>All Quotes</span></div>
+  <div class="quote-grid" id="quote-grid"></div>
+</div>
+
+<div class="bottom-nav">
+  <a class="bn-link" href="plc-capital.html">&#8592; Ops</a>
+  <a class="bn-link active" href="mind.html">&#9670; Mind</a>
+  <a class="bn-link" href="ledger.html">Ledger</a>
+  <a class="bn-link" href="bets.html">Bets</a>
+  <a class="bn-link" href="tv.html">TV</a>
+  <a class="bn-link" href="belmont.html">Belmont</a>
+  <a class="bn-link" href="private.html">Private</a>
+</div>
+
+<script>
+var QUOTES = [
+  // RESILIENCE
+  {q:"You are not a moon. You are not made to reflect someone else's light.",a:"—",cat:"resilience"},
+  {q:"The comeback is always stronger than the setback.",a:"—",cat:"resilience"},
+  {q:"Rock bottom became the solid foundation on which I rebuilt my life.",a:"J.K. Rowling",cat:"resilience"},
+  {q:"I can be changed by what happens to me. But I refuse to be reduced by it.",a:"Maya Angelou",cat:"resilience"},
+  {q:"You were given this life because you are strong enough to live it.",a:"—",cat:"resilience"},
+  {q:"Fall seven times, stand up eight.",a:"Japanese Proverb",cat:"resilience"},
+  {q:"Every next level of your life will demand a different version of you.",a:"—",cat:"resilience"},
+  {q:"The wound is the place where the light enters you.",a:"Rumi",cat:"resilience"},
+  {q:"Hardship often prepares an ordinary person for an extraordinary destiny.",a:"C.S. Lewis",cat:"resilience"},
+  {q:"It does not matter how slowly you go as long as you do not stop.",a:"Confucius",cat:"resilience"},
+  {q:"What lies behind us and what lies before us are tiny matters compared to what lies within us.",a:"Ralph Waldo Emerson",cat:"resilience"},
+  {q:"You were not built for comfort. You were built for greatness.",a:"—",cat:"resilience"},
+  {q:"The darkest nights produce the brightest stars.",a:"—",cat:"resilience"},
+  {q:"Pain is temporary. Quitting lasts forever.",a:"Lance Armstrong",cat:"resilience"},
+  {q:"Scars are just tattoos with better stories.",a:"—",cat:"resilience"},
+  // WEALTH
+  {q:"Don't think about having money. Think about solving problems worth being paid for.",a:"—",cat:"wealth"},
+  {q:"An investment in knowledge pays the best interest.",a:"Benjamin Franklin",cat:"wealth"},
+  {q:"The secret to wealth is simple: find a way to do more for others than anyone else does.",a:"Tony Robbins",cat:"wealth"},
+  {q:"Wealth is not about having a lot of money. It is about having a lot of options.",a:"Chris Rock",cat:"wealth"},
+  {q:"If you don't find a way to make money while you sleep, you will work until you die.",a:"Warren Buffett",cat:"wealth"},
+  {q:"The goal isn't more money. The goal is living life on your own terms.",a:"Chris Brogan",cat:"wealth"},
+  {q:"Money is a tool. Used properly it makes something beautiful. Used wrong, it makes a mess.",a:"Bradley Vinson",cat:"wealth"},
+  {q:"Your income is a direct result of the value you bring to the marketplace.",a:"Jim Rohn",cat:"wealth"},
+  {q:"Do not save what is left after spending. Spend what is left after saving.",a:"Warren Buffett",cat:"wealth"},
+  {q:"Financial freedom is available to those who learn about it and work for it.",a:"Robert Kiyosaki",cat:"wealth"},
+  {q:"Rich people have small TVs and big libraries. Poor people have small libraries and big TVs.",a:"Zig Ziglar",cat:"wealth"},
+  {q:"Every dollar you spend is a vote for the kind of world you want to live in.",a:"—",cat:"wealth"},
+  {q:"The number one problem in today's generation and economy is the lack of financial literacy.",a:"Alan Greenspan",cat:"wealth"},
+  {q:"Stop buying things you don't need to impress people you don't like.",a:"Dave Ramsey",cat:"wealth"},
+  {q:"Opportunities don't happen. You create them.",a:"Chris Grosser",cat:"wealth"},
+  // IDENTITY
+  {q:"You are not who you were. You are who you are becoming.",a:"—",cat:"identity"},
+  {q:"The most powerful thing you can do is define yourself before the world does it for you.",a:"—",cat:"identity"},
+  {q:"You are not required to set yourself on fire to keep others warm.",a:"—",cat:"identity"},
+  {q:"Know who you are. Know what you want. The rest is just execution.",a:"—",cat:"identity"},
+  {q:"Never let someone's opinion of you become your reality.",a:"Les Brown",cat:"identity"},
+  {q:"Be so good they can't ignore you.",a:"Steve Martin",cat:"identity"},
+  {q:"Your life does not get better by chance. It gets better by change.",a:"Jim Rohn",cat:"identity"},
+  {q:"You were born an original. Don't die a copy.",a:"John Mason",cat:"identity"},
+  {q:"The only person you are destined to become is the person you decide to be.",a:"Ralph Waldo Emerson",cat:"identity"},
+  {q:"What you tolerate is what you become.",a:"—",cat:"identity"},
+  {q:"A lion doesn't concern himself with the opinion of sheep.",a:"—",cat:"identity"},
+  {q:"Stop shrinking yourself to fit into spaces you've outgrown.",a:"—",cat:"identity"},
+  {q:"You are built from every experience, every lesson, every scar. That is not weakness. That is architecture.",a:"—",cat:"identity"},
+  {q:"The version of you that wakes up next year is being decided by what you do today.",a:"—",cat:"identity"},
+  {q:"Discipline is choosing between what you want now and what you want most.",a:"Abraham Lincoln",cat:"identity"},
+  // FORWARD (Living Well / Revenge Reframed)
+  {q:"The best revenge is massive success.",a:"Frank Sinatra",cat:"forward"},
+  {q:"Living well is the best revenge.",a:"George Herbert",cat:"forward"},
+  {q:"Success is the sweetest response to every person who doubted you.",a:"—",cat:"forward"},
+  {q:"Don't look back. You're not going that way.",a:"—",cat:"forward"},
+  {q:"The people who tried to bury you forgot you were a seed.",a:"—",cat:"forward"},
+  {q:"Prove them wrong in silence. Let success make the noise.",a:"—",cat:"forward"},
+  {q:"Your future is so bright that your past is irrelevant.",a:"—",cat:"forward"},
+  {q:"What someone did to you is their karma. What you do next is yours.",a:"—",cat:"forward"},
+  {q:"There is no revenge so complete as forgetting — because forgetting means you've moved so far ahead it didn't matter.",a:"—",cat:"forward"},
+  {q:"While they were talking about you, you were building. That's the difference.",a:"—",cat:"forward"},
+  {q:"The goal is to win so completely that the person who hurt you becomes a footnote.",a:"—",cat:"forward"},
+  {q:"You don't need closure. You need forward motion.",a:"—",cat:"forward"},
+  {q:"One day you'll be everything they said you couldn't be. That day is coming sooner than you think.",a:"—",cat:"forward"},
+  {q:"They will hear about it eventually. Through someone. In passing. That moment will hit them harder than anything you could say.",a:"—",cat:"forward"},
+  {q:"The quietest people make the loudest moves.",a:"—",cat:"forward"}
+];
+
+var activeFilter = 'all';
+var currentIdx   = 0;
+var filtered     = QUOTES.slice();
+
+function filterCat(cat, btn) {
+  activeFilter = cat;
+  filtered = cat === 'all' ? QUOTES.slice() : QUOTES.filter(function(q){ return q.cat === cat; });
+  currentIdx = 0;
+  document.querySelectorAll('.btn-filter').forEach(function(b){ b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  showQuote(currentIdx);
+  renderGrid();
+}
+
+function showQuote(idx) {
+  var q = filtered[idx];
+  if (!q) return;
+  var el = document.getElementById('hero-quote');
+  el.style.opacity = '0';
+  setTimeout(function(){
+    el.textContent = q.q;
+    document.getElementById('hero-author').textContent = q.a !== '—' ? '— ' + q.a : '';
+    document.getElementById('hero-cat').textContent = q.cat.toUpperCase();
+    document.getElementById('quote-counter').textContent = (idx+1) + ' / ' + filtered.length;
+    el.style.opacity = '1';
+  }, 250);
+}
+
+function nextQuote() {
+  currentIdx = (currentIdx + 1) % filtered.length;
+  showQuote(currentIdx);
+}
+
+function renderGrid() {
+  var grid = document.getElementById('quote-grid');
+  grid.innerHTML = '';
+  var display = activeFilter === 'all' ? QUOTES : filtered;
+  for (var i = 0; i < display.length; i++) {
+    var q = display[i];
+    var div = document.createElement('div');
+    div.className = 'quote-card';
+    div.innerHTML =
+      '<div class="card-cat">' + q.cat.toUpperCase() + '</div>' +
+      '<div class="card-quote">\u201C' + q.q + '\u201D</div>' +
+      '<div class="card-author">' + (q.a !== '\u2014' ? '\u2014 ' + q.a : q.a) + '</div>';
+    (function(qi){ div.onclick = function(){ currentIdx = qi; showQuote(qi); window.scrollTo({top:0,behavior:'smooth'}); }; })(i);
+    grid.appendChild(div);
+  }
+}
+
+// Auto-rotate every 30 seconds
+setInterval(nextQuote, 30000);
+
+// Random start
+currentIdx = Math.floor(Math.random() * QUOTES.length);
+showQuote(currentIdx);
+renderGrid();
+</script>
+</body>
+</html>
