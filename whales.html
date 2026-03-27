@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Payton Loop — Whale Tracker</title>
+<style>
+* { box-sizing: border-box; }
+body { margin:0; padding:0; background:#010d1a; color:#fff; font-family:Arial,sans-serif; font-size:14px; }
+.outer { max-width:960px; margin:0 auto; padding:20px 12px 40px; }
+.hdr { text-align:center; border-bottom:2px solid #cc0000; padding-bottom:14px; margin-bottom:16px; }
+.hdr h1 { font-size:22px; font-weight:bold; letter-spacing:2px; margin:0 0 4px; text-transform:uppercase; color:#fff; }
+.hdr p { font-size:11px; color:#666; margin:0; letter-spacing:1px; }
+.home-link { font-size:11px; color:#555; text-decoration:underline; cursor:pointer; display:inline-block; margin-bottom:16px; letter-spacing:.5px; text-transform:uppercase; }
+.home-link:hover { color:#cc0000; }
+
+/* PULSE BAR */
+.pulse-bar { display:flex; align-items:center; gap:10px; background:#0a0a0a; border:1px solid #222; padding:8px 14px; margin-bottom:20px; }
+.pulse-dot { width:8px; height:8px; background:#cc0000; border-radius:50%; animation:pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
+.pulse-text { font-size:11px; color:#666; letter-spacing:1px; text-transform:uppercase; }
+.pulse-time { font-size:11px; color:#333; margin-left:auto; font-family:monospace; }
+
+/* SIGNAL CARDS */
+.signal-grid { display:flex; flex-direction:column; gap:8px; margin-bottom:24px; }
+.signal-card { background:#0a0a0a; border:1px solid #222; padding:14px 16px; position:relative; overflow:hidden; }
+.signal-card.hot { border-color:#cc0000; }
+.signal-card.warm { border-color:#886600; }
+.signal-card.cold { border-color:#006600; }
+.signal-type { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:#555; margin-bottom:6px; }
+.signal-card.hot .signal-type { color:#cc0000; }
+.signal-card.warm .signal-type { color:#886600; }
+.signal-card.cold .signal-type { color:#006600; }
+.signal-q { font-size:14px; font-weight:bold; line-height:1.3; margin-bottom:8px; }
+.signal-meta { display:flex; gap:16px; margin-bottom:10px; font-size:11px; color:#555; }
+.signal-meta span { display:flex; align-items:center; gap:4px; }
+.price-row { display:flex; align-items:center; gap:12px; }
+.price-pill { padding:4px 12px; font-size:13px; font-weight:bold; font-family:monospace; border:1px solid; }
+.price-pill.yes { border-color:#006600; color:#00aa44; }
+.price-pill.no { border-color:#cc0000; color:#cc0000; }
+.price-pill.other { border-color:#555; color:#aaa; }
+.change-badge { padding:3px 10px; font-size:12px; font-weight:bold; font-family:monospace; }
+.change-up { background:#cc0000; color:#fff; }
+.change-down { background:#006600; color:#fff; }
+.change-flat { background:#222; color:#888; }
+.signal-bar { position:absolute; bottom:0; left:0; height:2px; }
+.signal-action { margin-top:10px; padding-top:10px; border-top:1px solid #1a1a1a; font-size:12px; color:#888; display:flex; justify-content:space-between; align-items:center; }
+.trade-link { color:#555; text-decoration:underline; font-size:11px; letter-spacing:.5px; text-transform:uppercase; }
+.trade-link:hover { color:#cc0000; }
+.edge-tag { font-size:10px; padding:2px 8px; letter-spacing:.5px; text-transform:uppercase; }
+.edge-tag.play { background:#006600; color:#fff; }
+.edge-tag.watch { background:#886600; color:#fff; }
+.edge-tag.pass { background:#333; color:#888; }
+
+/* METRICS ROW */
+.metrics-row { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:20px; }
+.metric-box { background:#0a0a0a; border:1px solid #222; padding:12px; text-align:center; }
+.metric-val { font-size:20px; font-weight:bold; font-family:monospace; margin-bottom:3px; }
+.metric-label { font-size:9px; color:#555; text-transform:uppercase; letter-spacing:1px; }
+
+/* FEED */
+.feed-item { border-bottom:1px solid #111; padding:10px 0; font-size:12px; color:#555; display:flex; gap:12px; align-items:flex-start; }
+.feed-time { color:#333; font-family:monospace; font-size:11px; min-width:50px; }
+.feed-msg { flex:1; line-height:1.5; }
+.feed-msg strong { color:#888; }
+.feed-msg .hl { color:#cc0000; }
+
+.sl { font-size:9px; font-weight:bold; text-transform:uppercase; letter-spacing:2px; color:#555; margin:20px 0 10px; padding-bottom:6px; border-bottom:1px solid #1a1a1a; }
+.disclaimer { font-size:10px; color:#333; border-top:1px solid #111; padding-top:12px; margin-top:20px; line-height:1.8; }
+.loading { text-align:center; padding:40px; color:#333; font-size:12px; letter-spacing:1px; text-transform:uppercase; }
+</style>
+
+<style id="page-theme">
+
+/* Deep ocean — whale tracker */
+body {
+  background-color:#010d1a !important;
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgba(0,40,80,0.9) 0%, transparent 60%),
+    radial-gradient(ellipse at 20% 100%, rgba(0,20,60,0.6) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 60%, rgba(0,30,70,0.4) 0%, transparent 40%) !important;
+  color:#a0c4d8 !important;
+}
+body::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cellipse cx='100' cy='100' rx='80' ry='2' fill='none' stroke='rgba(0,150,255,0.04)' stroke-width='1'/%3E%3Cellipse cx='100' cy='100' rx='60' ry='1.5' fill='none' stroke='rgba(0,150,255,0.03)' stroke-width='1'/%3E%3C/svg%3E");
+  background-size:200px 200px;
+  pointer-events:none;
+  z-index:0;
+}
+h1,h2,h3,.section-title { color:#4db8e8 !important; }
+
+</style>
+</head>
+<body>
+<div class="outer">
+
+  <div class="hdr">
+    <h1>&#9608; Whale Tracker</h1>
+    <p>Live Polymarket Smart Money · Price Movement Signals · Edge Alerts</p>
+  </div>
+
+  <a class="home-link" href="plc-capital.html">&#8592; Operations Page</a>
+  &nbsp;&nbsp;
+  <a class="home-link" href="predict.html">&#8592; Prediction Markets</a>
+
+  <div class="pulse-bar">
+    <div class="pulse-dot"></div>
+    <div class="pulse-text">Live · Polymarket CLOB · Refreshes every 90 seconds</div>
+    <div class="pulse-time" id="last-refresh">Loading...</div>
+  </div>
+
+  <!-- MARKET METRICS -->
+  <div class="metrics-row" id="metrics-row">
+    <div class="metric-box"><div class="metric-val" id="m-markets">—</div><div class="metric-label">Markets Tracked</div></div>
+    <div class="metric-box"><div class="metric-val" id="m-hot">—</div><div class="metric-label">Hot Signals</div></div>
+    <div class="metric-box"><div class="metric-val" id="m-vol">—</div><div class="metric-label">Total Volume</div></div>
+    <div class="metric-box"><div class="metric-val" id="m-plays">—</div><div class="metric-label">PLAY Calls</div></div>
+  </div>
+
+  <!-- SIGNAL CARDS -->
+  <div class="sl">&#9608; Smart Money Signals — Price Movement</div>
+  <div class="loading" id="signals-loading">Scanning Polymarket for whale activity...</div>
+  <div class="signal-grid" id="signal-grid"></div>
+
+  <!-- ACTIVITY FEED -->
+  <div class="sl">&#9608; Activity Feed</div>
+  <div id="activity-feed">
+    <div class="feed-item"><div class="feed-time">--:--</div><div class="feed-msg">Loading feed...</div></div>
+  </div>
+
+  <div class="disclaimer">
+    Whale Tracker monitors public Polymarket price data and identifies unusual price movements that may indicate large position activity.
+    This is not financial advice. Prediction market trading involves significant risk of total loss.
+    Data sourced from Polymarket's public CLOB API — no authentication required.
+  </div>
+
+</div>
+
+<script>
+var trackedMarkets = [];
+var refreshTimer = null;
+
+var MARKET_SEEDS = [
+  { q: "Will the DHS shutdown end after March 31, 2026?", token: "7484541299090384156856309927566517173053985515132798281469067148912459159546", slug: "will-the-dhs-shutdown-end-after-march-31-2026", outcomes: ["Yes","No"], vol: 983632, liq: 16574, prices: [0.45, 0.55] },
+  { q: "Will the 2026 Midterm Elections happen as scheduled?", token: "58527611073420283009369936461084764824964857567606734891598926759299731813608", slug: "will-the-2026-midterm-elections-happen-as-scheduled", outcomes: ["Yes","No"], vol: 98776, liq: 25716, prices: [0.90, 0.10] },
+  { q: "Will Spider-Man: Brand New Day be the top grossing movie of 2026?", token: "28161183422242370392388296744035422249088647252796713903067039294971789722479", slug: "will-spider-man-brand-new-day-be-the-top-grossing-movie-of-2026", outcomes: ["Yes","No"], vol: 99229, liq: 44441, prices: [0.405, 0.595] },
+  { q: "MegaETH market cap (FDV) >$800M one day after launch?", token: "61268780060811317912125567165718241493378747385698282791855508063291413917546", slug: "megaeth-market-cap-fdv-800m-one-day-after-launch-987-114-655", outcomes: ["Yes","No"], vol: 99341, liq: 48815, prices: [0.33, 0.67] },
+  { q: "OpenAI receives federal backstop for infrastructure before July?", token: "2573207755291238620520169357234429566264425244697480836231467818450524491984", slug: "openai-receives-federal-backstop-for-infrastructure-before-july", outcomes: ["Yes","No"], vol: 98838, liq: 7326, prices: [0.069, 0.931] },
+  { q: "Another US bank failure by March 31?", token: "64371196473622878484519062120142282808545261868404543985073685116632626774676", slug: "another-us-bank-failure-by-march-31", outcomes: ["Yes","No"], vol: 98505, liq: 8708, prices: [0.032, 0.968] },
+  { q: "Will Crude Oil (CL) settle at $85-$90 in March?", token: "5176249398000147907791395740606163487159938446642094483260356713682011189255", slug: "will-crude-oil-cl-settle-at-85-90-in-march", outcomes: ["Yes","No"], vol: 99298, liq: 7526, prices: [0.115, 0.885] },
+  { q: "Putin out as President of Russia by June 30?", token: "35905647640629665756064703393673614960889025088095059972985498266769285867388", slug: "putin-out-as-president-of-russia-by-june-30", outcomes: ["Yes","No"], vol: 978943, liq: 95228, prices: [0.039, 0.961] },
+];
+
+function fmtVol(v) {
+  if (v >= 1e6) return '$' + (v/1e6).toFixed(1) + 'M';
+  if (v >= 1e3) return '$' + (v/1e3).toFixed(0) + 'K';
+  return '$' + Math.round(v);
+}
+
+function fmtTime(ts) {
+  return new Date(ts * 1000).toLocaleTimeString('en-US', { timeZone:'America/Chicago', hour:'2-digit', minute:'2-digit' });
+}
+
+function signalClass(change) {
+  if (Math.abs(change) >= 5) return 'hot';
+  if (Math.abs(change) >= 2) return 'warm';
+  return 'cold';
+}
+
+function edgeTag(change, price) {
+  var absChange = Math.abs(change);
+  if (absChange >= 8) return { cls:'play', text: change > 0 ? 'FOLLOW YES' : 'FOLLOW NO' };
+  if (absChange >= 4) return { cls:'watch', text:'WATCH' };
+  return { cls:'pass', text:'MONITOR' };
+}
+
+function fetchPriceHistory(token, cb) {
+  var url = 'https://clob.polymarket.com/prices-history?market=' + token + '&interval=1h&fidelity=60';
+  fetch(url)
+    .then(function(r){ return r.json(); })
+    .then(function(d){ cb(null, d.history || []); })
+    .catch(function(e){ cb(e, []); });
+}
+
+var feedLog = [];
+function addFeed(msg) {
+  var now = new Date().toLocaleTimeString('en-US', { timeZone:'America/Chicago', hour:'2-digit', minute:'2-digit' });
+  feedLog.unshift({ time: now, msg: msg });
+  if (feedLog.length > 20) feedLog.pop();
+  renderFeed();
+}
+
+function renderFeed() {
+  var feed = document.getElementById('activity-feed');
+  if (feedLog.length === 0) return;
+  feed.innerHTML = feedLog.map(function(f) {
+    return '<div class="feed-item"><div class="feed-time">' + f.time + '</div><div class="feed-msg">' + f.msg + '</div></div>';
+  }).join('');
+}
+
+var pendingFetches = 0;
+var results = [];
+
+function loadAll() {
+  document.getElementById('signals-loading').style.display = 'block';
+  document.getElementById('signal-grid').innerHTML = '';
+  results = [];
+  pendingFetches = MARKET_SEEDS.length;
+
+  MARKET_SEEDS.forEach(function(m, idx) {
+    setTimeout(function() {
+      fetchPriceHistory(m.token, function(err, history) {
+        var change = 0;
+        var oldPrice = m.prices[0];
+        var newPrice = m.prices[0];
+
+        if (!err && history.length >= 2) {
+          oldPrice = history[0].p;
+          newPrice = history[history.length - 1].p;
+          change = (newPrice - oldPrice) * 100;
+        }
+
+        results.push({ market: m, change: change, oldPrice: oldPrice, newPrice: newPrice, history: history });
+        pendingFetches--;
+
+        if (pendingFetches === 0) {
+          renderSignals();
+        }
+      });
+    }, idx * 300);
+  });
+}
+
+function renderSignals() {
+  document.getElementById('signals-loading').style.display = 'none';
+
+  // Sort by absolute change (biggest movers first)
+  results.sort(function(a,b){ return Math.abs(b.change) - Math.abs(a.change); });
+
+  var hot = results.filter(function(r){ return Math.abs(r.change) >= 5; }).length;
+  var totalVol = MARKET_SEEDS.reduce(function(s,m){ return s + m.vol; }, 0);
+  var plays = results.filter(function(r){ return Math.abs(r.change) >= 8; }).length;
+
+  document.getElementById('m-markets').textContent = MARKET_SEEDS.length;
+  document.getElementById('m-hot').textContent = hot;
+  document.getElementById('m-hot').style.color = hot > 0 ? '#cc0000' : '#fff';
+  document.getElementById('m-vol').textContent = fmtVol(totalVol);
+  document.getElementById('m-plays').textContent = plays;
+  document.getElementById('m-plays').style.color = plays > 0 ? '#00aa44' : '#fff';
+
+  var grid = document.getElementById('signal-grid');
+  grid.innerHTML = results.map(function(r) {
+    var m = r.market;
+    var cls = signalClass(r.change);
+    var tag = edgeTag(r.change, r.newPrice);
+    var direction = r.change > 0.5 ? '▲' : r.change < -0.5 ? '▼' : '—';
+    var changeBadgeCls = r.change > 0.5 ? 'change-up' : r.change < -0.5 ? 'change-down' : 'change-flat';
+    var barColor = cls === 'hot' ? '#cc0000' : cls === 'warm' ? '#886600' : '#006600';
+    var barWidth = Math.min(100, Math.abs(r.change) * 4) + '%';
+
+    var whaleNote = '';
+    if (Math.abs(r.change) >= 8) whaleNote = '<span class="hl">WHALE ALERT — ' + Math.abs(r.change).toFixed(1) + 'pp move detected. Smart money is repositioning.</span>';
+    else if (Math.abs(r.change) >= 4) whaleNote = 'Notable price movement. Monitor for continuation.';
+    else whaleNote = 'Market is stable. No significant whale activity.';
+
+    return '<div class="signal-card ' + cls + '">' +
+      '<div class="signal-type">' + (cls === 'hot' ? '&#9608; HOT SIGNAL' : cls === 'warm' ? '&#9608; WARM SIGNAL' : '&#9608; STABLE') + '</div>' +
+      '<div class="signal-q">' + m.q + '</div>' +
+      '<div class="signal-meta">' +
+        '<span>VOL: ' + fmtVol(m.vol) + '</span>' +
+        '<span>LIQ: ' + fmtVol(m.liq) + '</span>' +
+        '<span>Closes: ' + (m.end || 'TBD') + '</span>' +
+      '</div>' +
+      '<div class="price-row">' +
+        m.outcomes.map(function(o,i) {
+          var pc = (m.prices[i] * 100).toFixed(1);
+          var cls2 = o.toLowerCase() === 'yes' ? 'yes' : o.toLowerCase() === 'no' ? 'no' : 'other';
+          return '<span class="price-pill ' + cls2 + '">' + o + ' ' + pc + '%</span>';
+        }).join('') +
+        '<span class="change-badge ' + changeBadgeCls + '">' + direction + ' ' + (r.change >= 0 ? '+' : '') + r.change.toFixed(1) + 'pp</span>' +
+      '</div>' +
+      '<div class="signal-action">' +
+        '<span style="color:#555;font-size:11px">' + whaleNote + '</span>' +
+        '<span>' +
+          '<span class="edge-tag ' + tag.cls + '">' + tag.text + '</span>&nbsp;&nbsp;' +
+          '<a class="trade-link" href="https://polymarket.com/event/' + m.slug + '" target="_blank">Trade →</a>' +
+        '</span>' +
+      '</div>' +
+      '<div class="signal-bar" style="width:' + barWidth + ';background:' + barColor + '"></div>' +
+    '</div>';
+  }).join('');
+
+  // Add to feed
+  results.forEach(function(r) {
+    if (Math.abs(r.change) >= 5) {
+      var dir = r.change > 0 ? 'surged' : 'dropped';
+      addFeed('<strong>' + r.market.q.slice(0,60) + '...</strong> YES price <span class="hl">' + dir + ' ' + Math.abs(r.change).toFixed(1) + 'pp</span> — possible whale activity');
+    }
+  });
+
+  if (feedLog.length === 0) addFeed('Scan complete. ' + MARKET_SEEDS.length + ' markets monitored. ' + results.filter(function(r){ return Math.abs(r.change) >= 5; }).length + ' hot signals detected.');
+
+  document.getElementById('last-refresh').textContent = new Date().toLocaleTimeString('en-US',{timeZone:'America/Chicago'}) + ' CDT';
+  scheduleRefresh();
+}
+
+function scheduleRefresh() {
+  if (refreshTimer) clearTimeout(refreshTimer);
+  refreshTimer = setTimeout(function() {
+    addFeed('Auto-refresh triggered...');
+    loadAll();
+  }, 90000);
+}
+
+window.onload = loadAll;
+</script>
+
+
+<script src="darkmode.js"></script>
+<script src="search.js"></script>
+</body>
+</html>

@@ -1,0 +1,952 @@
+html = r"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Payton Loop — Financial Calculators</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f0f4f8;font-family:Arial,sans-serif;font-size:14px;color:#111}
+.outer{max-width:1040px;margin:0 auto;padding:24px 16px 80px}
+/* HEADER */
+.hdr{text-align:center;padding-bottom:18px;margin-bottom:24px;border-bottom:3px double #000}
+.hdr h1{font-size:26px;font-weight:900;letter-spacing:3px;text-transform:uppercase;margin-bottom:4px}
+.hdr p{font-size:11px;color:#777;letter-spacing:1.5px;text-transform:uppercase}
+.home-link{font-size:11px;color:#00008b;text-decoration:underline;display:inline-block;margin-bottom:18px}
+/* SIDEBAR + CONTENT LAYOUT */
+.layout{display:flex;gap:20px;align-items:flex-start}
+.sidebar{width:200px;flex-shrink:0;position:sticky;top:20px}
+.sidebar-item{display:block;width:100%;text-align:left;padding:11px 14px;border:1px solid #ccc;background:#fff;font-family:Arial;font-size:12px;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;cursor:pointer;color:#777;margin-bottom:4px;border-left:3px solid transparent}
+.sidebar-item:hover{color:#000;background:#fafafa}
+.sidebar-item.active{background:#000;color:#fff;border-left:3px solid #cc0000;border-color:#000}
+.sidebar-sub{font-size:10px;font-weight:normal;color:#aaa;display:block;margin-top:2px;letter-spacing:.3px;text-transform:none}
+.sidebar-item.active .sidebar-sub{color:#999}
+.content{flex:1;min-width:0}
+/* CARDS */
+.section{display:none}.section.show{display:block}
+.card{background:#fff;border:1px solid #ddd;padding:24px;margin-bottom:20px}
+.card-title{font-size:16px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px}
+.card-desc{font-size:12px;color:#777;margin-bottom:20px;line-height:1.6;padding-bottom:14px;border-bottom:1px solid #eee}
+/* FORM */
+.form-section{margin-bottom:18px}
+.form-section-label{font-size:10px;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;color:#999;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.form-section-label::after{content:"";flex:1;height:1px;background:#eee}
+.field-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
+.field label{font-size:10px;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;color:#555;display:block;margin-bottom:5px}
+.field input,.field select{width:100%;border:1px solid #ccc;padding:9px 11px;font-size:13px;font-family:Arial;background:#fff;color:#111;border-radius:0}
+.field input:focus,.field select:focus{outline:none;border-color:#000;box-shadow:inset 0 0 0 1px #000}
+/* COMPANY PICKER */
+.co-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.co-btn{border:1px solid #ddd;padding:8px 10px;font-size:11px;text-align:center;cursor:pointer;background:#fff;font-family:Arial;min-width:72px;transition:all .15s}
+.co-btn:hover{border-color:#000;background:#f5f5f5}
+.co-btn.active{background:#000;color:#fff;border-color:#000}
+.co-ticker{font-size:12px;font-weight:bold;display:block}
+.co-name{font-size:9px;color:inherit;display:block;margin-top:1px;opacity:.7}
+/* BUTTONS */
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.btn{padding:11px 28px;font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;cursor:pointer;font-family:Arial;border:none}
+.btn-primary{background:#000;color:#fff}
+.btn-primary:hover{background:#222}
+.btn-export{background:#fff;color:#000;border:2px solid #000}
+.btn-export:hover{background:#f5f5f5}
+/* RESULTS */
+.result-panel{display:none;margin-top:20px}
+.result-panel.show{display:block}
+.result-header{background:#000;color:#fff;padding:14px 18px;font-size:11px;font-weight:bold;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:1px}
+.metrics-strip{background:#111;display:flex;flex-wrap:wrap;gap:1px;margin-bottom:12px}
+.metric{background:#1a1a1a;padding:14px 18px;flex:1;min-width:130px}
+.metric-label{font-size:9px;color:#777;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+.metric-value{font-size:22px;font-weight:900;font-family:monospace;color:#fff}
+.metric-value.green{color:#22dd66}
+.metric-value.red{color:#ee3333}
+.metric-value.yellow{color:#ddaa00}
+/* DATA TABLE */
+.data-table-wrap{overflow-x:auto;margin-bottom:12px}
+.data-table{width:100%;border-collapse:collapse;font-size:12px}
+.data-table th{background:#000;color:#fff;padding:8px 10px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.5px;font-weight:bold;white-space:nowrap}
+.data-table td{border-bottom:1px solid #eee;padding:7px 10px;font-family:monospace;white-space:nowrap}
+.data-table tr:hover td{background:#f9f9f9}
+.up{color:#009933}.dn{color:#cc0000}
+/* NOTES */
+.result-note{font-size:11px;color:#666;line-height:1.8;padding:12px 14px;background:#fafafa;border-left:3px solid #ccc;margin-top:10px}
+.result-note strong{color:#333}
+/* STATUS */
+.status-badge{display:inline-block;font-size:10px;font-weight:bold;padding:3px 10px;text-transform:uppercase;letter-spacing:.5px;border:1px solid}
+.status-good{color:#006600;border-color:#006600;background:#f0fff0}
+.status-ok{color:#886600;border-color:#886600;background:#fffcf0}
+.status-bad{color:#cc0000;border-color:#cc0000;background:#fff0f0}
+.spinner{padding:20px;text-align:center;font-size:11px;color:#999;text-transform:uppercase;letter-spacing:1px;display:none}
+.spinner.show{display:block}
+/* FORMULA BOX */
+.formula-box{background:#f8f8f8;border:1px solid #e0e0e0;padding:12px 14px;font-family:monospace;font-size:12px;color:#444;margin-top:14px;line-height:2}
+.formula-box .formula-label{font-family:Arial;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#999;display:block;margin-bottom:6px}
+</style>
+
+<style id="page-theme">
+
+/* Blueprint grid — engineering/drafting table */
+body {
+  background-color:#f0f4f8 !important;
+  background-image:
+    linear-gradient(rgba(100,140,200,0.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(100,140,200,0.15) 1px, transparent 1px),
+    linear-gradient(rgba(100,140,200,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(100,140,200,0.06) 1px, transparent 1px) !important;
+  background-size: 80px 80px, 80px 80px, 16px 16px, 16px 16px !important;
+  background-position: -1px -1px, -1px -1px, -1px -1px, -1px -1px !important;
+}
+
+</style>
+</head>
+<body>
+<div class="outer">
+<div class="hdr">
+  <h1>Financial Calculators</h1>
+  <p>Live SEC EDGAR Data &middot; Institutional-Grade Formulas &middot; Excel Export</p>
+</div>
+<a class="home-link" href="plc-capital.html">&larr; Operations Page</a> &nbsp;|&nbsp; <a class="home-link" href="predict.html">Prediction Markets</a> &nbsp;|&nbsp; <a class="home-link" href="whales.html">Whale Tracker</a>
+
+<div class="layout">
+  <!-- SIDEBAR NAV -->
+  <div class="sidebar">
+    <button class="sidebar-item active" onclick="showTab('cagr')">CAGR<span class="sidebar-sub">Company growth rate</span></button>
+    <button class="sidebar-item" onclick="showTab('roic')">ROIC<span class="sidebar-sub">Return on invested capital</span></button>
+    <button class="sidebar-item" onclick="showTab('cd')">CD Calculator<span class="sidebar-sub">Certificates of deposit</span></button>
+    <button class="sidebar-item" onclick="showTab('compound')">Compound Interest<span class="sidebar-sub">Investment growth</span></button>
+    <button class="sidebar-item" onclick="showTab('dcf')">DCF / Intrinsic Value<span class="sidebar-sub">Buffett valuation model</span></button>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="content">
+
+    <!-- ====== CAGR ====== -->
+    <div id="tab-cagr" class="section show">
+      <div class="card">
+        <div class="card-title">Compound Annual Growth Rate</div>
+        <div class="card-desc">
+          CAGR measures the rate at which an investment or metric would have grown had it grown at a steady rate over a given period.
+          Click a company to load live revenue data directly from SEC EDGAR official filings, then select any start and end year.
+          <div class="formula-box"><span class="formula-label">Formula</span>CAGR = (End Value / Start Value) ^ (1 / Years) - 1</div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-label">Quick Load — Live SEC EDGAR Data</div>
+          <div class="co-grid" id="cagr-co-grid"></div>
+          <div class="spinner" id="cagr-spinner">Fetching SEC EDGAR data&hellip;</div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-label">Parameters</div>
+          <div class="field-grid">
+            <div class="field"><label>Metric</label>
+              <select id="cagr-metric" onchange="onCAGRMetricChange()">
+                <option value="revenue">Revenue</option>
+                <option value="custom">Custom Values</option>
+              </select>
+            </div>
+            <div class="field" id="cagr-yr1-wrap" style="display:none"><label>Start Year</label><select id="cagr-yr1" onchange="onCAGRYearChange()"></select></div>
+            <div class="field" id="cagr-yr2-wrap" style="display:none"><label>End Year</label><select id="cagr-yr2" onchange="onCAGRYearChange()"></select></div>
+            <div class="field"><label>Start Value ($)</label><input type="number" id="cagr-sv" placeholder="e.g. 64000000000" step="any"></div>
+            <div class="field"><label>End Value ($)</label><input type="number" id="cagr-ev" placeholder="e.g. 371000000000" step="any"></div>
+            <div class="field"><label>Number of Years</label><input type="number" id="cagr-n" placeholder="e.g. 10" min="1" step="1"></div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="calcCAGR()">Calculate CAGR</button>
+          <button class="btn btn-export" onclick="exportTable('cagr-data-table','cagr_analysis.csv')">Export to CSV / Excel</button>
+        </div>
+      </div>
+
+      <div class="result-panel" id="cagr-result">
+        <div class="result-header" id="cagr-result-title">CAGR Results</div>
+        <div class="metrics-strip" id="cagr-metrics"></div>
+        <div class="data-table-wrap"><table class="data-table" id="cagr-data-table"></table></div>
+        <div class="result-note" id="cagr-note"></div>
+      </div>
+    </div>
+
+    <!-- ====== ROIC ====== -->
+    <div id="tab-roic" class="section">
+      <div class="card">
+        <div class="card-title">Return on Invested Capital</div>
+        <div class="card-desc">
+          ROIC is the gold standard for measuring capital efficiency. It shows how many dollars of profit a company generates for every dollar of capital deployed.
+          Warren Buffett targets companies with ROIC &gt;15% sustained over 10+ years.
+          <div class="formula-box"><span class="formula-label">Formulas</span>
+NOPAT = Operating Income (EBIT) &times; (1 &minus; Tax Rate)<br>
+Invested Capital = Total Equity + Total Debt &minus; Excess Cash<br>
+ROIC = NOPAT &divide; Invested Capital
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-label">Quick Load — Live SEC EDGAR Data</div>
+          <div class="co-grid" id="roic-co-grid"></div>
+          <div class="spinner" id="roic-spinner">Fetching SEC EDGAR data&hellip;</div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-label">Inputs</div>
+          <div class="field-grid">
+            <div class="field"><label>Operating Income / EBIT ($)</label><input type="number" id="roic-ebit" placeholder="e.g. 50000000000" step="any"></div>
+            <div class="field"><label>Tax Rate (%)</label><input type="number" id="roic-tax" value="21" step="any"></div>
+            <div class="field"><label>Total Equity ($)</label><input type="number" id="roic-eq" placeholder="e.g. 560000000000" step="any"></div>
+            <div class="field"><label>Total Debt ($)</label><input type="number" id="roic-debt" placeholder="e.g. 120000000000" step="any" value="0"></div>
+            <div class="field"><label>Excess Cash ($)</label><input type="number" id="roic-cash" placeholder="e.g. 30000000000" step="any" value="0"></div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="calcROIC()">Calculate ROIC</button>
+          <button class="btn btn-export" onclick="exportTable('roic-data-table','roic_analysis.csv')">Export to CSV / Excel</button>
+        </div>
+      </div>
+      <div class="result-panel" id="roic-result">
+        <div class="result-header">ROIC Results</div>
+        <div class="metrics-strip" id="roic-metrics"></div>
+        <div class="data-table-wrap"><table class="data-table" id="roic-data-table"></table></div>
+        <div class="result-note" id="roic-note"></div>
+      </div>
+    </div>
+
+    <!-- ====== CD ====== -->
+    <div id="tab-cd" class="section">
+      <div class="card">
+        <div class="card-title">Certificate of Deposit Calculator</div>
+        <div class="card-desc">
+          Full CD analysis with maturity value, early withdrawal penalty scenarios, effective APY, and month-by-month schedule.
+          Handles any penalty structure: months of interest forfeited or flat percentage of principal.
+          <div class="formula-box"><span class="formula-label">Formulas</span>
+Maturity Value = P &times; (1 + r/n)^(n &times; t)<br>
+Effective APY = (1 + r/n)^n &minus; 1<br>
+Early W/D Penalty = months &times; (P &times; r / 12)&nbsp;&nbsp;<em>or</em>&nbsp;&nbsp;P &times; penalty%
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-label">CD Terms</div>
+          <div class="field-grid">
+            <div class="field"><label>Principal ($)</label><input type="number" id="cd-p" value="10000" step="any"></div>
+            <div class="field"><label>Annual Interest Rate (%)</label><input type="number" id="cd-rate" value="5.10" step="any"></div>
+            <div class="field"><label>Term (Months)</label><input type="number" id="cd-term" value="12" min="1" step="1"></div>
+            <div class="field"><label>Compounding Frequency</label>
+              <select id="cd-freq">
+                <option value="365">Daily</option>
+                <option value="12" selected>Monthly</option>
+                <option value="4">Quarterly</option>
+                <option value="2">Semi-Annual</option>
+                <option value="1">Annual</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-label">Early Withdrawal Scenario (Optional)</div>
+          <div class="field-grid">
+            <div class="field"><label>Penalty Type</label>
+              <select id="cd-ptype" onchange="onCDPenaltyChange()">
+                <option value="months">Months of Interest</option>
+                <option value="pct">% of Principal</option>
+                <option value="none">No Penalty</option>
+              </select>
+            </div>
+            <div class="field" id="cd-pval-wrap"><label id="cd-pval-lbl">Months Forfeited</label><input type="number" id="cd-pval" value="6" min="0" step="any"></div>
+            <div class="field"><label>Withdraw at Month # (optional)</label><input type="number" id="cd-wd-at" placeholder="Leave blank for full term" step="1" min="1"></div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="calcCD()">Calculate</button>
+          <button class="btn btn-export" onclick="exportTable('cd-data-table','cd_analysis.csv')">Export to CSV / Excel</button>
+        </div>
+      </div>
+      <div class="result-panel" id="cd-result">
+        <div class="result-header">CD Results</div>
+        <div class="metrics-strip" id="cd-metrics"></div>
+        <div class="data-table-wrap"><table class="data-table" id="cd-data-table"></table></div>
+        <div class="result-note" id="cd-note"></div>
+      </div>
+    </div>
+
+    <!-- ====== COMPOUND ====== -->
+    <div id="tab-compound" class="section">
+      <div class="card">
+        <div class="card-title">Compound Interest &amp; Investment Growth</div>
+        <div class="card-desc">
+          Project investment growth with optional regular contributions. Shows nominal balance, total contributed, interest earned, and inflation-adjusted real value side by side.
+          <div class="formula-box"><span class="formula-label">Formulas</span>
+Balance = P &times; (1 + r/n)^(n&times;t) + PMT &times; [((1 + r/n)^(n&times;t) &minus; 1) / (r/n)]<br>
+Real Value = Nominal Balance &divide; (1 + inflation)^years
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-label">Inputs</div>
+          <div class="field-grid">
+            <div class="field"><label>Initial Principal ($)</label><input type="number" id="ci-p" value="1000" step="any"></div>
+            <div class="field"><label>Annual Rate (%)</label><input type="number" id="ci-rate" value="10" step="any"></div>
+            <div class="field"><label>Years</label><input type="number" id="ci-yrs" value="20" min="1" step="1"></div>
+            <div class="field"><label>Monthly Contribution ($)</label><input type="number" id="ci-pmt" value="0" step="any"></div>
+            <div class="field"><label>Compounding Frequency</label>
+              <select id="ci-freq">
+                <option value="12" selected>Monthly</option>
+                <option value="4">Quarterly</option>
+                <option value="1">Annual</option>
+                <option value="365">Daily</option>
+              </select>
+            </div>
+            <div class="field"><label>Inflation Rate (%)</label><input type="number" id="ci-inf" value="2.66" step="any"></div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="calcCI()">Calculate</button>
+          <button class="btn btn-export" onclick="exportTable('ci-data-table','compound_interest.csv')">Export to CSV / Excel</button>
+        </div>
+      </div>
+      <div class="result-panel" id="ci-result">
+        <div class="result-header">Compound Interest Results</div>
+        <div class="metrics-strip" id="ci-metrics"></div>
+        <div class="data-table-wrap"><table class="data-table" id="ci-data-table"></table></div>
+        <div class="result-note" id="ci-note"></div>
+      </div>
+    </div>
+
+    <!-- ====== DCF ====== -->
+    <div id="tab-dcf" class="section">
+      <div class="card">
+        <div class="card-title">DCF — Discounted Cash Flow / Intrinsic Value</div>
+        <div class="card-desc">
+          Two-stage DCF model: explicit 10-year FCF projection + terminal value using Gordon Growth Model. Used by Buffett, Munger, and every serious value investor to determine what a business is actually worth.
+          <div class="formula-box"><span class="formula-label">Formulas</span>
+PV of FCF = FCF_year / (1 + WACC)^year<br>
+Terminal Value = FCF_10 &times; (1 + g_terminal) / (WACC &minus; g_terminal)<br>
+Intrinsic Value/Share = (Sum of PV + Terminal PV &minus; Net Debt) / Shares
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-label">Quick Load — Live SEC EDGAR Data</div>
+          <div class="co-grid" id="dcf-co-grid"></div>
+          <div class="spinner" id="dcf-spinner">Fetching SEC EDGAR data&hellip;</div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-label">DCF Inputs</div>
+          <div class="field-grid">
+            <div class="field"><label>Trailing FCF / Operating CF ($)</label><input type="number" id="dcf-fcf" placeholder="e.g. 45000000000" step="any"></div>
+            <div class="field"><label>Growth Rate Yr 1–5 (%)</label><input type="number" id="dcf-g1" value="8" step="any"></div>
+            <div class="field"><label>Growth Rate Yr 6–10 (%)</label><input type="number" id="dcf-g2" value="5" step="any"></div>
+            <div class="field"><label>Terminal Growth Rate (%)</label><input type="number" id="dcf-gt" value="2.5" step="any"></div>
+            <div class="field"><label>Discount Rate / WACC (%)</label><input type="number" id="dcf-wacc" value="10" step="any"></div>
+            <div class="field"><label>Net Debt (Debt minus Cash) ($)</label><input type="number" id="dcf-nd" value="0" step="any"></div>
+            <div class="field"><label>Shares Outstanding (millions)</label><input type="number" id="dcf-shares" placeholder="e.g. 1450" step="any"></div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="calcDCF()">Calculate Intrinsic Value</button>
+          <button class="btn btn-export" onclick="exportTable('dcf-data-table','dcf_intrinsic_value.csv')">Export to CSV / Excel</button>
+        </div>
+      </div>
+      <div class="result-panel" id="dcf-result">
+        <div class="result-header" id="dcf-result-title">DCF Results</div>
+        <div class="metrics-strip" id="dcf-metrics"></div>
+        <div class="data-table-wrap"><table class="data-table" id="dcf-data-table"></table></div>
+        <div class="result-note" id="dcf-note"></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /layout -->
+</div><!-- /outer -->
+
+<script>
+var COMPANIES = [
+  {t:"BRK",  n:"Berkshire Hathaway", cik:"0001067983"},
+  {t:"AAPL", n:"Apple",              cik:"0000320193"},
+  {t:"MSFT", n:"Microsoft",          cik:"0000789019"},
+  {t:"NVDA", n:"NVIDIA",             cik:"0001045810"},
+  {t:"TSLA", n:"Tesla",              cik:"0001318605"},
+  {t:"AMZN", n:"Amazon",             cik:"0001018724"},
+  {t:"GOOGL",n:"Alphabet",           cik:"0001652044"},
+  {t:"JPM",  n:"JPMorgan",           cik:"0000019617"},
+  {t:"WMT",  n:"Walmart",            cik:"0000104169"},
+  {t:"V",    n:"Visa",               cik:"0001403161"}
+];
+
+var REV_CONCEPTS  = ["Revenues","RevenueFromContractWithCustomerExcludingAssessedTax","SalesRevenueNet","RevenueFromContractWithCustomerIncludingAssessedTax"];
+var EBIT_CONCEPTS = ["OperatingIncomeLoss","NetIncomeLoss"];
+var EQ_CONCEPTS   = ["StockholdersEquity","StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest"];
+var OCF_CONCEPTS  = ["NetCashProvidedByUsedInOperatingActivities","NetCashProvidedByUsedInOperatingActivitiesContinuingOperations"];
+var DEBT_CONCEPTS = ["LongTermDebt","LongTermDebtNoncurrent"];
+var CASH_CONCEPTS = ["CashAndCashEquivalentsAtCarryingValue","CashCashEquivalentsAndShortTermInvestments"];
+var SH_CONCEPTS   = ["CommonStockSharesOutstanding","WeightedAverageNumberOfSharesOutstandingBasic"];
+
+var cagrSeries = {};   // ticker -> [{year,val}]
+
+/* ---- EDGAR FETCH ---- */
+function fetchEDGAR(cik, concepts, cb) {
+  var url = "https://data.sec.gov/api/xbrl/companyfacts/CIK" + cik + ".json";
+  fetch(url, {headers: {"User-Agent": "Payton Loop Research research@paytonloop.com"}})
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var gaap = (data.facts || {})["us-gaap"] || {};
+      var out = {};
+      for (var ci = 0; ci < concepts.length; ci++) {
+        var concept = concepts[ci];
+        if (!gaap[concept]) continue;
+        var usd = (gaap[concept].units || {}).USD || [];
+        var seen = {};
+        for (var ui = 0; ui < usd.length; ui++) {
+          var x = usd[ui];
+          if (x.form === "10-K" && x.end) {
+            var yr = parseInt(x.end.substring(0,4));
+            if (!seen[yr] || x.end > seen[yr].end) {
+              seen[yr] = {year: yr, val: x.val, end: x.end};
+            }
+          }
+        }
+        var arr = [];
+        var yrs = Object.keys(seen).sort();
+        for (var k = 0; k < yrs.length; k++) arr.push(seen[yrs[k]]);
+        if (arr.length > 0) { out[concept] = arr; break; }
+      }
+      cb(null, out);
+    })
+    .catch(function(e) { cb(e, {}); });
+}
+
+function firstSeries(result, concepts) {
+  for (var i = 0; i < concepts.length; i++) {
+    if (result[concepts[i]] && result[concepts[i]].length > 0) return result[concepts[i]];
+  }
+  return [];
+}
+
+function lastVal(series) { return series.length ? series[series.length-1].val : 0; }
+
+/* ---- FORMAT HELPERS ---- */
+function fmtMoney(v) {
+  var sign = v < 0 ? "-" : "";
+  v = Math.abs(v);
+  if (v >= 1e12) return sign + "$" + (v/1e12).toFixed(2) + "T";
+  if (v >= 1e9)  return sign + "$" + (v/1e9).toFixed(2) + "B";
+  if (v >= 1e6)  return sign + "$" + (v/1e6).toFixed(2) + "M";
+  if (v >= 1e3)  return sign + "$" + (v/1e3).toFixed(1) + "K";
+  return sign + "$" + v.toFixed(2);
+}
+function fmtPct(v, d) { return (v >= 0 ? "+" : "") + v.toFixed(d === undefined ? 2 : d) + "%"; }
+function fmtNum(v, d) { return v.toFixed(d === undefined ? 2 : d); }
+
+function metricHTML(label, val, cls) {
+  return '<div class="metric"><div class="metric-label">' + label + '</div><div class="metric-value ' + (cls||"") + '">' + val + '</div></div>';
+}
+
+function statusBadge(roic) {
+  if (roic >= 20) return '<span class="status-badge status-good">Exceptional — Buffett Quality</span>';
+  if (roic >= 15) return '<span class="status-badge status-good">Excellent</span>';
+  if (roic >= 10) return '<span class="status-badge status-ok">Good</span>';
+  if (roic >= 7)  return '<span class="status-badge status-ok">Average</span>';
+  return '<span class="status-badge status-bad">Below Average</span>';
+}
+
+/* ---- COMPANY GRIDS ---- */
+function buildGrid(id, fn) {
+  var el = document.getElementById(id);
+  var html = "";
+  for (var i = 0; i < COMPANIES.length; i++) {
+    var c = COMPANIES[i];
+    html += '<div class="co-btn" id="' + id + '-' + c.t + '" onclick="' + fn + '(\'' + c.t + '\')">'
+          + '<span class="co-ticker">' + c.t + '</span>'
+          + '<span class="co-name">' + c.n.split(" ")[0] + '</span>'
+          + '</div>';
+  }
+  el.innerHTML = html;
+}
+
+function setActive(gridId, ticker) {
+  var els = document.getElementById(gridId).querySelectorAll(".co-btn");
+  for (var i = 0; i < els.length; i++) els[i].classList.remove("active");
+  var btn = document.getElementById(gridId + "-" + ticker);
+  if (btn) btn.classList.add("active");
+}
+
+buildGrid("cagr-co-grid",  "loadCAGR");
+buildGrid("roic-co-grid",  "loadROIC");
+buildGrid("dcf-co-grid",   "loadDCF");
+
+/* ======= CAGR ======= */
+function loadCAGR(ticker) {
+  setActive("cagr-co-grid", ticker);
+  var co = null;
+  for (var i = 0; i < COMPANIES.length; i++) { if (COMPANIES[i].t === ticker) { co = COMPANIES[i]; break; } }
+  if (!co) return;
+  document.getElementById("cagr-spinner").classList.add("show");
+  document.getElementById("cagr-yr1-wrap").style.display = "none";
+  document.getElementById("cagr-yr2-wrap").style.display = "none";
+
+  fetchEDGAR(co.cik, REV_CONCEPTS, function(err, result) {
+    document.getElementById("cagr-spinner").classList.remove("show");
+    var series = firstSeries(result, REV_CONCEPTS);
+    if (!series.length) { alert("Could not load data for " + ticker + ". Use manual entry."); return; }
+
+    cagrSeries[ticker] = series;
+
+    var yr1 = document.getElementById("cagr-yr1");
+    var yr2 = document.getElementById("cagr-yr2");
+    yr1.innerHTML = "";
+    yr2.innerHTML = "";
+    for (var i = 0; i < series.length; i++) {
+      var opt1 = document.createElement("option");
+      opt1.value = i;
+      opt1.textContent = series[i].year + "  (" + fmtMoney(series[i].val) + ")";
+      yr1.appendChild(opt1);
+      var opt2 = document.createElement("option");
+      opt2.value = i;
+      opt2.textContent = series[i].year + "  (" + fmtMoney(series[i].val) + ")";
+      yr2.appendChild(opt2);
+    }
+    yr1.selectedIndex = 0;
+    yr2.selectedIndex = series.length - 1;
+    document.getElementById("cagr-yr1-wrap").style.display = "";
+    document.getElementById("cagr-yr2-wrap").style.display = "";
+    onCAGRYearChange();
+  });
+}
+
+function onCAGRYearChange() {
+  var activeTicker = null;
+  var btns = document.getElementById("cagr-co-grid").querySelectorAll(".co-btn.active");
+  if (btns.length) activeTicker = btns[0].id.replace("cagr-co-grid-","");
+  if (!activeTicker || !cagrSeries[activeTicker]) return;
+  var series = cagrSeries[activeTicker];
+  var i1 = parseInt(document.getElementById("cagr-yr1").value);
+  var i2 = parseInt(document.getElementById("cagr-yr2").value);
+  if (i2 <= i1) { document.getElementById("cagr-yr2").selectedIndex = series.length - 1; i2 = series.length - 1; }
+  document.getElementById("cagr-sv").value = series[i1].val;
+  document.getElementById("cagr-ev").value = series[i2].val;
+  document.getElementById("cagr-n").value  = series[i2].year - series[i1].year;
+}
+
+function onCAGRMetricChange() {
+  // future: support NI if needed — for now just revenue
+}
+
+function calcCAGR() {
+  var sv = parseFloat(document.getElementById("cagr-sv").value);
+  var ev = parseFloat(document.getElementById("cagr-ev").value);
+  var n  = parseFloat(document.getElementById("cagr-n").value);
+  if (isNaN(sv) || isNaN(ev) || isNaN(n) || n <= 0 || sv <= 0 || ev <= 0) {
+    alert("Please fill in Start Value, End Value, and Number of Years (all must be positive).");
+    return;
+  }
+  var cagr = (Math.pow(ev / sv, 1 / n) - 1) * 100;
+  var totalReturn = ((ev - sv) / sv) * 100;
+  var doubleTime  = cagr > 0 ? (Math.log(2) / Math.log(1 + cagr/100)) : Infinity;
+  var cagrClass   = cagr >= 15 ? "green" : cagr >= 8 ? "yellow" : "red";
+
+  var activeTicker = null;
+  var btns = document.getElementById("cagr-co-grid").querySelectorAll(".co-btn.active");
+  if (btns.length) activeTicker = btns[0].id.replace("cagr-co-grid-","");
+
+  var title = "CAGR Results";
+  if (activeTicker) {
+    for (var i = 0; i < COMPANIES.length; i++) {
+      if (COMPANIES[i].t === activeTicker) { title = COMPANIES[i].n + " — Revenue CAGR"; break; }
+    }
+  }
+  document.getElementById("cagr-result-title").textContent = title;
+
+  document.getElementById("cagr-metrics").innerHTML =
+    metricHTML("CAGR", fmtNum(cagr) + "%", cagrClass) +
+    metricHTML("Total Return", fmtNum(totalReturn, 1) + "%", totalReturn >= 0 ? "green" : "red") +
+    metricHTML("Start Value", fmtMoney(sv), "") +
+    metricHTML("End Value", fmtMoney(ev), "") +
+    metricHTML("Years", fmtNum(n, 0), "") +
+    metricHTML("Doubling Time", isFinite(doubleTime) ? fmtNum(doubleTime, 1) + " yrs" : "N/A", "");
+
+  // Build year-by-year table if series available
+  var tableRows = "";
+  var tableHead = "<tr><th>Year</th><th>Revenue</th><th>YoY Growth</th><th>Cumulative Return</th></tr>";
+  var series = activeTicker && cagrSeries[activeTicker] ? cagrSeries[activeTicker] : null;
+  if (series) {
+    var i1 = parseInt(document.getElementById("cagr-yr1").value);
+    var i2 = parseInt(document.getElementById("cagr-yr2").value);
+    var slice = series.slice(i1, i2 + 1);
+    for (var j = 0; j < slice.length; j++) {
+      var yoy = j === 0 ? null : ((slice[j].val - slice[j-1].val) / slice[j-1].val) * 100;
+      var cumRet = ((slice[j].val - slice[0].val) / slice[0].val) * 100;
+      var yoyHtml = yoy === null ? "<td>—</td>" : ('<td class="' + (yoy >= 0 ? "up" : "dn") + '">' + fmtPct(yoy, 1) + "</td>");
+      var cumHtml = j === 0 ? "<td>—</td>" : ('<td class="' + (cumRet >= 0 ? "up" : "dn") + '">' + fmtPct(cumRet, 1) + "</td>");
+      tableRows += "<tr><td>" + slice[j].year + "</td><td>" + fmtMoney(slice[j].val) + "</td>" + yoyHtml + cumHtml + "</tr>";
+    }
+  } else {
+    tableRows = "<tr><td>" + "Start" + "</td><td>" + fmtMoney(sv) + "</td><td>—</td><td>—</td></tr>";
+    tableRows += "<tr><td>End (Year " + fmtNum(n,0) + ")</td><td>" + fmtMoney(ev) + "</td><td>—</td><td>" + fmtPct(totalReturn,1) + "</td></tr>";
+  }
+  document.getElementById("cagr-data-table").innerHTML = tableHead + tableRows;
+  document.getElementById("cagr-note").innerHTML = "<strong>Formula:</strong> CAGR = (End / Start)^(1/n) &minus; 1 &nbsp;|&nbsp; <strong>Data Source:</strong> SEC EDGAR XBRL official annual (10-K) filings. Doubling time via Rule of 72 exact calculation. Past growth does not guarantee future returns.";
+  document.getElementById("cagr-result").classList.add("show");
+}
+
+/* ======= ROIC ======= */
+function loadROIC(ticker) {
+  setActive("roic-co-grid", ticker);
+  var co = null;
+  for (var i = 0; i < COMPANIES.length; i++) { if (COMPANIES[i].t === ticker) { co = COMPANIES[i]; break; } }
+  if (!co) return;
+  document.getElementById("roic-spinner").classList.add("show");
+  var all = EBIT_CONCEPTS.concat(EQ_CONCEPTS).concat(DEBT_CONCEPTS).concat(CASH_CONCEPTS);
+  fetchEDGAR(co.cik, all, function(err, result) {
+    document.getElementById("roic-spinner").classList.remove("show");
+    var ebit = lastVal(firstSeries(result, EBIT_CONCEPTS));
+    var eq   = lastVal(firstSeries(result, EQ_CONCEPTS));
+    var debt = lastVal(firstSeries(result, DEBT_CONCEPTS));
+    var cash = lastVal(firstSeries(result, CASH_CONCEPTS));
+    if (ebit) document.getElementById("roic-ebit").value = ebit;
+    if (eq)   document.getElementById("roic-eq").value   = eq;
+    if (debt) document.getElementById("roic-debt").value = debt;
+    if (cash) document.getElementById("roic-cash").value = cash;
+    calcROIC();
+  });
+}
+
+function calcROIC() {
+  var ebit = parseFloat(document.getElementById("roic-ebit").value);
+  var tax  = parseFloat(document.getElementById("roic-tax").value);
+  var eq   = parseFloat(document.getElementById("roic-eq").value);
+  var debt = parseFloat(document.getElementById("roic-debt").value) || 0;
+  var cash = parseFloat(document.getElementById("roic-cash").value) || 0;
+  if (isNaN(ebit) || isNaN(eq) || isNaN(tax)) {
+    alert("Please fill in Operating Income, Tax Rate, and Total Equity.");
+    return;
+  }
+  var nopat = ebit * (1 - tax / 100);
+  var ic    = eq + debt - cash;
+  var roic  = ic > 0 ? (nopat / ic) * 100 : 0;
+  var roe   = eq > 0 ? (nopat / eq) * 100 : 0;
+  var roicClass = roic >= 15 ? "green" : roic >= 8 ? "yellow" : "red";
+
+  document.getElementById("roic-metrics").innerHTML =
+    metricHTML("ROIC", fmtNum(roic) + "%", roicClass) +
+    metricHTML("NOPAT", fmtMoney(nopat), nopat >= 0 ? "green" : "red") +
+    metricHTML("Invested Capital", fmtMoney(ic), "") +
+    metricHTML("ROE (alt)", fmtNum(roe) + "%", roe >= 15 ? "green" : "yellow") +
+    metricHTML("EBIT", fmtMoney(ebit), "") +
+    metricHTML("Tax Rate", fmtNum(tax) + "%", "");
+
+  document.getElementById("roic-data-table").innerHTML =
+    "<tr><th>Line Item</th><th>Value</th><th>Notes</th></tr>" +
+    "<tr><td>Operating Income (EBIT)</td><td>" + fmtMoney(ebit) + "</td><td>From income statement</td></tr>" +
+    "<tr><td>Tax Rate</td><td>" + fmtNum(tax) + "%</td><td>Effective or statutory</td></tr>" +
+    "<tr><td>NOPAT</td><td>" + fmtMoney(nopat) + "</td><td>EBIT &times; (1 &minus; Tax Rate)</td></tr>" +
+    "<tr><td>Total Equity</td><td>" + fmtMoney(eq) + "</td><td>Shareholders equity</td></tr>" +
+    "<tr><td>Total Debt</td><td>" + fmtMoney(debt) + "</td><td>Long-term debt</td></tr>" +
+    "<tr><td>Excess Cash</td><td>" + fmtMoney(cash) + "</td><td>Cash &amp; equivalents</td></tr>" +
+    "<tr><td>Invested Capital</td><td>" + fmtMoney(ic) + "</td><td>Equity + Debt &minus; Cash</td></tr>" +
+    '<tr><td><strong>ROIC</strong></td><td><strong>' + fmtNum(roic) + '%</strong></td><td>' + statusBadge(roic) + "</td></tr>";
+
+  document.getElementById("roic-note").innerHTML =
+    "<strong>ROIC Assessment:</strong> " + statusBadge(roic) +
+    "<br><strong>Buffett Standard:</strong> &gt;15% ROIC sustained over 10+ years indicates durable competitive advantage (moat)." +
+    "<br><strong>Limitation:</strong> One-year snapshot. Always look at 5-10 year ROIC trend. EDGAR data uses latest 10-K. Net income used when operating income unavailable.";
+  document.getElementById("roic-result").classList.add("show");
+
+  window._roicData = {ebit:ebit, tax:tax, nopat:nopat, eq:eq, debt:debt, cash:cash, ic:ic, roic:roic, roe:roe};
+}
+
+/* ======= CD ======= */
+function onCDPenaltyChange() {
+  var pt = document.getElementById("cd-ptype").value;
+  var wrap = document.getElementById("cd-pval-wrap");
+  var lbl  = document.getElementById("cd-pval-lbl");
+  if (pt === "none") { wrap.style.display = "none"; return; }
+  wrap.style.display = "";
+  lbl.textContent = pt === "months" ? "Months of Interest Forfeited" : "Penalty (% of Principal)";
+}
+
+function calcCD() {
+  var P    = parseFloat(document.getElementById("cd-p").value);
+  var rate = parseFloat(document.getElementById("cd-rate").value);
+  var term = parseInt(document.getElementById("cd-term").value);
+  var n    = parseInt(document.getElementById("cd-freq").value);
+  var pt   = document.getElementById("cd-ptype").value;
+  var pval = parseFloat(document.getElementById("cd-pval").value) || 0;
+  var wdAt = parseInt(document.getElementById("cd-wd-at").value) || 0;
+  if (isNaN(P) || isNaN(rate) || isNaN(term) || P <= 0 || rate <= 0 || term < 1) {
+    alert("Please fill in Principal, Annual Rate, and Term.");
+    return;
+  }
+  var r = rate / 100;
+
+  // Full-term balance: A = P*(1 + r/n)^(n*t) where t = term/12
+  var maturity = P * Math.pow(1 + r/n, n * (term/12));
+  var totalInt = maturity - P;
+  var effectiveAPY = (Math.pow(1 + r/n, n) - 1) * 100;
+
+  // Compute penalty for early withdrawal
+  function penaltyAmt(monthlyRate, principal, pval, pt) {
+    if (pt === "months") return principal * monthlyRate * pval;
+    if (pt === "pct")    return principal * (pval / 100);
+    return 0;
+  }
+  var monthlyRate = r / 12;
+
+  // Month-by-month schedule (show every month, export all)
+  var rows = [];
+  for (var mo = 1; mo <= term; mo++) {
+    var bal = P * Math.pow(1 + r/n, n * (mo/12));
+    var earned = bal - P;
+    var penalty = mo < term ? penaltyAmt(monthlyRate, P, pval, pt) : 0;
+    var net = bal - penalty;
+    var effYield = ((bal - P) / P) * 100;
+    rows.push({mo:mo, bal:bal, earned:earned, penalty:penalty, net:net, effYield:effYield});
+  }
+
+  var wdRow = null;
+  if (wdAt >= 1 && wdAt < term) {
+    wdRow = rows[wdAt - 1];
+  }
+
+  var metricsHtml =
+    metricHTML("Maturity Value", fmtMoney(maturity), "green") +
+    metricHTML("Total Interest", fmtMoney(totalInt), "green") +
+    metricHTML("Effective APY", fmtNum(effectiveAPY) + "%", "green") +
+    metricHTML("Term", term + " mo", "");
+  if (wdRow) {
+    metricsHtml +=
+      metricHTML("If Withdrawn Month " + wdAt, fmtMoney(wdRow.net), wdRow.net > P ? "yellow" : "red") +
+      metricHTML("Early W/D Penalty", fmtMoney(wdRow.penalty), "red");
+  }
+  document.getElementById("cd-metrics").innerHTML = metricsHtml;
+
+  // Table: show every 3 months + month 1 + final + wd month
+  var showMonths = {};
+  showMonths[1] = true; showMonths[term] = true;
+  if (wdAt) showMonths[wdAt] = true;
+  for (var mo2 = 3; mo2 <= term; mo2 += 3) showMonths[mo2] = true;
+
+  var tableHead = "<tr><th>Month</th><th>Balance</th><th>Interest Earned</th><th>APY to Date</th><th>Early W/D Penalty</th><th>Net if Withdrawn</th></tr>";
+  var tableRows = "";
+  for (var ri = 0; ri < rows.length; ri++) {
+    var rw = rows[ri];
+    if (!showMonths[rw.mo]) continue;
+    var isWD = wdAt && rw.mo === wdAt;
+    tableRows += "<tr" + (isWD ? ' style="background:#fff8e1"' : "") + ">"
+      + "<td>" + rw.mo + (isWD ? " ★" : "") + "</td>"
+      + "<td>" + fmtMoney(rw.bal) + "</td>"
+      + "<td class='up'>" + fmtMoney(rw.earned) + "</td>"
+      + "<td>" + fmtNum(rw.effYield) + "%</td>"
+      + "<td class='dn'>" + (rw.penalty > 0 ? fmtMoney(rw.penalty) : "—") + "</td>"
+      + "<td class='" + (rw.net > P ? "up" : "") + "'>" + fmtMoney(rw.net) + "</td>"
+      + "</tr>";
+  }
+  document.getElementById("cd-data-table").innerHTML = tableHead + tableRows;
+
+  var penaltyDesc = pt === "none" ? "no penalty" : pt === "months" ? pval + " months of interest" : pval + "% of principal";
+  document.getElementById("cd-note").innerHTML =
+    "<strong>Formula:</strong> A = P &times; (1 + r/n)^(n&times;t) &nbsp;|&nbsp; Effective APY = (1 + r/n)^n &minus; 1" +
+    "<br><strong>Early withdrawal penalty:</strong> " + penaltyDesc + ". ★ = selected withdrawal month." +
+    "<br><strong>Note:</strong> Verify your institution's exact penalty terms. FDIC insures up to $250,000 per depositor per bank.";
+  document.getElementById("cd-result").classList.add("show");
+
+  window._cdRows = rows;
+}
+
+/* ======= COMPOUND INTEREST ======= */
+function calcCI() {
+  var P   = parseFloat(document.getElementById("ci-p").value);
+  var r   = parseFloat(document.getElementById("ci-rate").value);
+  var yrs = parseInt(document.getElementById("ci-yrs").value);
+  var pmt = parseFloat(document.getElementById("ci-pmt").value) || 0;
+  var n   = parseInt(document.getElementById("ci-freq").value);
+  var inf = parseFloat(document.getElementById("ci-inf").value) || 0;
+  if (isNaN(P) || isNaN(r) || isNaN(yrs) || P < 0 || r < 0 || yrs < 1) {
+    alert("Please fill in Principal, Annual Rate, and Years.");
+    return;
+  }
+  var rn = r / 100 / n;
+
+  var rows = [];
+  var totalContrib = P;
+  for (var yr = 1; yr <= yrs; yr++) {
+    // Balance from lump sum
+    var balLump = P * Math.pow(1 + rn, n * yr);
+    // Balance from periodic payments (PMT per period, n periods/yr)
+    // FV of annuity = PMT * [((1+rn)^periods - 1) / rn]
+    var periods = n * yr;
+    var pmtPerPeriod = pmt / (12 / (12/n));  // PMT is monthly, convert to per-period
+    // simpler: monthly PMT -> annual contribution = pmt*12
+    // Use exact: balance = P*(1+rn)^(n*yr) + (pmt/n*12) * ((1+rn)^(n*yr)-1)/rn
+    // Actually: PMT is monthly. Period rate = r/n. Periods = n*yr.
+    // Monthly rate = r/100/12. Periods = 12*yr.
+    var rMonth = r / 100 / 12;
+    var totalPeriods = 12 * yr;
+    var bal = P * Math.pow(1 + rMonth, totalPeriods);
+    if (rMonth > 0) {
+      bal += pmt * (Math.pow(1 + rMonth, totalPeriods) - 1) / rMonth;
+    } else {
+      bal += pmt * totalPeriods;
+    }
+    totalContrib = P + pmt * 12 * yr;
+    var interest = bal - totalContrib;
+    var realBal  = bal / Math.pow(1 + inf/100, yr);
+    rows.push({yr:yr, bal:bal, contrib:totalContrib, interest:interest, realBal:realBal});
+  }
+
+  var final = rows[rows.length - 1];
+  var multiplier = P > 0 ? final.bal / P : 0;
+
+  document.getElementById("ci-metrics").innerHTML =
+    metricHTML("Final Balance", fmtMoney(final.bal), "green") +
+    metricHTML("Total Invested", fmtMoney(final.contrib), "") +
+    metricHTML("Interest Earned", fmtMoney(final.interest), "green") +
+    metricHTML("Real Value (today's $)", fmtMoney(final.realBal), "yellow") +
+    metricHTML("Money Multiplier", fmtNum(multiplier, 1) + "x", "green") +
+    metricHTML("Interest / Contributions", fmtNum(final.contrib > 0 ? final.interest/final.contrib : 0, 2) + "x", "green");
+
+  var tableHead = "<tr><th>Year</th><th>Balance</th><th>Total Invested</th><th>Interest Earned</th><th>Real Value (" + fmtNum(inf) + "% inf.)</th><th>Interest %</th></tr>";
+  var tableRows = "";
+  for (var ri = 0; ri < rows.length; ri++) {
+    var rw = rows[ri];
+    var intPct = rw.contrib > 0 ? (rw.interest / rw.bal) * 100 : 0;
+    tableRows += "<tr><td>" + rw.yr + "</td><td class='up'>" + fmtMoney(rw.bal) + "</td><td>" + fmtMoney(rw.contrib) + "</td><td class='up'>" + fmtMoney(rw.interest) + "</td><td class='yellow' style='color:#886600'>" + fmtMoney(rw.realBal) + "</td><td>" + fmtNum(intPct, 1) + "%</td></tr>";
+  }
+  document.getElementById("ci-data-table").innerHTML = tableHead + tableRows;
+  document.getElementById("ci-note").innerHTML =
+    "<strong>Formula:</strong> FV = P(1+r/n)^(nt) + PMT&times;[((1+r/n)^(nt)&minus;1)/(r/n)] &nbsp;|&nbsp; Real Value = FV &divide; (1+inflation)^t" +
+    "<br>Monthly contributions compounded at the chosen frequency. Real value reflects purchasing power in today's dollars at " + fmtNum(inf) + "% annual inflation.";
+  document.getElementById("ci-result").classList.add("show");
+  window._ciRows = rows;
+}
+
+/* ======= DCF ======= */
+function loadDCF(ticker) {
+  setActive("dcf-co-grid", ticker);
+  var co = null;
+  for (var i = 0; i < COMPANIES.length; i++) { if (COMPANIES[i].t === ticker) { co = COMPANIES[i]; break; } }
+  if (!co) return;
+  document.getElementById("dcf-spinner").classList.add("show");
+  var all = OCF_CONCEPTS.concat(DEBT_CONCEPTS).concat(CASH_CONCEPTS).concat(SH_CONCEPTS);
+  fetchEDGAR(co.cik, all, function(err, result) {
+    document.getElementById("dcf-spinner").classList.remove("show");
+    var ocf    = lastVal(firstSeries(result, OCF_CONCEPTS));
+    var debt   = lastVal(firstSeries(result, DEBT_CONCEPTS));
+    var cash   = lastVal(firstSeries(result, CASH_CONCEPTS));
+    var shares = lastVal(firstSeries(result, SH_CONCEPTS));
+    if (ocf)    document.getElementById("dcf-fcf").value    = ocf;
+    if (debt && cash) document.getElementById("dcf-nd").value = Math.max(0, debt - cash);
+    if (shares) document.getElementById("dcf-shares").value = Math.round(shares / 1e6);
+    var title = "";
+    for (var i = 0; i < COMPANIES.length; i++) { if (COMPANIES[i].t === ticker) title = COMPANIES[i].n; }
+    document.getElementById("dcf-result-title").textContent = title + " — DCF Intrinsic Value";
+    calcDCF();
+  });
+}
+
+function calcDCF() {
+  var fcf0  = parseFloat(document.getElementById("dcf-fcf").value);
+  var g1    = parseFloat(document.getElementById("dcf-g1").value) / 100;
+  var g2    = parseFloat(document.getElementById("dcf-g2").value) / 100;
+  var gt    = parseFloat(document.getElementById("dcf-gt").value)  / 100;
+  var wacc  = parseFloat(document.getElementById("dcf-wacc").value) / 100;
+  var nd    = parseFloat(document.getElementById("dcf-nd").value) || 0;
+  var sharesM = parseFloat(document.getElementById("dcf-shares").value) || 0;
+  if (isNaN(fcf0) || isNaN(wacc) || fcf0 <= 0 || wacc <= 0) {
+    alert("Please fill in FCF/OCF and WACC (both must be positive).");
+    return;
+  }
+  if (gt >= wacc) { alert("Terminal growth rate must be less than WACC. Adjust your inputs."); return; }
+
+  var rows = [];
+  var totalPV = 0;
+  var fcf = fcf0;
+  for (var yr = 1; yr <= 10; yr++) {
+    var g = yr <= 5 ? g1 : g2;
+    fcf = fcf * (1 + g);
+    var pv = fcf / Math.pow(1 + wacc, yr);
+    totalPV += pv;
+    rows.push({yr:yr, g:g*100, fcf:fcf, pv:pv, cumPV:totalPV});
+  }
+  var termFCF = fcf * (1 + gt);
+  var terminalValue = termFCF / (wacc - gt);
+  var terminalPV    = terminalValue / Math.pow(1 + wacc, 10);
+  var enterpriseVal = totalPV + terminalPV;  var equityVal  = enterpriseVal - nd;
+  var ivPerShare = sharesM > 0 ? equityVal / (sharesM * 1e6) : 0;
+  var termPct    = (terminalPV / enterpriseVal) * 100;
+
+  document.getElementById("dcf-metrics").innerHTML =
+    metricHTML("Intrinsic Value / Share", sharesM > 0 ? "$" + fmtNum(ivPerShare) : "Enter shares", "green") +
+    metricHTML("Enterprise Value", fmtMoney(enterpriseVal), "green") +
+    metricHTML("Equity Value", fmtMoney(equityVal), "green") +
+    metricHTML("10-Yr FCF PV", fmtMoney(totalPV), "") +
+    metricHTML("Terminal Value PV", fmtMoney(terminalPV), "") +
+    metricHTML("Terminal % of EV", fmtNum(termPct, 1) + "%", termPct > 80 ? "red" : "yellow");
+
+  var tableHead = "<tr><th>Year</th><th>Growth Rate</th><th>Projected FCF</th><th>PV of FCF</th><th>Cumulative PV</th></tr>";
+  var tableRows = "";
+  for (var ri = 0; ri < rows.length; ri++) {
+    var rw = rows[ri];
+    tableRows += "<tr><td>" + rw.yr + "</td><td>" + fmtNum(rw.g, 1) + "%</td><td>" + fmtMoney(rw.fcf) + "</td><td>" + fmtMoney(rw.pv) + "</td><td>" + fmtMoney(rw.cumPV) + "</td></tr>";
+  }
+  tableRows += "<tr style='background:#1a1a1a;color:#fff'><td colspan='3'>Terminal Value (perpetuity after Year 10)</td><td>" + fmtMoney(terminalPV) + "</td><td>—</td></tr>";
+  document.getElementById("dcf-data-table").innerHTML = tableHead + tableRows;
+
+  var mosPrice = ivPerShare * 0.70;
+  document.getElementById("dcf-note").innerHTML =
+    "<strong>DCF Formula:</strong> Two-stage model. PV = FCF_t / (1+WACC)^t. Terminal Value = FCF_10&times;(1+g) / (WACC&minus;g_terminal). Buffett Margin of Safety = buy at 30% discount." +
+    (ivPerShare > 0 ? "<br><strong>Margin of Safety Price (30% discount):</strong> $" + fmtNum(mosPrice) + " per share." : "") +
+    "<br><strong>Warning:</strong> DCF is extremely sensitive to WACC and terminal growth assumptions. Terminal value represents " + fmtNum(termPct,1) + "% of enterprise value — " +
+    (termPct > 80 ? "high sensitivity to long-run assumptions." : "reasonable split.") +
+    "<br><strong>Data Source:</strong> Operating Cash Flow from SEC EDGAR XBRL 10-K filings (OCF used as FCF proxy — subtract capex for true FCF).";
+  document.getElementById("dcf-result").classList.add("show");
+
+  window._dcfRows  = rows;
+  window._dcfExtra = {enterpriseVal:enterpriseVal, equityVal:equityVal, ivPerShare:ivPerShare, terminalPV:terminalPV, termPct:termPct};
+}
+
+/* ======= TABS ======= */
+function showTab(tab) {
+  var tabs = ["cagr","roic","cd","compound","dcf"];
+  for (var i = 0; i < tabs.length; i++) {
+    document.getElementById("tab-" + tabs[i]).classList.toggle("show", tabs[i] === tab);
+  }
+  var btns = document.querySelectorAll(".sidebar-item");
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].classList.toggle("active", i === tabs.indexOf(tab));
+  }
+  window.scrollTo(0, 0);
+}
+
+/* ======= EXPORT ======= */
+function exportTable(tableId, filename) {
+  var table = document.getElementById(tableId);
+  if (!table) { alert("Calculate first, then export."); return; }
+  var rows = table.querySelectorAll("tr");
+  if (!rows.length) { alert("Nothing to export — run a calculation first."); return; }
+  var csv = "";
+  for (var i = 0; i < rows.length; i++) {
+    var cells = rows[i].querySelectorAll("th,td");
+    var line = [];
+    for (var j = 0; j < cells.length; j++) {
+      var txt = cells[j].innerText.replace(/,/g,"").replace(/\n/g," ").trim();
+      line.push('"' + txt + '"');
+    }
+    csv += line.join(",") + "\n";
+  }
+  var a = document.createElement("a");
+  a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+</script>
+
+<script src="darkmode.js"></script>
+<script src="search.js"></script>
+</body>
+</html>

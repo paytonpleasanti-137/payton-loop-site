@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Payton Loop — The Edge</title>
+<style>
+* { box-sizing: border-box; }
+body { margin:0; padding:0; background:#1a1a14; font-family:Arial,sans-serif; font-size:14px; color:#000; }
+.outer { max-width:860px; margin:0 auto; padding:20px 12px 60px; }
+.hdr { text-align:center; border-bottom:3px solid #000; padding-bottom:16px; margin-bottom:20px; }
+.hdr h1 { font-size:28px; font-weight:bold; letter-spacing:2px; margin:0 0 6px; text-transform:uppercase; }
+.hdr .tagline { font-size:12px; color:#555; letter-spacing:1px; text-transform:uppercase; margin:0; }
+.hdr .warning { font-size:11px; color:#cc0000; margin-top:8px; font-style:italic; }
+.home-link { font-size:11px; color:#00008b; text-decoration:underline; display:inline-block; margin-bottom:16px; }
+.home-link:hover { color:#cc0000; }
+
+/* CATEGORY NAV */
+.cat-nav { display:flex; gap:0; border-bottom:2px solid #000; margin-bottom:24px; overflow-x:auto; }
+.cat-btn { padding:8px 16px; font-size:11px; text-transform:uppercase; letter-spacing:1px; cursor:pointer; border:none; background:#fff; color:#888; font-family:Arial; white-space:nowrap; flex-shrink:0; }
+.cat-btn:hover { color:#000; }
+.cat-btn.active { background:#000; color:#fff; }
+
+/* OPPORTUNITY CARDS */
+.opp-section { display:none; }
+.opp-section.show { display:block; }
+.section-intro { font-size:13px; color:#555; line-height:1.8; margin-bottom:20px; padding:12px 16px; border-left:3px solid #000; background:#f8f8f8; }
+
+.opp-card { border:1px solid #ddd; margin-bottom:16px; }
+.opp-card-header { padding:14px 16px 10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:flex-start; cursor:pointer; }
+.opp-card-header:hover { background:#fafafa; }
+.opp-title { font-size:15px; font-weight:bold; margin-bottom:4px; }
+.opp-subtitle { font-size:11px; color:#888; text-transform:uppercase; letter-spacing:.5px; }
+.opp-badges { display:flex; gap:6px; flex-shrink:0; margin-left:12px; flex-wrap:wrap; justify-content:flex-end; }
+.badge { font-size:10px; padding:3px 8px; font-weight:bold; letter-spacing:.5px; text-transform:uppercase; border:1px solid; }
+.badge-legal { color:#006600; border-color:#006600; }
+.badge-gray { color:#886600; border-color:#886600; }
+.badge-risk-low { color:#006600; border-color:#006600; }
+.badge-risk-med { color:#886600; border-color:#886600; }
+.badge-risk-high { color:#cc0000; border-color:#cc0000; }
+.badge-new { background:#000; color:#fff; border-color:#000; }
+.badge-crypto { color:#555; border-color:#999; }
+
+.opp-body { padding:16px; display:none; }
+.opp-body.show { display:block; }
+.opp-what { font-size:13px; line-height:1.8; color:#333; margin-bottom:14px; }
+.opp-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
+.opp-stat { border:1px solid #eee; padding:10px 12px; }
+.opp-stat-label { font-size:10px; color:#888; text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }
+.opp-stat-val { font-size:15px; font-weight:bold; font-family:monospace; }
+.opp-stat-val.green { color:#006600; }
+.opp-stat-val.red { color:#cc0000; }
+.opp-stat-val.yellow { color:#886600; }
+.opp-how { margin-bottom:12px; }
+.opp-how h4 { font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#555; margin:0 0 8px; border-bottom:1px solid #eee; padding-bottom:4px; }
+.opp-how ol, .opp-how ul { font-size:13px; line-height:1.9; color:#333; padding-left:20px; margin:0; }
+.opp-risk { background:#fff8f8; border:1px solid #ffdddd; padding:10px 12px; font-size:12px; line-height:1.7; color:#555; margin-bottom:10px; }
+.opp-risk strong { color:#cc0000; }
+.opp-links { display:flex; gap:10px; flex-wrap:wrap; }
+.opp-link { font-size:11px; color:#00008b; text-decoration:underline; }
+.opp-link:hover { color:#cc0000; }
+.opp-ledger { background:#000; color:#0f0; font-family:monospace; font-size:11px; padding:10px 12px; margin-top:10px; line-height:1.8; }
+.expand-icon { font-size:18px; color:#ccc; flex-shrink:0; }
+
+/* SCORE TABLE */
+.score-table { width:100%; border-collapse:collapse; font-size:13px; margin-bottom:20px; }
+.score-table th { text-align:left; border-bottom:2px solid #000; padding:6px 4px; font-size:10px; text-transform:uppercase; letter-spacing:.5px; }
+.score-table td { border-bottom:1px solid #eee; padding:8px 4px; vertical-align:top; }
+.score-table tr:last-child td { border-bottom:none; }
+.n { text-align:right; font-family:monospace; }
+
+.disclaimer { font-size:11px; color:#888; border-top:2px solid #000; padding-top:16px; margin-top:24px; line-height:1.8; }
+</style>
+
+<style id="page-theme">
+
+/* Classified document — redacted intel */
+body {
+  background-color:#1a1a14 !important;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 31px, rgba(255,220,0,0.03) 31px, rgba(255,220,0,0.03) 32px) !important;
+  color:#d4d0c0 !important;
+}
+body::before {
+  content:'TOP SECRET // NOFORN';
+  position:fixed;
+  top:12px;
+  right:16px;
+  font-family:Arial,sans-serif;
+  font-size:9px;
+  font-weight:bold;
+  letter-spacing:2px;
+  color:rgba(180,0,0,0.25);
+  pointer-events:none;
+  z-index:9999;
+}
+body::after {
+  content:'';
+  position:fixed;
+  inset:0;
+  border:2px solid rgba(180,0,0,0.08);
+  pointer-events:none;
+  z-index:9998;
+}
+h1,h2,h3,.section-title { color:#e8d880 !important; }
+
+</style>
+</head>
+<body>
+<div class="outer">
+
+  <div class="hdr">
+    <h1>The Edge</h1>
+    <p class="tagline">Gray Area &middot; Unregulated &middot; Asymmetric &middot; Forward-Thinking Opportunities</p>
+    <p class="warning">This page documents opportunities that exist in legal gray areas or emerging regulatory environments. Understand every risk before acting. This is intelligence, not advice.</p>
+  </div>
+
+  <a class="home-link" href="plc-capital.html">&larr; Operations Page</a>
+
+  <div class="cat-nav">
+    <button class="cat-btn active" onclick="showCat('overview')">Overview</button>
+    <button class="cat-btn" onclick="showCat('predict')">Prediction Markets</button>
+    <button class="cat-btn" onclick="showCat('defi')">DeFi Yield</button>
+    <button class="cat-btn" onclick="showCat('arb')">Arbitrage</button>
+    <button class="cat-btn" onclick="showCat('info')">Information Edge</button>
+    <button class="cat-btn" onclick="showCat('emerging')">Emerging</button>
+    <button class="cat-btn" onclick="showCat('compare')">Comparison</button>
+  </div>
+
+  <!-- ===== OVERVIEW ===== -->
+  <div id="cat-overview" class="opp-section show">
+    <div class="section-intro">
+      <strong>What is "The Edge"?</strong><br>
+      Every generation has a window where new financial instruments or markets exist before regulators, institutions, or the mainstream public fully understands them. In the 1990s it was internet stocks. In 2010 it was Bitcoin at $0.01. In 2016 it was ICOs. In 2020 it was DeFi yield farming paying 1,000% APY.<br><br>
+      We are currently in one of those windows. Prediction markets, onchain yield, tokenized real-world assets, and AI-augmented information arbitrage all exist in zones where the rules are still being written. The people who understand these now — before regulation standardizes and compresses returns — have the asymmetric advantage.<br><br>
+      This page is your briefing. Updated as the landscape changes.
+    </div>
+
+    <div class="section-intro" style="border-left-color:#cc0000;background:#fff8f8">
+      <strong>The Framework: How to Evaluate a Gray Area Opportunity</strong><br>
+      Before acting on anything here, ask four questions:<br>
+      1. <strong>Is it legal in Oklahoma?</strong> Most crypto and prediction market activity is legal for US residents with caveats.<br>
+      2. <strong>What's the downside?</strong> Can you lose 100%? Is there counterparty risk?<br>
+      3. <strong>What's the edge?</strong> Why do YOU have an advantage that others don't?<br>
+      4. <strong>What's the exit?</strong> How do you convert back to USD and into your bank account?
+    </div>
+
+    <table class="score-table">
+      <tr><th>Opportunity</th><th>Legal Status</th><th>Return Potential</th><th>Risk</th><th>Capital Needed</th><th>Time to First $</th></tr>
+      <tr><td><strong>Kalshi Prediction Markets</strong></td><td style="color:#006600">✓ CFTC Regulated</td><td>10–200% per trade</td><td style="color:#886600">Medium</td><td>$100+</td><td>Days</td></tr>
+      <tr><td><strong>Polymarket</strong></td><td style="color:#886600">Gray (USDC/crypto)</td><td>10–500% per trade</td><td style="color:#886600">Medium</td><td>$50 USDC</td><td>Days</td></tr>
+      <tr><td><strong>DeFi Stablecoin Yield</strong></td><td style="color:#886600">Gray (unregulated)</td><td>5–20% APY</td><td style="color:#886600">Low-Medium</td><td>$500+</td><td>Daily</td></tr>
+      <tr><td><strong>Onchain Arbitrage</strong></td><td style="color:#886600">Gray (unregulated)</td><td>0.1–3% per trade</td><td style="color:#006600">Low</td><td>$1,000+</td><td>Minutes</td></tr>
+      <tr><td><strong>Information Arbitrage</strong></td><td style="color:#006600">✓ Legal</td><td>Unlimited (compounding)</td><td style="color:#006600">Very Low</td><td>$0</td><td>Hours</td></tr>
+      <tr><td><strong>AI Content Arbitrage</strong></td><td style="color:#006600">✓ Legal</td><td>$500–$10k/month</td><td style="color:#006600">Low</td><td>$0–$50</td><td>Weeks</td></tr>
+      <tr><td><strong>Tokenized Real-World Assets</strong></td><td style="color:#886600">Emerging regulation</td><td>8–25% APY</td><td style="color:#886600">Medium</td><td>$100+</td><td>Days</td></tr>
+      <tr><td><strong>Sports Betting Arbitrage</strong></td><td style="color:#006600">✓ Legal (Oklahoma)</td><td>2–8% per arb</td><td style="color:#006600">Very Low</td><td>$500+</td><td>Hours</td></tr>
+    </table>
+    <p style="font-size:12px;color:#555;font-style:italic">Click any category above to read the full intelligence briefing for that opportunity.</p>
+  </div>
+
+  <!-- ===== PREDICTION MARKETS ===== -->
+  <div id="cat-predict" class="opp-section">
+    <div class="section-intro">
+      Prediction markets let you buy and sell shares in the outcome of real-world events. If you're right, you collect $1 per share. If you're wrong, you lose your stake. The edge comes from being better informed than the crowd — or identifying where the crowd is systematically wrong.
+    </div>
+
+    <div class="opp-card">
+      <div class="opp-card-header" onclick="toggleCard(this)">
+        <div>
+          <div class="opp-title">Kalshi — CFTC Regulated Event Contracts</div>
+          <div class="opp-subtitle">US Legal &middot; Real USD &middot; Bank Account &middot; Oklahoma OK</div>
+        </div>
+        <div>
+          <div class="opp-badges">
+            <span class="badge badge-legal">Legal</span>
+            <span class="badge badge-risk-med">Medium Risk</span>
+          </div>
+          <div class="expand-icon" style="text-align:right;margin-top:6px">▼</div>
+        </div>
+      </div>
+      <div class="opp-body">
+        <div class="opp-what">
+          Kalshi is the only CFTC-regulated prediction market in the United States. You deposit real USD via bank transfer and trade contracts on real-world outcomes — Fed rate decisions, election results, economic indicators. Each contract pays $1 if correct, $0 if wrong. This is fully legal for US residents including Oklahoma.
+        </div>
+        <div class="opp-grid">
+          <div class="opp-stat"><div class="opp-stat-label">Return potential</div><div class="opp-stat-val green">10–200% per trade</div></div>
+          <div class="opp-stat"><div class="opp-stat-label">Fee</div><div class="opp-stat-val">~2–3% per trade</div></div>
+          <div class="opp-stat"><div class="opp-stat-label">Minimum</div><div class="opp-stat-val">$1</div></div>
+          <div class="opp-stat"><div class="opp-stat-label">Best edge category</div><div class="opp-stat-val green">Fed decisions</div></div>
+        </div>
+        <div class="opp-how">
+          <h4>How to Make Money</h4>
+          <ol>
+            <li>Open account at kalshi.com — bank account, no crypto needed, 5 minutes</li>
+            <li>Fund with $100–$500 minimum to get meaningful trades</li>
+            <li>Focus on Fed rate decision markets — the crowd systematically overestimates cuts</li>
+            <li>Use the Edge Analyzer on the Prediction Markets page to verify positive EV before trading</li>
+            <li>Size using Quarter-Kelly — never more than 2% of bankroll per trade</li>
+            <li>Track every trade in the Bets Desk — after 50 trades you'll know your edge</li>
+          </ol>
+        </div>
+        <div class="opp-risk"><strong>Key Risks:</strong> You can lose 100% of your stake on any single trade. Kalshi has counterparty risk as a company (though CFTC regulated). Fee drag at 2-3% per trade means you need consistent 55%+ accuracy to be profitable long-term.</div>
+        <div class="opp-ledger">LEDGER EDGE SCORE: 7.2/10
+Best category: Federal Reserve decisions (crowd overestimates cuts ~68% of the time)
+Current signal: Check the Whale Tracker for large position moves before placing trades
+Minimum viable strategy: 50 trades at 2% bankroll sizing, track win rate, only continue if >54%</div>
+        <div class="opp-links"><a class="opp-link" href="https://kalshi.com" target="_blank">Kalshi.com →</a><a class="opp-link" href="predict.html">Edge Analyzer →</a></div>
+      </div>
+    </div>
+
+    <div class="opp-card">
+      <div class="opp-card-header" onclick="toggleCard(this)">
+        <div>
+          <div class="opp-title">Polymarket — Largest Global Prediction Market</div>
+          <div class="opp-subtitle">Crypto (USDC) &middot; Gray Area for US &middot; Largest Liquidity</div>
+        </div>
+        <div>
+          <div class="opp-badges">
+            <span class="badge badge-gray">Gray Area</span>
+            <span class="badge badge-risk-med">Medium Risk</span>
+          </div>
+          <div class="expand-icon" style="text-align:right;margin-top:6px">▼</div>
+        </div>
+      </div>
+      <div class="opp-body">
+        <div class="opp-what">
+          Polymarket is the world's largest prediction market by volume — over $1 billion traded monthly. It operates on the Polygon blockchain using USDC (a dollar-pegged stablecoin). <strong>Technically, US users are not supposed to use it due to SEC/CFTC jurisdiction concerns.</strong> In practice, most US users access it without issue. Polymarket itself was fined $1.4M by the CFTC in 2022 and continues operating. The company's legal posture is that individual US traders aren't liable — only the platform is.
+        </div>
+        <div class="opp-grid">
+          <div class="opp-stat"><div class="opp-stat-label">Monthly volume</div><div class="opp-stat-val green">$1B+</div></div>
+          <div class="opp-stat"><div class="opp-stat-label">Fee</div><div class="opp-stat-val green">0% (no fee)</div></div>
+          <div class="opp-stat"><div class="opp-stat-label">Legal risk to user</div><div class="opp-stat-val yellow">Low-Medium</div></div>
+          <div class="opp-stat"><div class="opp-stat-label">Edge vs Kalshi</div><div class="opp-stat-val green">No fee = bigger profit</div></div>
+        </div>
+        <div class="opp-how">
+          <h4>How to Access (US User)</h4>
+          <ol>
+            <li>Buy USDC on Coinbase ($50 minimum) — fully legal in Oklahoma</li>
+            <li>Download MetaMask wallet (free browser extension)</li>
+            <li>Transfer USDC from Coinbase to MetaMask on Polygon network</li>
+            <li>Connect MetaMask to polymarket.com</li>
+            <li>Trade — no KYC required, no name attached to wallet</li>
+          </ol>
+        </div>
+        <div class="opp-risk"><strong>Key Risks:</strong> US legal gray area — Polymarket has been fined by CFTC. Individual user enforcement is rare but not zero. Smart contract risk (code bugs can lose funds). USDC de-peg risk (extremely rare but happened briefly in 2023). Converting USDC back to USD requires Coinbase KYC.</div>
+        <div class="opp-ledger">LEDGER EDGE SCORE: 8.1/10
+The 0% fee structure makes this superior to Kalshi on a pure math basis.
+The liquidity ($1B+/month) means your trades don't move the market.
+The gray area legal status is the price of admission.
+Recommended approach: Start with Kalshi legally, then evaluate Polymarket once comfortable.</div>
+        <div class="opp-links"><a class="opp-link" href="https://polymarket.com" target="_blank">Polymarket.com →</a><a class="opp-link" href="whales.html">Whale Tracker →</a></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DEFI YIELD ===== -->
+  <div id="cat-defi" class="opp-section">
+    <div class="section-intro">
+      Decentralized Finance (DeFi) lets you lend, provide liquidity, and earn yield without a bank. The returns are higher than traditional finance because there's no middleman — and because the risk is real. In 2024–2026, stablecoin yields of 8–20% APY are available on-chain with relatively low risk. Understanding these now puts you ahead of 99% of Americans.
+    </div>
+
+    <div class="opp-card">
+      <div class="opp-card-header" onclick="toggleCard(this)">
+        <div>
+          <div class="opp-title">Stablecoin Lending — 8–20% APY on Dollar-Pegged Assets</div>
+          <div class="opp-subtitle">Low volatility &middot; Higher than savings accounts &middot; Smart contract risk</div>
+        </div>
+        <div>
+          <div class="opp-badges">
+            <span class="badge badge-gray">Unregulated</span>
+            <span class="badge badge-risk-med">Medium Risk</span>
+          </div>
+          <div class="expand-icon" style="text-align:right;margin-top:6px">▼</div>
+        </div>
+      </div>
+      <div class="opp-body">
+        <div class="opp-what">
+          Stablecoins (USDC, USDT, DAI) are cryptocurrencies pegged to the US dollar. You can lend them on DeFi protocols and earn 8–20% APY — compared to 4–5% at the best US savings accounts. The yield comes from borrowers paying interest to trade with leverage. No bank, no FDIC insurance, no middleman — just code.
+        </div>
+        <div class="opp-grid">
+          <div class="opp-stat"><div class="opp-stat-label">Current yields (2026)</div><div class="opp-stat-val green">8–20% APY</div></div>
+          <div class="opp-stat"><div class="opp-stat-label">vs. Best US savings rate</div><div class="opp-stat-val green">4–5% APY</div></div>
+          <div class="opp-stat"><div class="opp-stat-label">Volatility of principal</div><div class="opp-stat-val green">Near zero (stablecoin)</div></div>
+          <div class="opp-stat"><div class="opp-stat-label">Key risk</div><div class="opp-stat-val red">Smart contract hack</div></div>
+        </div>
+        <div class="opp-how">
+          <h4>Platforms with Strongest Track Record</h4>
+          <ul>
+            <li><strong>Aave (aave.com)</strong> — Largest DeFi lending protocol. $15B+ TVL. USDC yield: ~8–12% APY. Never been hacked at the core protocol level.</li>
+            <li><strong>Compound (compound.finance)</strong> — Second largest. Similar yields. Battle-tested since 2018.</li>
+            <li><strong>Ethena (ethena.fi)</strong> — Issues USDe synthetic dollar. Current APY: 12–20%. More complex, higher yield, newer (2024).</li>
+            <li><strong>Sky/MakerDAO (sky.money)</strong> — DAI savings rate. Currently ~8% APY. Most decentralized.</li>
+          </ul>
+        </div>
+        <div class="opp-risk"><strong>Key Risks:</strong> Smart contract bugs can drain funds (has happened at smaller protocols). Regulatory crackdown could freeze assets. Stablecoin de-peg risk (USDC briefly hit $0.87 during SVB collapse in 2023). No FDIC insurance — you are your own bank.</div>
+        <div class="opp-ledger">LEDGER ANALYSIS: $1,000 in best US savings account = $40-50/year.
+$1,000 in Aave USDC = $80-120/year.
+$1,000 in Ethena USDe = $120-200/year.
+The gap compounds. After 5 years at 15% APY: $2,011. At 4.5% savings: $1,246.
+Recommended entry: Start with Aave only. Established, audited, battle-tested. Add Ethena only after understanding the mechanism.</div>
+        <div class="opp-links">
+          <a class="opp-link" href="https://aave.com" target="_blank">Aave →</a>
+          <a class="opp-link" href="https://ethena.fi" target="_blank">Ethena →</a>
+          <a class="opp-link" href="https://sky.money" target="_blank">Sky/MakerDAO →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="opp-card">
+      <div class="opp-card-header" onclick="toggleCard(this)">
+        <div>
+          <div class="opp-title">Liquidity Provision — Earn Fees from Every Trade</div>
+          <div class="opp-subtitle">Passive income &middot; Impermanent loss risk &middot; Best for stablecoin pairs</div>
+        </div>
+        <div>
+          <div class="opp-badges">
+            <span class="badge badge-gray">Unregulated</span>
+            <span class="badge badge-risk-high">Higher Risk</span>
+          </div>
+          <div class="expand-icon" style="text-align:right;margin-top:6px">▼</div>
+        </div>
+      </div>
+      <div class="opp-body">
+        <div class="opp-what">
+          Decentralized exchanges (Uniswap, Curve) let you deposit two assets into a liquidity pool. Every time someone trades through that pool, you earn a fee (0.01–1% per trade). The risk is "impermanent loss" — if the prices of your two assets diverge significantly, you end up holding less value than if you'd just held them. The solution: only provide liquidity for stablecoin-to-stablecoin pairs (USDC/USDT) where both assets are always ~$1.
+        </div>
+        <div class="opp-grid">
+          <div class="opp-stat"><div class="opp-stat-label">USDC/USDT pool APY</div><div class="opp-stat-val green">5–15% APY</div></div>
+          <div class="opp-stat"><div class="opp-stat-label">Impermanent loss risk</div><div class="opp-stat-val green">Near zero (stable pairs)</div></div>
+          <div class="opp-stat"><div class="opp-stat-label">Best platform</div><div class="opp-stat-val">Curve Finance</div></div>
+          <div class="opp-stat"><div class="opp-stat-label">Minimum</div><div class="opp-stat-val">$100</div></div>
+        </div>
+        <div class="opp-risk"><strong>Key Risks:</strong> Smart contract bugs. Curve was hacked in July 2023 (reentrancy vulnerability) — $62M lost, but stablecoin pools were unaffected. Always check if the specific pool you're entering has been audited.</div>
+        <div class="opp-ledger">LEDGER NOTE: Curve's 3pool (USDC/USDT/DAI) has over $1B in TVL and has never been drained in a hack. It's as close to "safe DeFi" as exists. The yield is lower than newer protocols but the risk-adjusted return is better.</div>
+        <div class="opp-links"><a class="opp-link" href="https://curve.fi" target="_blank">Curve Finance →</a><a class="opp-link" href="https://uniswap.org" target="_blank">Uniswap →</a></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ARBITRAGE ===== -->
+  <div id="cat-arb" class="opp-section">
+    <div class="section-intro">
+      Arbitrage is the simultaneous buying and selling of the same asset in different markets to profit from a price difference. In theory it's risk-free. In practice, execution speed and fees determine whether you actually capture the spread. Three types matter for Payton Loop: prediction market arb, sports book arb, and onchain DEX arb.
+    </div>
+
+    <div class="opp-card">
+      <div class="opp-card-header" onclick="toggleCard(this)">
+        <div>
+          <div class="opp-title">Sports Book Arbitrage — Guaranteed Profit on Both Sides</div>
+          <div class="opp-subtitle">100% Legal in Oklahoma &middot; 2–8% per arb &middot; Account banning risk</div>
+        </div>
+        <div>
+          <div class="opp-badges">
+            <span class="badge badge-legal">Legal</span>
+            <span class="badge badge-risk-low">Low Risk</span>
+          </div>
+          <div class="expand-icon" style="text-align:right;margin-top:6px">▼</div>
+        </div>
+      </div>
+      <div class="opp-body">
+        <div class="opp-what">
+          When two sportsbooks disagree on the same game, you can bet both sides and guarantee a profit regardless of outcome. Example: FanDuel has Chiefs -110 and DraftKings has Eagles +115 on the same game. If the combined implied probability is under 100%, you have an arb. Oklahoma sports betting is legal via tribal gaming compacts since August 2024 — FanDuel and DraftKings both operate here.
+        </div>
+        <div class="opp-grid">
+          <div class="opp-stat"><div class="opp-stat-label">Avg profit per arb</div><div class="opp-stat-val green">2–8%</div></div>
+          <div class="opp-stat"><div class="opp-stat-label">Frequency</div><div class="opp-stat-val">5–20 arbs/day</div></div>
+          <div class="opp-stat"><div class="opp-stat-label">Account ban risk</div><div class="opp-stat-val red">High (if detected)</div></div>
+          <div class="opp-stat"><div class="opp-stat-label">Capital needed</div><div class="opp-stat-val">$500–$2,000</div></div>
+        </div>
+        <div class="opp-how">
+          <h4>The System</h4>          <ol>
+            <li>Use OddsJam or Arbitrage Betting (free tools) to scan for arbs across FanDuel, DraftKings, BetMGM</li>
+            <li>When arb found: calculate exact stakes for each side using the Arb Calculator in the Bets Desk</li>
+            <li>Place both bets simultaneously (speed matters — lines change)</li>
+            <li>Collect guaranteed profit within 24 hours</li>
+            <li>Rotate through 3–5 accounts to avoid pattern detection</li>
+          </ol>
+        </div>
+        <div class="opp-risk"><strong>Key Risk:</strong> Sportsbooks will limit or ban accounts that consistently arb. The strategy has a lifespan. Solution: spread bets across multiple accounts, mix in "square" bets occasionally, withdraw frequently.</div>
+        <div class="opp-ledger">LEDGER MATH: $1,000 bankroll. 3 arbs/day at 3% avg = $90/day in theory.
+Real-world: 1–2 arbs/day at 2–4% = $20–$80/day.
+Monthly: $600–$2,400.
+Lifespan of accounts: 3–6 months before limiting.
+Best used as: bridge income while YouTube/Gumroad scale up.</div>
+        <div class="opp-links">
+          <a class="opp-link" href="https://oddsjam.com" target="_blank">OddsJam (arb finder) →</a>
+          <a class="opp-link" href="bets.html">Bets Desk Arb Calculator →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="opp-card">
+      <div class="opp-card-header" onclick="toggleCard(this)">
+        <div>
+          <div class="opp-title">Prediction Market Arb — Polymarket vs Kalshi</div>
+          <div class="opp-subtitle">Same event, two prices &middot; Risk-free if spread exists &middot; Speed critical</div>
+        </div>
+        <div>
+          <div class="opp-badges">
+            <span class="badge badge-gray">Gray Area</span>
+            <span class="badge badge-risk-low">Low-Medium</span>
+          </div>
+          <div class="expand-icon" style="text-align:right;margin-top:6px">▼</div>
+        </div>
+      </div>
+      <div class="opp-body">
+        <div class="opp-what">
+          When Polymarket and Kalshi both list the same real-world event, they sometimes price it differently. Buy YES on the cheaper platform and NO on the more expensive one. Total cost must be under $1 per share. The spread is your guaranteed profit. These windows are typically small (under 5%) and close within hours.
+        </div>
+        <div class="opp-grid">
+          <div class="opp-stat"><div class="opp-stat-label">Avg spread when available</div><div class="opp-stat-val green">3–10%</div></div>
+          <div class="opp-stat"><div class="opp-stat-label">Frequency</div><div class="opp-stat-val yellow">Rare — check daily</div></div>
+          <div class="opp-stat"><div class="opp-stat-label">Net after Kalshi fee</div><div class="opp-stat-val">Need 5%+ spread</div></div>
+          <div class="opp-stat"><div class="opp-stat-label">Speed required</div><div class="opp-stat-val red">Under 30 minutes</div></div>
+        </div>
+        <div class="opp-risk"><strong>Key Risk:</strong> Execution risk — if you fill one leg and the other moves against you before filling, you have a directional position instead of a hedge. Always try to fill both legs within seconds of each other.</div>
+        <div class="opp-ledger">LEDGER NOTE: True riskless arb on prediction markets is rare — maybe 2–3 genuine opportunities per week. More common is quasi-arb where you have a strong opinion AND a favorable price. The Arb Scanner in the Predict section monitors this in real time.</div>
+        <div class="opp-links">
+          <a class="opp-link" href="predict.html">Prediction Market Arb Scanner →</a>
+          <a class="opp-link" href="whales.html">Whale Tracker →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== INFORMATION EDGE ===== -->
+  <div id="cat-info" class="opp-section">
+    <div class="section-intro">
+      The most underrated gray-area advantage is information arbitrage — knowing something before the price reflects it. This is 100% legal when the information is public but not yet priced in. The tools below let you systematically find these windows before the crowd does.
+    </div>
+
+    <div class="opp-card">
+      <div class="opp-card-header" onclick="toggleCard(this)">
+        <div>
+          <div class="opp-title">SEC EDGAR Early Filing Reader — Trade Before the Street</div>
+          <div class="opp-subtitle">100% Legal &middot; Public data &middot; Speed advantage over retail</div>
+        </div>
+        <div>
+          <div class="opp-badges">
+            <span class="badge badge-legal">Legal</span>
+            <span class="badge badge-risk-low">Low Risk</span>
+            <span class="badge badge-new">Ledger-Powered</span>
+          </div>
+          <div class="expand-icon" style="text-align:right;margin-top:6px">▼</div>
+        </div>
+      </div>
+      <div class="opp-body">
+        <div class="opp-what">
+          When a company files an 8-K (material event disclosure) or 13-D (large position disclosure) with the SEC, the information is public immediately. But most retail investors won't see it for hours or days — they wait for Bloomberg, CNBC, or Reddit to report it. Ledger can monitor EDGAR's RSS feed in real time and alert you within minutes of significant filings. That's your window.
+        </div>
+        <div class="opp-grid">
+          <div class="opp-stat"><div class="opp-stat-label">Edge window</div><div class="opp-stat-val green">5–60 minutes</div></div>
+          <div class="opp-stat"><div class="opp-stat-label">Data cost</div><div class="opp-stat-val green">Free (EDGAR RSS)</div></div>
+          <div class="opp-stat"><div class="opp-stat-label">Legal status</div><div class="opp-stat-val green">100% legal</div></div>
+          <div class="opp-stat"><div class="opp-stat-label">Relevant filings</div><div class="opp-stat-val">8-K, 13-D, SC 13G</div></div>
+        </div>
+        <div class="opp-how">
+          <h4>Filings to Watch</h4>
+          <ul>
+            <li><strong>8-K (Material Events)</strong> — Mergers, CEO departures, earnings restatements. Price-moving and immediate.</li>
+            <li><strong>13-D (Activist Disclosure)</strong> — When a hedge fund takes a 5%+ stake. Almost always pushes price up. Window: 30–90 minutes before retail notices.</li>
+            <li><strong>SC 13G (Passive Large Stakes)</strong> — Institutional buying. Bullish signal. Less immediate but directional.</li>
+            <li><strong>Form 4 (Insider Transactions)</strong> — When executives buy their own stock. One of the strongest bullish signals that exists.</li>
+          </ul>
+        </div>
+        <div class="opp-ledger">LEDGER CAN DO THIS: I can set up a cron job that polls EDGAR's RSS feed every 5 minutes, parses new 8-K and 13-D filings, and sends you a Telegram alert with a one-line summary. Free. Automated. Running 24/7. Say "build the EDGAR alert system" and I'll build it in 20 minutes.</div>
+        <div class="opp-links"><a class="opp-link" href="filings.html">Filings Archive →</a><a class="opp-link" href="https://efts.sec.gov/LATEST/search-index?q=%228-K%22&dateRange=custom&startdt=2024-01-01&forms=8-K" target="_blank">EDGAR Live Feed →</a></div>
+      </div>
+    </div>
+
+    <div class="opp-card">
+      <div class="opp-card-header" onclick="toggleCard(this)">
+        <div>
+          <div class="opp-title">Polymarket as a News Source — Markets Know Before Media</div>
+          <div class="opp-subtitle">Information arbitrage &middot; Free &middot; No capital required to read</div>
+        </div>
+        <div>
+          <div class="opp-badges">
+            <span class="badge badge-legal">Legal</span>
+            <span class="badge badge-new">Underused Edge</span>
+          </div>
+          <div class="expand-icon" style="text-align:right;margin-top:6px">▼</div>
+        </div>
+      </div>
+      <div class="opp-body">
+        <div class="opp-what">
+          Prediction markets aggregate the informed opinions of thousands of traders with real money at stake. Studies show Polymarket prices predict real-world outcomes more accurately than polls, pundits, or media coverage. The key insight: when a Polymarket price moves sharply, something real is happening — usually before it's reported in the news. The Whale Tracker is your early warning system for this.
+        </div>
+        <div class="opp-how">
+          <h4>Practical Application</h4>
+          <ul>
+            <li>Check Whale Tracker daily — any market moving 5%+ in 24 hours means smart money knows something</li>
+            <li>Cross-reference with Google Trends and Twitter for emerging narrative confirmation</li>
+            <li>Use this intelligence to inform your YouTube content (trending topics = algorithm gold)</li>
+            <li>Use this to trade on Kalshi BEFORE the narrative hits mainstream media</li>
+          </ul>
+        </div>
+        <div class="opp-ledger">REAL EXAMPLE: In the 2024 election, Polymarket had Trump at 65% when every major poll showed a toss-up. The market was right. People who used Polymarket as a news source — not a betting site — had a 3-week head start on the narrative that shaped Q4 2024 markets, content, and political discourse.</div>
+        <div class="opp-links"><a class="opp-link" href="whales.html">Whale Tracker →</a><a class="opp-link" href="predict.html">Live Markets →</a></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== EMERGING ===== -->
+  <div id="cat-emerging" class="opp-section">
+    <div class="section-intro">
+      These opportunities are in the earliest stages — some don't have clear regulatory frameworks yet. They represent the highest upside and highest uncertainty. These are the things to understand now, before the crowd.
+    </div>
+
+    <div class="opp-card">
+      <div class="opp-card-header" onclick="toggleCard(this)">
+        <div>
+          <div class="opp-title">Tokenized Real-World Assets (RWAs) — BlackRock Is Already Here</div>
+          <div class="opp-subtitle">Fastest growing DeFi sector &middot; 8–25% yields &middot; Institutional-grade</div>
+        </div>
+        <div>
+          <div class="opp-badges">
+            <span class="badge badge-gray">Emerging Regulation</span>
+            <span class="badge badge-risk-med">Medium Risk</span>
+            <span class="badge badge-new">2024–2026 Window</span>
+          </div>
+          <div class="expand-icon" style="text-align:right;margin-top:6px">▼</div>
+        </div>
+      </div>
+      <div class="opp-body">
+        <div class="opp-what">
+          Real-world assets — US Treasury bonds, private credit, real estate — are being tokenized on blockchain. BlackRock launched BUIDL (a tokenized Treasury fund) in 2024. Franklin Templeton has $400M+ in tokenized Treasuries. You can now earn 4.5–5.5% on US Treasuries onchain, or 12–25% on tokenized private credit. The regulatory framework is still being written — early participants have access before institutional gatekeeping tightens.
+        </div>
+        <div class="opp-grid">
+          <div class="opp-stat"><div class="opp-stat-label">Tokenized Treasury yield</div><div class="opp-stat-val green">4.5–5.5% APY</div></div>
+          <div class="opp-stat"><div class="opp-stat-label">Private credit yield</div><div class="opp-stat-val green">12–25% APY</div></div>
+          <div class="opp-stat"><div class="opp-stat-label">Market size (2026)</div><div class="opp-stat-val green">$15B+ TVL</div></div>
+          <div class="opp-stat"><div class="opp-stat-label">Key risk</div><div class="opp-stat-val red">Regulatory freeze</div></div>
+        </div>
+        <div class="opp-how">
+          <h4>Key Platforms</h4>
+          <ul>
+            <li><strong>Ondo Finance (ondo.finance)</strong> — Tokenized US Treasuries. Backed by Blackstone, Tiger Global. $500M+ TVL. Minimum $5,000 for OUSG (accredited investors). USDY token available to non-accredited at smaller sizes.</li>
+            <li><strong>Maple Finance (maple.finance)</strong> — Tokenized private credit. 12–15% APY. Institutional borrowers. Higher risk — some defaults in 2022 bear market.</li>
+            <li><strong>Centrifuge (centrifuge.io)</strong> — Real-world loans on-chain. Wide range of asset types.</li>
+          </ul>
+        </div>
+        <div class="opp-ledger">LEDGER TAKE: This is the most significant structural shift in finance since ETFs. When BlackRock tokenizes something, it's not a gray area anymore — it's the future becoming the present. The early participants in tokenized Treasuries are earning Treasury rates without a brokerage account, without Vanguard, without minimum balances. Watch this space closely over the next 18 months.</div>
+        <div class="opp-links">
+          <a class="opp-link" href="https://ondo.finance" target="_blank">Ondo Finance →</a>
+          <a class="opp-link" href="https://maple.finance" target="_blank">Maple Finance →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="opp-card">
+      <div class="opp-card-header" onclick="toggleCard(this)">
+        <div>
+          <div class="opp-title">AI Content Arbitrage — You Have the Tools, Others Don't</div>
+          <div class="opp-subtitle">Payton Loop's core edge &middot; Zero capital &middot; Compounding returns</div>
+        </div>
+        <div>
+          <div class="opp-badges">
+            <span class="badge badge-legal">Legal</span>
+            <span class="badge badge-risk-low">Very Low Risk</span>
+            <span class="badge badge-new">Active Right Now</span>
+          </div>
+          <div class="expand-icon" style="text-align:right;margin-top:6px">▼</div>
+        </div>
+      </div>
+      <div class="opp-body">
+        <div class="opp-what">
+          Most people creating content spend 8–20 hours per video. You spend 45 minutes and produce the same output — because you have an AI system (Ledger) that handles research, scripting, and analysis. That's a 10–20x productivity advantage that the market hasn't priced in yet. The window where AI-produced content is indistinguishable from human-produced content AND still treated the same by platforms is open right now. It may not stay open.
+        </div>
+        <div class="opp-grid">
+          <div class="opp-stat"><div class="opp-stat-label">Your time per video</div><div class="opp-stat-val green">45 min</div></div>
+          <div class="opp-stat"><div class="opp-stat-label">Competitor time per video</div><div class="opp-stat-val">8–20 hours</div></div>
+          <div class="opp-stat"><div class="opp-stat-label">Your productivity advantage</div><div class="opp-stat-val green">10–20x</div></div>
+          <div class="opp-stat"><div class="opp-stat-label">Capital required</div><div class="opp-stat-val green">$0 (already paid)</div></div>
+        </div>
+        <div class="opp-how">
+          <h4>The Compounding System</h4>
+          <ol>
+            <li>Ledger identifies trending topics via prediction markets + EDGAR signals + YouTube algorithm data</li>
+            <li>Ledger writes the script in 2 minutes (trained on what converts)</li>
+            <li>You produce in InVideo or CapCut in 30 minutes</li>
+            <li>Ledger writes the description, tags, and Gumroad CTA automatically</li>
+            <li>Video earns AdSense + affiliate clicks + Gumroad sales perpetually</li>
+            <li>Each video feeds the algorithm for the next — compound content effect</li>
+          </ol>
+        </div>
+        <div class="opp-ledger">THIS IS YOUR PRIMARY EDGE RIGHT NOW. Not prediction markets. Not DeFi. Those require capital you don't have yet. AI content arbitrage requires only time and the system already built. The asymmetry: you spend $25/month on tools. A competitor spends 200 hours. Who wins at scale? You do. Post the video today.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== COMPARISON ===== -->
+  <div id="cat-compare" class="opp-section">
+    <div class="section-intro">A side-by-side comparison of every opportunity on this page, ranked by Ledger's expected value score for your specific situation: Oklahoma resident, $181 deployed, limited capital, time-constrained (9am–6pm work schedule).</div>
+
+    <table class="score-table">
+      <tr><th>Opportunity</th><th>EV Score</th><th>Capital Req.</th><th>Time Req.</th><th>Legal</th><th>Payton Priority</th></tr>
+      <tr><td><strong>AI Content Arbitrage (Payton Loop)</strong></td><td style="color:#006600;font-weight:bold">9.4 / 10</td><td>$0</td><td>45 min/video</td><td style="color:#006600">✓</td><td style="color:#006600">DO THIS FIRST</td></tr>
+      <tr><td><strong>Kalshi Prediction Markets</strong></td><td style="color:#006600">7.2 / 10</td><td>$100</td><td>15 min/trade</td><td style="color:#006600">✓</td><td>After $500 earned</td></tr>
+      <tr><td><strong>Sports Book Arb</strong></td><td style="color:#006600">6.8 / 10</td><td>$500</td><td>1hr/day</td><td style="color:#006600">✓</td><td>After $1,000 earned</td></tr>
+      <tr><td><strong>Polymarket</strong></td><td style="color:#886600">7.8 / 10</td><td>$50 USDC</td><td>15 min/trade</td><td style="color:#886600">Gray</td><td>Understand Kalshi first</td></tr>
+      <tr><td><strong>Stablecoin Lending (Aave)</strong></td><td style="color:#886600">6.5 / 10</td><td>$500</td><td>30 min setup</td><td style="color:#886600">Unregulated</td><td>After $2,000 earned</td></tr>
+      <tr><td><strong>Prediction Market Arb</strong></td><td style="color:#886600">6.2 / 10</td><td>$200</td><td>30 min/arb</td><td style="color:#886600">Gray</td><td>After Kalshi comfortable</td></tr>
+      <tr><td><strong>EDGAR Information Arb</strong></td><td style="color:#006600">7.0 / 10</td><td>$0 (read only)</td><td>15 min/day</td><td style="color:#006600">✓</td><td>Ledger builds alert today</td></tr>
+      <tr><td><strong>Tokenized RWAs</strong></td><td style="color:#886600">7.5 / 10</td><td>$1,000</td><td>1hr setup</td><td style="color:#886600">Emerging</td><td>Watch, don't act yet</td></tr>
+    </table>
+
+    <div class="section-intro" style="border-left-color:#cc0000;background:#fff8f8;margin-top:8px">
+      <strong>The Sequence:</strong> Right now your highest EV action is posting content (AI arbitrage — 9.4/10, zero capital). Every dollar earned from content goes into a Kalshi account to compound via prediction markets. Every Kalshi win funds stablecoin yield. The machine funds itself. You just have to start it.
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    The Edge is an intelligence briefing for educational purposes only. Nothing here constitutes financial, legal, or investment advice. Gray area opportunities carry regulatory risk that can change without notice. DeFi protocols carry smart contract risk including total loss of principal. Prediction markets in the United States exist in evolving regulatory environments. Consult qualified legal and financial professionals before acting on any information presented here. Payton Loop earns no commission from any platform mentioned.
+  </div>
+
+</div>
+
+<script>
+function showCat(cat) {
+  document.querySelectorAll('.opp-section').forEach(function(s){ s.classList.remove('show'); });
+  document.getElementById('cat-' + cat).classList.add('show');
+  document.querySelectorAll('.cat-btn').forEach(function(b,i){
+    b.classList.toggle('active', ['overview','predict','defi','arb','info','emerging','compare'][i] === cat);
+  });
+}
+
+function toggleCard(header) {
+  var body = header.nextElementSibling;
+  var icon = header.querySelector('.expand-icon');
+  var isOpen = body.classList.contains('show');
+  body.classList.toggle('show', !isOpen);
+  if (icon) icon.textContent = isOpen ? '▼' : '▲';
+}
+</script>
+
+
+<script src="darkmode.js"></script>
+<script src="search.js"></script>
+</body>
+</html>

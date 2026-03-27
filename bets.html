@@ -1,0 +1,878 @@
+html = r"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Payton Loop — Bets Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+/* ═══════════════════════════════════════════
+   BETS DESK — CASINO IDENTITY
+   Felt green • Gold accents • Oswald headers
+   Roboto Mono numbers • High-stakes energy
+═══════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --felt:       #0b3d0b;
+  --felt-mid:   #0d4a0d;
+  --felt-light: #145214;
+  --felt-card:  rgba(0,0,0,0.35);
+  --gold:       #d4a843;
+  --gold-light: #f0c866;
+  --gold-dim:   #8a6c28;
+  --green-win:  #2ecc71;
+  --red-loss:   #e74c3c;
+  --amber-hold: #f39c12;
+  --text-main:  #e8f0e8;
+  --text-dim:   #8ab08a;
+  --text-muted: #567856;
+  --border:     rgba(212,168,67,0.25);
+  --border-hot: rgba(212,168,67,0.7);
+  --mono:       'Roboto Mono', monospace;
+  --head:       'Oswald', sans-serif;
+  --body:       'Inter', sans-serif;
+}
+
+body {
+  background-color: var(--felt);
+  background-image:
+    radial-gradient(ellipse at 50% 0%,   rgba(20,82,20,0.9) 0%, transparent 55%),
+    radial-gradient(ellipse at 0% 100%,  rgba(5,25,5,0.8)  0%, transparent 50%),
+    radial-gradient(ellipse at 100% 50%, rgba(10,40,10,0.6) 0%, transparent 50%);
+  min-height: 100vh;
+  font-family: var(--body);
+  font-size: 14px;
+  color: var(--text-main);
+}
+
+/* Felt texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='3' height='3'%3E%3Ccircle cx='1.5' cy='1.5' r='0.6' fill='rgba(255,255,255,0.018)'/%3E%3C/svg%3E");
+  background-size: 3px 3px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Gold border vignette */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  box-shadow: inset 0 0 80px rgba(0,0,0,0.6);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.outer {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 16px 60px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── TICKER ── */
+.ticker-wrap {
+  background: #060f06;
+  border-bottom: 1px solid var(--gold-dim);
+  overflow: hidden;
+  white-space: nowrap;
+  padding: 7px 0;
+}
+.ticker-inner {
+  display: inline-block;
+  animation: ticker 40s linear infinite;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: 1px;
+}
+@keyframes ticker {
+  from { transform: translateX(100vw); }
+  to   { transform: translateX(-100%); }
+}
+
+/* ── HEADER ── */
+.hdr {
+  text-align: center;
+  padding: 32px 0 20px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 28px;
+  position: relative;
+}
+
+/* Gold corner ornaments */
+.hdr::before, .hdr::after {
+  content: '♠ ♥ ♦ ♣';
+  font-size: 14px;
+  color: var(--gold-dim);
+  letter-spacing: 8px;
+  display: block;
+  margin-bottom: 10px;
+}
+.hdr::after {
+  margin-bottom: 0;
+  margin-top: 14px;
+}
+
+.hdr h1 {
+  font-family: var(--head);
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: var(--gold-light);
+  text-shadow: 0 0 30px rgba(212,168,67,0.4), 0 2px 4px rgba(0,0,0,0.8);
+  margin-bottom: 8px;
+}
+
+.hdr p {
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.home-link {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--gold-dim);
+  text-decoration: none;
+  letter-spacing: 1px;
+  margin-bottom: 24px;
+  border: 1px solid var(--border);
+  padding: 5px 12px;
+  transition: all 0.2s;
+}
+.home-link:hover {
+  color: var(--gold);
+  border-color: var(--gold-dim);
+  background: rgba(212,168,67,0.06);
+}
+
+/* ── SECTION LABELS ── */
+.sl {
+  font-family: var(--head);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 32px 0 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sl::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 14px;
+  background: var(--gold);
+}
+
+/* ── TICKET ANALYZER CARD ── */
+.analyzer-card {
+  background: var(--felt-card);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--gold-dim);
+  padding: 24px;
+  backdrop-filter: blur(4px);
+  margin-bottom: 24px;
+}
+
+.cr { margin-bottom: 14px; }
+.cr label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 5px;
+}
+
+input[type=number],
+input[type=text],
+select {
+  width: 100%;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid var(--border);
+  border-bottom: 1px solid var(--gold-dim);
+  color: var(--text-main);
+  font-family: var(--mono);
+  font-size: 14px;
+  padding: 9px 12px;
+  outline: none;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+}
+input:focus, select:focus {
+  border-color: var(--gold);
+  background: rgba(0,0,0,0.7);
+}
+input::placeholder { color: var(--text-muted); }
+
+.cr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.cr-grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+/* ── BUTTON ── */
+.btn-gold {
+  background: linear-gradient(135deg, #c49b30, #d4a843, #e8c060);
+  color: #1a1a00;
+  border: none;
+  padding: 13px 32px;
+  font-family: var(--head);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 8px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 15px rgba(212,168,67,0.3);
+}
+.btn-gold:hover {
+  background: linear-gradient(135deg, #d4a843, #f0c866, #ffd970);
+  box-shadow: 0 6px 25px rgba(212,168,67,0.5);
+  transform: translateY(-1px);
+}
+.btn-gold:active { transform: translateY(0); }
+
+.btn-sm {
+  background: rgba(212,168,67,0.15);
+  color: var(--gold);
+  border: 1px solid var(--border);
+  padding: 7px 18px;
+  font-family: var(--head);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-sm:hover { background: rgba(212,168,67,0.25); border-color: var(--gold); }
+
+/* ── RESULT PANEL ── */
+.result {
+  display: none;
+  margin-top: 16px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid var(--border);
+  padding: 20px;
+}
+.result.show { display: block; }
+
+.result-verdict {
+  font-family: var(--head);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 12px;
+  margin-bottom: 16px;
+  border: 2px solid;
+}
+.verdict-play  { color: var(--green-win); border-color: var(--green-win); background: rgba(46,204,113,0.08); }
+.verdict-pass  { color: var(--red-loss);  border-color: var(--red-loss);  background: rgba(231,76,60,0.08);  }
+.verdict-maybe { color: var(--amber-hold);border-color: var(--amber-hold);background: rgba(243,156,18,0.08); }
+
+.result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  margin-bottom: 12px;
+}
+.result-cell {
+  background: rgba(0,0,0,0.6);
+  padding: 12px;
+  text-align: center;
+}
+.result-cell .rc-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 5px;
+}
+.result-cell .rc-val {
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 600;
+}
+.rc-pos { color: var(--green-win); }
+.rc-neg { color: var(--red-loss); }
+.rc-neu { color: var(--gold); }
+
+/* ── FEATURED TICKETS ── */
+.ticket {
+  background: var(--felt-card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--gold-dim);
+  padding: 20px;
+  margin-bottom: 14px;
+  position: relative;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.ticket:hover {
+  border-color: var(--border-hot);
+  border-left-color: var(--gold);
+  box-shadow: 0 4px 20px rgba(212,168,67,0.1);
+}
+
+.ticket .t-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.ticket .t-play {
+  font-family: var(--head);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-main);
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  padding-right: 80px;
+}
+.ticket .t-meta {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.9;
+  margin-bottom: 10px;
+  font-family: var(--mono);
+}
+.ticket .t-verdict {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+  margin-top: 8px;
+}
+
+.badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  padding: 4px 12px;
+  font-family: var(--head);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  border: 2px solid;
+}
+.badge-play  { color: var(--green-win); border-color: var(--green-win); }
+.badge-pass  { color: var(--red-loss);  border-color: var(--red-loss);  }
+.badge-wait  { color: var(--amber-hold);border-color: var(--amber-hold);}
+
+/* ── ODDS CONVERTER ── */
+.odds-panel {
+  background: var(--felt-card);
+  border: 1px solid var(--border);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+.odds-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.odds-box {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--border);
+  padding: 14px;
+  text-align: center;
+}
+.odds-box .ob-num {
+  font-family: var(--mono);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--gold-light);
+}
+.odds-box .ob-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.prob-row { margin-top: 12px; }
+.prob-label-row {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+.prob-track {
+  height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.prob-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+  border-radius: 3px;
+  width: 0;
+  transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ── BANKROLL TABLE ── */
+.bankroll-card {
+  background: var(--felt-card);
+  border: 1px solid var(--border);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.summary-bar {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--border);
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  letter-spacing: 0.5px;
+}
+
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 8px;
+  text-align: left;
+}
+tbody td {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  padding: 10px 8px;
+}
+.n { text-align: right; }
+.up { color: var(--green-win) !important; font-weight: 600; }
+.dn { color: var(--red-loss)  !important; font-weight: 600; }
+.push { color: var(--amber-hold) !important; }
+
+select option { background: #0b3d0b; color: var(--text-main); }
+
+/* ── CHART AREA ── */
+.chart-card {
+  background: var(--felt-card);
+  border: 1px solid var(--border);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+/* ── DISCLAIMER ── */
+.disclaimer {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+  margin-top: 24px;
+  line-height: 1.8;
+  letter-spacing: 0.3px;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  .cr-grid, .cr-grid3, .odds-grid, .result-grid { grid-template-columns: 1fr; }
+  .hdr h1 { font-size: 26px; }
+  .ticket .t-play { font-size: 16px; padding-right: 70px; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-inner">
+    NBA FINALS ODDS &nbsp;&#9830;&nbsp; OKC THUNDER ML -180 &nbsp;&#9830;&nbsp; CELTICS +3.5 &nbsp;&#9830;&nbsp; LAKERS ML +220 &nbsp;&#9830;&nbsp; OVER 218.5 -108 &nbsp;&#9830;&nbsp; DRAFTKINGS &bull; FANDUEL &bull; BETMGM &nbsp;&#9830;&nbsp; OKLAHOMA LEGAL SPORTS BETTING &nbsp;&#9830;&nbsp; CLEAN TICKET PROTOCOL ACTIVE &nbsp;&#9830;&nbsp; MAX STAKE $25 &nbsp;&#9830;&nbsp; KELLY CRITERION SIZING &nbsp;&#9830;&nbsp; PAYTON LOOP BETS DESK &nbsp;&#9830;&nbsp;
+  </div>
+</div>
+
+<div class="outer">
+
+  <div class="hdr">
+    <h1>Bets Desk</h1>
+    <p>Clean Ticket Protocol &nbsp;&bull;&nbsp; Quantitative Analysis &nbsp;&bull;&nbsp; Oklahoma Legal</p>
+  </div>
+
+  <a class="home-link" href="plc-capital.html">&larr; Return to Operations</a>
+
+  <!-- TICKET ANALYZER -->
+  <div class="sl">Live Ticket Analyzer</div>
+  <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;font-family:var(--mono);letter-spacing:0.3px">Enter any bet. Ledger runs the Clean Ticket Protocol: implied probability, edge check, break-even, Kelly sizing, verdict.</p>
+
+  <div class="analyzer-card">
+    <div class="cr">
+      <label>Market / Bet Description</label>
+      <input type="text" id="mkt" placeholder="e.g. OKC Thunder -4.5 vs Pacers">
+    </div>
+    <div class="cr-grid">
+      <div class="cr">
+        <label>Odds (American)</label>
+        <input type="number" id="odds" placeholder="-110">
+      </div>
+      <div class="cr">
+        <label>Your True Win Probability (%)</label>
+        <input type="number" id="prob" placeholder="55" min="1" max="99">
+      </div>
+    </div>
+    <div class="cr-grid">
+      <div class="cr">
+        <label>Intended Stake ($)</label>
+        <input type="number" id="stake" placeholder="25" min="1">
+      </div>
+      <div class="cr">
+        <label>Bankroll ($)</label>
+        <input type="number" id="bank" placeholder="500" min="1">
+      </div>
+    </div>
+    <button class="btn-gold" onclick="analyzeTicket()">Run Clean Ticket Protocol</button>
+    <div class="result" id="ticket-result"></div>
+  </div>
+
+  <!-- FEATURED PLAYS -->
+  <div class="sl">Featured Analysis &mdash; NBA 2026</div>
+  <p style="font-size:11px;color:var(--text-muted);margin-bottom:16px;font-family:var(--mono)">Pre-analyzed tickets via Clean Ticket Protocol. Verify current lines before betting.</p>
+
+  <div class="ticket">
+    <div class="badge badge-play">PLAY</div>
+    <div class="t-label">NBA &mdash; Regular Season</div>
+    <div class="t-play">OKC Thunder ML (Home Favorite)</div>
+    <div class="t-meta">
+      Typical line: -165 to -180 &nbsp;|&nbsp; Implied prob: ~62-64%<br>
+      SRS rank: Top 3 &nbsp;|&nbsp; Home record: 30-8 &nbsp;|&nbsp; Rest advantage: +1 day
+    </div>
+    <div class="t-verdict" style="color:var(--green-win)">
+      &#10003; EDGE: Strong home court + SRS advantage. True prob est. 68-72%. Edge: +4 to +8 pts. Play at -180 or better.
+    </div>
+  </div>
+
+  <div class="ticket">
+    <div class="badge badge-play">PLAY</div>
+    <div class="t-label">NBA &mdash; Totals</div>
+    <div class="t-play">Celtics / Heat UNDER (Defensive Clash)</div>
+    <div class="t-meta">
+      Typical line: U 210.5 -110 &nbsp;|&nbsp; Implied prob: 52.4%<br>
+      Both teams top-8 defensive rating &nbsp;|&nbsp; Pace: Below league avg
+    </div>
+    <div class="t-verdict" style="color:var(--green-win)">
+      &#10003; EDGE: Defensive matchup + pace differential. True prob est. 56-58%. Marginal but positive. Half unit.
+    </div>
+  </div>
+
+  <div class="ticket">
+    <div class="badge badge-pass">PASS</div>
+    <div class="t-label">NBA &mdash; Spread</div>
+    <div class="t-play">Lakers -3.5 (Road Underdog Special)</div>
+    <div class="t-meta">
+      Typical line: -3.5 -115 &nbsp;|&nbsp; Implied prob: 53.5%<br>
+      Road record: 14-25 &nbsp;|&nbsp; B2B spot &nbsp;|&nbsp; No rest advantage
+    </div>
+    <div class="t-verdict" style="color:var(--red-loss)">
+      &#10005; PASS: Road B2B with inferior rest. No identifiable edge. House has the line. Skip.
+    </div>
+  </div>
+
+  <!-- ODDS CONVERTER -->
+  <div class="sl">Odds Converter</div>
+
+  <div class="odds-panel">
+    <div class="cr-grid">
+      <div class="cr">
+        <label>American Odds</label>
+        <input type="number" id="amer" placeholder="-110" oninput="convertOdds('amer')">
+      </div>
+      <div class="cr">
+        <label>Decimal Odds</label>
+        <input type="number" id="dec" placeholder="1.909" step="0.001" oninput="convertOdds('dec')">
+      </div>
+    </div>
+    <div class="odds-grid" id="odds-display" style="display:none">
+      <div class="odds-box">
+        <div class="ob-num" id="disp-amer">--</div>
+        <div class="ob-label">American</div>
+      </div>
+      <div class="odds-box">
+        <div class="ob-num" id="disp-dec">--</div>
+        <div class="ob-label">Decimal</div>
+      </div>
+    </div>
+    <div class="prob-row" id="prob-bar-wrap" style="display:none">
+      <div class="prob-label-row">
+        <span id="prob-label">Break-even probability</span>
+        <span id="imp-pct" style="color:var(--gold)">--%</span>
+      </div>
+      <div class="prob-track"><div class="prob-fill" id="prob-bar"></div></div>
+    </div>
+  </div>
+
+  <!-- BANKROLL TRACKER -->
+  <div class="sl">Bankroll Tracker</div>
+
+  <div class="bankroll-card">
+    <div class="cr-grid3">
+      <div class="cr">
+        <label>Date</label>
+        <input type="text" id="b-date">
+      </div>
+      <div class="cr">
+        <label>Bet</label>
+        <input type="text" id="b-bet" placeholder="OKC -4.5">
+      </div>
+      <div class="cr">
+        <label>Odds</label>
+        <input type="number" id="b-odds" placeholder="-110">
+      </div>
+    </div>
+    <div class="cr-grid">
+      <div class="cr">
+        <label>Stake ($)</label>
+        <input type="number" id="b-stake" placeholder="25">
+      </div>
+      <div class="cr">
+        <label>Result</label>
+        <select id="b-result">
+          <option value="win">Win</option>
+          <option value="loss">Loss</option>
+          <option value="push">Push</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn-sm" onclick="addBet()">+ Log Bet</button>
+
+    <div class="summary-bar" id="bankroll-summary" style="margin-top:16px">No bets logged yet.</div>
+
+    <div style="overflow-x:auto">
+      <table id="bankroll-table">
+        <thead>
+          <tr>
+            <th>Date</th><th>Bet</th><th>Odds</th><th class="n">Stake</th><th>Result</th><th class="n">P&amp;L</th>
+          </tr>
+        </thead>
+        <tbody id="bankroll-body"></tbody>
+      </table>
+    </div>
+
+    <div style="margin-top:16px">
+      <canvas id="pnl-chart" height="80"></canvas>
+    </div>
+  </div>
+
+  <p class="disclaimer">
+    &#9830; All analysis is for informational purposes only. Sports betting involves risk. Past performance does not guarantee future results.<br>
+    &#9830; Oklahoma legal sports betting only: DraftKings, FanDuel, BetMGM, Caesars. Maximum stake: $25/bet per operating protocol.<br>
+    &#9830; Kelly Criterion sizing displayed at 1/4 Kelly. Never bet more than you can afford to lose.
+  </p>
+
+</div><!-- /.outer -->
+
+<script>
+// ══ CLEAN TICKET PROTOCOL ══
+function analyzeTicket() {
+  var mkt   = document.getElementById('mkt').value.trim();
+  var odds  = parseFloat(document.getElementById('odds').value);
+  var trueP = parseFloat(document.getElementById('prob').value) / 100;
+  var stake = parseFloat(document.getElementById('stake').value);
+  var bank  = parseFloat(document.getElementById('bank').value);
+
+  if (!mkt || isNaN(odds) || isNaN(trueP) || isNaN(stake) || isNaN(bank)) {
+    alert('Fill all fields before running the protocol.'); return;
+  }
+
+  var implP, payout;
+  if (odds < 0) {
+    implP  = Math.abs(odds) / (Math.abs(odds) + 100);
+    payout = 100 / Math.abs(odds);
+  } else {
+    implP  = 100 / (odds + 100);
+    payout = odds / 100;
+  }
+
+  var edge   = trueP - implP;
+  var ev     = (trueP * payout * stake) - ((1 - trueP) * stake);
+  var kelly  = Math.max(0, (edge / payout) / 4 * bank);
+
+  var vClass, vText, vLabel;
+  if (edge > 0.03)      { vClass = 'verdict-play';  vText = '▼ PLAY'; vLabel = 'PLAY'; }
+  else if (edge > 0)    { vClass = 'verdict-maybe'; vText = '\u25BA MARGINAL'; vLabel = 'MARGINAL'; }
+  else                  { vClass = 'verdict-pass';  vText = '\u25B2 PASS'; vLabel = 'PASS'; }
+
+  var edgeStr = (edge >= 0 ? '+' : '') + (edge * 100).toFixed(2) + '%';
+  var evStr   = (ev >= 0 ? '+' : '') + '$' + Math.abs(ev).toFixed(2);
+  var edgeCls = edge > 0 ? 'rc-pos' : 'rc-neg';
+  var evCls   = ev   > 0 ? 'rc-pos' : 'rc-neg';
+
+  var html = '<div class="result-verdict ' + vClass + '">' + vText + '</div>';
+  html += '<div class="result-grid">';
+  html += '<div class="result-cell"><div class="rc-label">Edge</div><div class="rc-val ' + edgeCls + '">' + edgeStr + '</div></div>';
+  html += '<div class="result-cell"><div class="rc-label">Expected Value</div><div class="rc-val ' + evCls + '">' + evStr + '</div></div>';
+  html += '<div class="result-cell"><div class="rc-label">Kelly Stake</div><div class="rc-val rc-neu">$' + kelly.toFixed(2) + '</div></div>';
+  html += '</div>';
+  html += '<div style="font-family:var(--mono);font-size:11px;color:var(--text-dim);line-height:1.9">';
+  html += '<b style="color:var(--text-main)">' + mkt + '</b><br>';
+  html += 'Implied Prob: ' + (implP*100).toFixed(2) + '% &nbsp;&bull;&nbsp; True Prob: ' + (trueP*100).toFixed(1) + '% &nbsp;&bull;&nbsp; Payout: ' + payout.toFixed(3) + 'x<br>';
+  html += 'Break-even at: ' + (implP*100).toFixed(2) + '% &nbsp;&bull;&nbsp; Your estimate: ' + (trueP*100).toFixed(1) + '%';
+  html += '</div>';
+
+  var r = document.getElementById('ticket-result');
+  r.className = 'result show';
+  r.innerHTML = html;
+}
+
+// == ODDS CONVERTER ==
+function convertOdds(from) {
+  var amer = parseFloat(document.getElementById('amer').value);
+  var dec  = parseFloat(document.getElementById('dec').value);
+  var imp;
+
+  if (from === 'amer' && !isNaN(amer)) {
+    if (amer < 0) { dec = (100/Math.abs(amer))+1; imp = Math.abs(amer)/(Math.abs(amer)+100); }
+    else          { dec = (amer/100)+1;             imp = 100/(amer+100); }
+    document.getElementById('dec').value = dec.toFixed(3);
+  } else if (from === 'dec' && !isNaN(dec) && dec > 1) {
+    imp  = 1/dec;
+    amer = dec >= 2 ? (dec-1)*100 : -100/(dec-1);
+    document.getElementById('amer').value = Math.round(amer);
+  } else return;
+
+  document.getElementById('disp-amer').textContent = document.getElementById('amer').value;
+  document.getElementById('disp-dec').textContent  = dec.toFixed(3);
+  document.getElementById('imp-pct').textContent   = (imp*100).toFixed(2) + '%';
+  document.getElementById('odds-display').style.display  = 'grid';
+  document.getElementById('prob-bar-wrap').style.display = 'block';
+  document.getElementById('prob-label').textContent = 'Break-even: win more than ' + (imp*100).toFixed(2) + '% to have edge';
+  document.getElementById('prob-bar').style.width   = (imp*100) + '%';
+}
+
+// == BANKROLL TRACKER ==
+function loadBets() { return JSON.parse(localStorage.getItem('plc-bets') || '[]'); }
+function saveBets(b) { localStorage.setItem('plc-bets', JSON.stringify(b)); }
+
+function addBet() {
+  var date   = document.getElementById('b-date').value;
+  var bet    = document.getElementById('b-bet').value;
+  var odds   = parseFloat(document.getElementById('b-odds').value);
+  var stake  = parseFloat(document.getElementById('b-stake').value);
+  var result = document.getElementById('b-result').value;
+  if (!date || !bet || isNaN(odds) || isNaN(stake)) { alert('Fill all bet fields.'); return; }
+  var pnl;
+  if      (result === 'push') pnl = 0;
+  else if (result === 'win')  pnl = odds > 0 ? stake*(odds/100) : stake*(100/Math.abs(odds));
+  else                        pnl = -stake;
+  var bets = loadBets();
+  bets.push({ date: date, bet: bet, odds: odds, stake: stake, result: result, pnl: pnl });
+  saveBets(bets);
+  renderBankroll();
+}
+
+var pnlChart = null;
+
+function renderBankroll() {
+  var bets  = loadBets();
+  var tbody = document.getElementById('bankroll-body');
+  tbody.innerHTML = '';
+  var totalPnl = 0, wins = 0, losses = 0, pushes = 0;
+  var cumData = [0];
+  var cumLabels = ['Start'];
+
+  for (var i = 0; i < bets.length; i++) {
+    var b = bets[i];
+    totalPnl += b.pnl;
+    if (b.result === 'win')  wins++;
+    else if (b.result === 'loss') losses++;
+    else pushes++;
+    cumData.push(parseFloat(totalPnl.toFixed(2)));
+    cumLabels.push(b.date);
+
+    var row = document.createElement('tr');
+    var signStr = b.odds > 0 ? '+' : '';
+    var resCls  = b.result === 'win' ? 'up' : b.result === 'loss' ? 'dn' : 'push';
+    var pnlSign = b.pnl >= 0 ? '+' : '';
+    row.innerHTML = '<td>' + b.date + '</td><td>' + b.bet + '</td><td class="n">' + signStr + b.odds + '</td><td class="n">$' + b.stake.toFixed(2) + '</td><td class="' + resCls + '">' + b.result.toUpperCase() + '</td><td class="n ' + resCls + '">' + pnlSign + '$' + Math.abs(b.pnl).toFixed(2) + '</td>';
+    tbody.appendChild(row);
+  }
+
+  var total = wins + losses + pushes;
+  var sumEl = document.getElementById('bankroll-summary');
+  if (bets.length === 0) {
+    sumEl.innerHTML = '<span style="color:var(--text-muted)">No bets logged yet.</span>';
+  } else {
+    var pnlColor = totalPnl >= 0 ? 'var(--green-win)' : 'var(--red-loss)';
+    sumEl.innerHTML = '<b style="color:var(--gold)">Record:</b> ' + wins + 'W &ndash; ' + losses + 'L &ndash; ' + pushes + 'P &nbsp;|&nbsp; <b style="color:var(--gold)">Win%:</b> ' + (total>0?((wins/total)*100).toFixed(1):'0') + '% &nbsp;|&nbsp; <b style="color:var(--gold)">P&L:</b> <span style="color:' + pnlColor + '">' + (totalPnl>=0?'+':'') + '$' + totalPnl.toFixed(2) + '</span>';
+  }
+
+  // P&L Chart
+  var ctx = document.getElementById('pnl-chart').getContext('2d');
+  if (pnlChart) pnlChart.destroy();
+  pnlChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: cumLabels,
+      datasets: [{
+        data: cumData,
+        borderColor: totalPnl >= 0 ? '#2ecc71' : '#e74c3c',
+        backgroundColor: totalPnl >= 0 ? 'rgba(46,204,113,0.08)' : 'rgba(231,76,60,0.08)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 3,
+        pointBackgroundColor: totalPnl >= 0 ? '#2ecc71' : '#e74c3c',
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { display: false },
+        y: {
+          ticks: { color: '#8ab08a', font: { family: 'Roboto Mono', size: 10 }, callback: function(v){ return '$'+v; } },
+          grid: { color: 'rgba(255,255,255,0.04)' }
+        }
+      }
+    }
+  });
+}
+
+window.onload = function() {
+  var now = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
+  document.getElementById('b-date').value = now;
+  renderBankroll();
+};
+</script>
+
+<script src="darkmode.js"></script>
+<script src="search.js"></script>
+</body>
+</html>

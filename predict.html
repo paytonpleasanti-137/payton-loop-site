@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Payton Loop — Prediction Markets</title>
+<style>
+* { box-sizing: border-box; }
+body { margin:0; padding:0; background:#0d0d1a; font-family:Arial,sans-serif; font-size:14px; color:#000; }
+.outer { max-width:960px; margin:0 auto; padding:20px 12px 40px; }
+.hdr { text-align:center; border-bottom:2px solid #000; padding-bottom:14px; margin-bottom:16px; }
+.hdr h1 { font-size:24px; font-weight:bold; letter-spacing:1px; margin:0 0 4px; text-transform:uppercase; }
+.hdr p { font-size:12px; color:#555; margin:4px 0 0; }
+.home-link { font-size:12px; color:#00008b; text-decoration:underline; cursor:pointer; display:inline-block; margin-bottom:12px; }
+.home-link:hover { color:#cc0000; }
+
+/* TABS */
+.tabs { display:flex; gap:0; border-bottom:2px solid #000; margin-bottom:20px; }
+.tab { padding:8px 20px; font-size:12px; text-transform:uppercase; letter-spacing:1px; cursor:pointer; border:none; background:#fff; color:#888; font-family:Arial; }
+.tab:hover { color:#000; }
+.tab.active { background:#000; color:#fff; font-weight:bold; }
+
+/* FILTER BAR */
+.filter-bar { display:flex; gap:8px; margin-bottom:16px; align-items:center; flex-wrap:wrap; }
+.filter-btn { border:1px solid #ccc; padding:5px 12px; font-size:11px; text-transform:uppercase; letter-spacing:.5px; cursor:pointer; background:#fff; color:#555; font-family:Arial; }
+.filter-btn:hover, .filter-btn.active { background:#000; color:#fff; border-color:#000; }
+.search-box { border:1px solid #ccc; padding:5px 10px; font-size:12px; font-family:Arial; flex:1; min-width:200px; }
+.sort-select { border:1px solid #ccc; padding:5px 8px; font-size:12px; font-family:Arial; }
+
+/* MARKET CARDS */
+.market-grid { display:flex; flex-direction:column; gap:0; }
+.mkt-card { border-bottom:1px solid #eee; padding:14px 0; display:grid; grid-template-columns:1fr auto; gap:12px; align-items:start; }
+.mkt-card:hover { background:#fafafa; }
+.mkt-question { font-size:14px; font-weight:bold; margin-bottom:6px; line-height:1.3; }
+.mkt-meta { font-size:11px; color:#888; margin-bottom:8px; }
+.mkt-meta span { margin-right:12px; }
+.outcome-row { display:flex; gap:6px; flex-wrap:wrap; }
+.outcome-pill { font-size:12px; padding:3px 10px; border:1px solid #000; font-family:monospace; }
+.outcome-pill.yes { background:#006600; color:#fff; border-color:#006600; }
+.outcome-pill.no { background:#cc0000; color:#fff; border-color:#cc0000; }
+.outcome-pill.other { background:#f0f0f0; color:#000; }
+.mkt-right { text-align:right; min-width:130px; }
+.vol-num { font-size:18px; font-weight:bold; font-family:monospace; }
+.vol-label { font-size:10px; color:#888; text-transform:uppercase; letter-spacing:.5px; }
+.liq-num { font-size:13px; color:#555; font-family:monospace; margin-top:4px; }
+.arb-badge { display:inline-block; background:#cc0000; color:#fff; font-size:10px; padding:2px 8px; font-weight:bold; letter-spacing:1px; margin-top:6px; }
+.edge-badge { display:inline-block; background:#006600; color:#fff; font-size:10px; padding:2px 8px; font-weight:bold; letter-spacing:1px; margin-top:6px; }
+.pm-links { margin-top:6px; }
+.pm-link { font-size:11px; color:#00008b; text-decoration:underline; margin-right:8px; cursor:pointer; }
+.pm-link:hover { color:#cc0000; }
+
+/* TICKET PANEL */
+.ticket-panel { background:#f8f8f8; border:1px solid #ccc; padding:16px; margin:8px 0 16px; display:none; }
+.ticket-panel.show { display:block; }
+.tp-title { font-size:13px; font-weight:bold; margin-bottom:10px; border-bottom:1px solid #ddd; padding-bottom:8px; }
+.tp-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; font-size:12px; }
+.tp-row { display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid #eee; }
+.tp-label { color:#666; }
+.tp-val { font-weight:bold; font-family:monospace; }
+.verdict-box { padding:10px 14px; font-size:13px; font-weight:bold; margin-top:10px; }
+.verdict-play { background:#006600; color:#fff; }
+.verdict-pass { background:#cc0000; color:#fff; }
+.verdict-wait { background:#886600; color:#fff; }
+.close-tp { float:right; font-size:11px; color:#888; cursor:pointer; text-decoration:underline; margin-top:-4px; }
+
+/* ANALYZER */
+.analyzer { border:1px solid #000; padding:16px; margin-bottom:20px; }
+.analyzer h3 { font-size:13px; font-weight:bold; text-transform:uppercase; letter-spacing:1px; margin:0 0 12px; }
+.cr { display:flex; align-items:center; gap:10px; margin-bottom:8px; font-size:13px; }
+.cr label { min-width:200px; color:#555; }
+.cr input, .cr select { border:1px solid #999; padding:4px 8px; font-family:Arial; font-size:13px; flex:1; }
+.ao { background:#000; color:#0f0; font-family:monospace; font-size:12px; padding:12px; margin-top:10px; line-height:1.8; min-height:80px; white-space:pre-wrap; display:none; }
+.ao.show { display:block; }
+button { background:#000; color:#fff; border:none; padding:7px 18px; font-family:Arial; font-size:12px; cursor:pointer; text-transform:uppercase; letter-spacing:.5px; }
+
+/* KALSHI */
+.kalshi-card { border:1px solid #000; padding:12px 14px; margin-bottom:10px; }
+.kalshi-q { font-size:14px; font-weight:bold; margin-bottom:6px; }
+.kalshi-meta { font-size:11px; color:#888; }
+.kalshi-note { font-size:12px; color:#555; line-height:1.7; margin-top:8px; background:#f8f8f8; padding:8px; }
+
+/* ARBS */
+.arb-card { border:2px solid #cc0000; padding:14px; margin-bottom:12px; }
+.arb-title { font-size:13px; font-weight:bold; color:#cc0000; margin-bottom:8px; text-transform:uppercase; letter-spacing:.5px; }
+.arb-math { font-family:monospace; font-size:13px; background:#fff8f8; padding:8px; margin:8px 0; }
+.arb-note { font-size:12px; color:#555; line-height:1.7; }
+
+.sl { font-size:11px; font-weight:bold; text-transform:uppercase; letter-spacing:.5px; margin:20px 0 10px; border-bottom:1px solid #ccc; padding-bottom:4px; }
+.loading-msg { padding:30px; text-align:center; color:#888; }
+.error-msg { padding:20px; color:#cc0000; background:#fff8f8; border:1px solid #cc0000; }
+.disclaimer { font-size:11px; color:#888; border-top:1px solid #eee; padding-top:12px; margin-top:20px; line-height:1.7; }
+</style>
+
+<style id="page-theme">
+
+/* Bloomberg terminal — prediction markets */
+body {
+  background-color:#0d0d1a !important;
+  background-image:
+    radial-gradient(ellipse at 30% 20%, rgba(20,0,60,0.8) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, rgba(0,10,40,0.6) 0%, transparent 50%) !important;
+  color:#c8d8f0 !important;
+}
+body::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  background:repeating-linear-gradient(0deg, transparent, transparent 22px, rgba(100,150,255,0.02) 22px, rgba(100,150,255,0.02) 23px);
+  pointer-events:none;
+  z-index:0;
+}
+h1,h2,h3,.section-title,.panel-title { color:#7eb8ff !important; }
+
+</style>
+</head>
+<body>
+<div class="outer">
+
+  <div class="hdr">
+    <h1>Payton Loop — Prediction Markets</h1>
+    <p>Live Polymarket &amp; Kalshi odds &middot; Clean Ticket Protocol &middot; Arbitrage Scanner &middot; Edge Finder</p>
+  </div>
+
+  <a class="home-link" href="plc-capital.html">&larr; Return to Operations Page</a>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('live')">Live Markets</button>
+    <button class="tab" onclick="showTab('analyzer')">Edge Analyzer</button>
+    <button class="tab" onclick="showTab('kalshi')">Kalshi</button>
+    <button class="tab" onclick="showTab('arb')">Arb Scanner</button>
+  </div>
+
+  <!-- ===== TAB 1: LIVE MARKETS ===== -->
+  <div id="tab-live">
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterMkts('all',this)">All</button>
+      <button class="filter-btn" onclick="filterMkts('politics',this)">Politics</button>
+      <button class="filter-btn" onclick="filterMkts('crypto',this)">Crypto</button>
+      <button class="filter-btn" onclick="filterMkts('sports',this)">Sports</button>
+      <button class="filter-btn" onclick="filterMkts('economy',this)">Economy</button>
+      <input class="search-box" type="text" placeholder="Search markets..." oninput="searchMkts(this.value)">
+      <select class="sort-select" onchange="sortMkts(this.value)">
+        <option value="volume">Sort: Volume</option>
+        <option value="liquidity">Sort: Liquidity</option>
+        <option value="closing">Sort: Closing Soon</option>
+        <option value="edge">Sort: Edge</option>
+      </select>
+    </div>
+
+    <div id="market-status" class="loading-msg">Loading live markets from Polymarket...</div>
+    <div class="market-grid" id="market-grid"></div>
+    <div id="load-more-wrap" style="text-align:center;margin-top:12px;display:none">
+      <button onclick="loadMore()">Load More Markets</button>
+    </div>
+  </div>
+
+  <!-- ===== TAB 2: EDGE ANALYZER ===== -->
+  <div id="tab-analyzer" style="display:none">
+    <div class="analyzer">
+      <h3>Clean Ticket Protocol — Prediction Markets</h3>
+      <div class="cr"><label>Market / Question</label><input type="text" id="a-mkt" placeholder="e.g. Will the Fed cut rates in May 2026?"></div>
+      <div class="cr"><label>Market Price (probability %)</label><input type="number" id="a-price" placeholder="45" min="1" max="99"></div>
+      <div class="cr"><label>Your True Probability Estimate (%)</label><input type="number" id="a-true" placeholder="60" min="1" max="99"></div>
+      <div class="cr"><label>Platform</label>
+        <select id="a-platform">
+          <option value="polymarket">Polymarket (crypto wallet, USDC)</option>
+          <option value="kalshi">Kalshi (regulated, US bank)</option>
+        </select>
+      </div>
+      <div class="cr"><label>Intended Stake ($)</label><input type="number" id="a-stake" placeholder="100" min="1"></div>
+      <div class="cr"><label>Total Account Bankroll ($)</label><input type="number" id="a-bank" placeholder="1000" min="1"></div>
+      <button onclick="runEdge()">RUN EDGE ANALYSIS</button>
+      <div class="ao" id="a-out"></div>
+    </div>
+
+    <div class="sl">How Prediction Markets Work</div>
+    <table style="font-size:13px">
+      <tr><th>Platform</th><th>Legal in US?</th><th>Min Bet</th><th>Fee</th><th>Payout</th><th>Best For</th></tr>
+      <tr><td><strong>Polymarket</strong></td><td>Yes (via VPN workaround or crypto)</td><td>$1 USDC</td><td>0%</td><td>$1 per correct share</td><td>Crypto-native, largest liquidity</td></tr>
+      <tr><td><strong>Kalshi</strong></td><td>Yes — CFTC regulated</td><td>$1</td><td>~2-3% maker/taker</td><td>$1 per correct contract</td><td>US residents, bank account</td></tr>
+    </table>
+
+    <div class="sl">Edge Finder — Where Are the Mistakes?</div>
+    <p style="font-size:12px;color:#555;margin-bottom:12px">These are market types where crowd pricing historically underprices or overprices the true probability. Find these, find your edge.</p>
+    <table style="font-size:13px">
+      <tr><th>Market Type</th><th>Crowd Bias</th><th>Edge Direction</th><th>Why</th></tr>
+      <tr><td>Fed rate decisions</td><td>Overestimates cuts</td><td>BET NO on aggressive cuts</td><td>Crowd is optimistic, Fed is hawkish</td></tr>
+      <tr><td>Political incumbents</td><td>Underestimates incumbents</td><td>BET YES on incumbents</td><td>Name recognition + institutional advantage</td></tr>
+      <tr><td>Crypto price milestones</td><td>Overestimates upside</td><td>BET NO on aggressive targets</td><td>Retail speculation inflates probability</td></tr>
+      <tr><td>Sports upsets</td><td>Overestimates upsets</td><td>BET favorites at fair price</td><td>Media narrative drives upset betting</td></tr>
+      <tr><td>Geopolitical events</td><td>Overestimates chaos</td><td>BET against dramatic outcomes</td><td>Status quo wins ~80% of the time</td></tr>
+      <tr><td>Economic recession calls</td><td>Overestimates recessions</td><td>BET NO on near-term recessions</td><td>Recessions are rare, predictions are frequent</td></tr>
+    </table>
+  </div>
+
+  <!-- ===== TAB 3: KALSHI ===== -->
+  <div id="tab-kalshi" style="display:none">
+    <p style="font-size:13px;color:#333;line-height:1.7;margin-bottom:16px">
+      <strong>Kalshi is the only CFTC-regulated prediction market in the US.</strong> You trade with real USD from your bank account — no crypto required. 
+      Contracts pay $1 if correct, $0 if wrong. Fee is ~2-3% per trade.
+    </p>
+
+    <div class="sl">How to Use Kalshi to Make Money</div>
+    <div class="kalshi-card">
+      <div class="kalshi-q">Step 1: Sign up at kalshi.com</div>
+      <div class="kalshi-meta">Regulated by CFTC &middot; US bank account &middot; No crypto needed &middot; Oklahoma legal</div>
+      <div class="kalshi-note">Create an account, connect your bank, deposit as little as $100. This is the cleanest way to trade prediction markets as a US resident without any legal grey area.</div>
+    </div>
+    <div class="kalshi-card">
+      <div class="kalshi-q">Step 2: Find mispriced markets using this page</div>
+      <div class="kalshi-meta">Edge Analyzer tab &middot; Clean Ticket Protocol</div>
+      <div class="kalshi-note">Run the Edge Analyzer on any Kalshi market. If your true probability estimate is more than 5 percentage points better than the market price, you have positive expected value. Only bet when the math says yes.</div>
+    </div>
+    <div class="kalshi-card">
+      <div class="kalshi-q">Step 3: Size correctly using Kelly Criterion</div>
+      <div class="kalshi-meta">Quarter-Kelly &middot; Max 2% of bankroll per bet</div>
+      <div class="kalshi-note">Kelly Criterion tells you the mathematically optimal bet size. Always use Quarter-Kelly (25% of full Kelly) to account for probability estimation error. Never bet more than 2% of your total bankroll on a single contract.</div>
+    </div>
+    <div class="kalshi-card">
+      <div class="kalshi-q">Step 4: Track every bet in the Bets Desk</div>
+      <div class="kalshi-meta"><a href="bets.html" style="color:#00008b">Open Bets Desk →</a></div>
+      <div class="kalshi-note">Log every Kalshi trade in the Bets Desk bankroll tracker. After 50 trades you'll have your true win rate vs expected win rate — the most valuable data you can collect as a prediction market trader.</div>
+    </div>
+
+    <div class="sl">Categories with Most Kalshi Volume</div>
+    <table style="font-size:13px">
+      <tr><th>Category</th><th>Examples</th><th>Edge Available?</th></tr>
+      <tr><td>Federal Reserve</td><td>Rate cut by March? Pause in June?</td><td class="g">Yes — Fed language is predictable</td></tr>
+      <tr><td>Economic Indicators</td><td>CPI above 3%? Jobs > 200k?</td><td class="g">Yes — data releases are forecastable</td></tr>
+      <tr><td>Politics</td><td>Bill passes Senate? Executive order?</td><td style="color:#886600">Sometimes — highly uncertain</td></tr>
+      <tr><td>Sports</td><td>Team wins? Player milestones?</td><td style="color:#886600">Sometimes — correlates with Bets Desk</td></tr>
+      <tr><td>Crypto</td><td>Bitcoin above $X by date?</td><td class="r">Rarely — too speculative</td></tr>
+    </table>
+
+    <div style="text-align:center;margin-top:20px">
+      <a href="https://kalshi.com" target="_blank" style="display:inline-block;background:#000;color:#fff;padding:10px 28px;font-size:13px;text-decoration:none;font-weight:bold;letter-spacing:1px">OPEN KALSHI ACCOUNT →</a>
+    </div>
+  </div>
+
+  <!-- ===== TAB 4: ARB SCANNER ===== -->
+  <div id="tab-arb" style="display:none">
+    <p style="font-size:13px;color:#333;line-height:1.7;margin-bottom:16px">
+      When the same question trades at different prices on Polymarket vs Kalshi, you can bet both sides and lock in a risk-free profit. 
+      This is called <strong>arbitrage</strong>. The scanner below identifies structural arb opportunities.
+    </p>
+
+    <div class="sl">How Prediction Market Arb Works</div>
+    <div class="arb-card">
+      <div class="arb-title">Example: Structural Arb</div>
+      <div class="arb-math">
+Polymarket: "Fed cuts in May" — YES at 42¢
+Kalshi: "Fed cuts in May" — NO at 52¢
+
+Buy YES on Polymarket for $42 → pays $100 if yes
+Buy NO on Kalshi for $52 → pays $100 if no
+
+Total cost: $94
+Guaranteed payout: $100 (one side always wins)
+Risk-free profit: $6 on $94 = 6.4% return
+      </div>
+      <div class="arb-note">This only works when the two markets price the SAME event. The spread disappears quickly as arbitrageurs trade it. Speed matters — set up accounts on both platforms first.</div>
+    </div>
+
+    <div class="arb-card">
+      <div class="arb-title">Arb Opportunity Calculator</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px;font-size:13px">
+        <div>
+          <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:#555;margin-bottom:4px">Platform A — YES Price (¢)</label>
+          <input type="number" id="arb-yes" value="42" min="1" max="99" style="border:1px solid #999;padding:5px 8px;font-family:Arial;font-size:15px;width:100%">
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:#555;margin-bottom:4px">Platform B — NO Price (¢)</label>
+          <input type="number" id="arb-no" value="52" min="1" max="99" style="border:1px solid #999;padding:5px 8px;font-family:Arial;font-size:15px;width:100%">
+        </div>
+      </div>
+      <div class="cr" style="margin-bottom:8px"><label>Total capital to deploy ($)</label><input type="number" id="arb-capital" value="1000" style="border:1px solid #999;padding:4px 8px;font-family:Arial;font-size:13px;width:120px"></div>
+      <button onclick="calcArb()">CALCULATE ARB</button>
+      <div class="ao" id="arb-out"></div>
+    </div>
+
+    <div class="sl">Known Structural Arb Setups (March 2026)</div>
+    <table style="font-size:13px">
+      <tr><th>Market</th><th>Polymarket</th><th>Kalshi</th><th>Spread</th><th>Action</th></tr>
+      <tr><td>Fed rate cut May 2026</td><td>~35% YES</td><td>~38% YES</td><td>3pp</td><td style="color:#886600">Too thin</td></tr>
+      <tr><td>DHS shutdown end by Mar 31</td><td>64% YES</td><td>Check Kalshi</td><td>Unknown</td><td class="g">Check manually</td></tr>
+      <tr><td>2026 Midterms on schedule</td><td>90% YES</td><td>Check Kalshi</td><td>Unknown</td><td class="g">Check manually</td></tr>
+      <tr><td>Bitcoin &gt;$100K by Dec 31</td><td>~45%</td><td>~42%</td><td>3pp</td><td style="color:#886600">Too thin</td></tr>
+    </table>
+    <p style="font-size:11px;color:#888;font-style:italic">True arb requires 5%+ spread to be worth the fee friction on both platforms. Spreads under 5% are eaten by Kalshi's 2-3% fee.</p>
+
+    <div class="sl">Set Up Both Accounts First</div>
+    <div style="display:flex;gap:12px;margin-bottom:20px">
+      <a href="https://polymarket.com" target="_blank" style="flex:1;display:block;border:2px solid #000;padding:14px;text-align:center;text-decoration:none;color:#000">
+        <div style="font-size:16px;font-weight:bold;margin-bottom:4px">Polymarket</div>
+        <div style="font-size:11px;color:#555">Crypto · USDC · Largest volume · No fee</div>
+      </a>
+      <a href="https://kalshi.com" target="_blank" style="flex:1;display:block;border:2px solid #000;padding:14px;text-align:center;text-decoration:none;color:#000">
+        <div style="font-size:16px;font-weight:bold;margin-bottom:4px">Kalshi</div>
+        <div style="font-size:11px;color:#555">USD · CFTC regulated · Bank account · 2-3% fee</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    Prediction markets involve financial risk. Polymarket operates via USDC on the Polygon blockchain — verify legal status in your jurisdiction. 
+    Kalshi is regulated by the CFTC and legal for US residents. Never invest more than you can afford to lose. 
+    This page provides informational analysis only — not financial or legal advice.
+    Payton Loop earns no commission from Polymarket or Kalshi.
+  </div>
+
+</div>
+
+<script>
+var allMarkets = [];
+var filteredMarkets = [];
+var displayCount = 20;
+var currentFilter = 'all';
+var currentSort = 'volume';
+var searchQuery = '';
+
+var CATEGORY_KEYWORDS = {
+  politics: ['president','congress','senate','election','trump','biden','democrat','republican','vote','law','bill','dhs','government','policy','fed','rate'],
+  crypto: ['bitcoin','ethereum','crypto','btc','eth','blockchain','usdc','defi','nft','solana','coinbase'],
+  sports: ['nba','nfl','mlb','nhl','world series','superbowl','finals','championship','win','game','match','tournament','ncaa','soccer','tennis'],
+  economy: ['gdp','inflation','cpi','unemployment','recession','fed','interest rate','jobs','market','stock','oil','crude']
+};
+
+function categorize(q) {
+  q = q.toLowerCase();
+  for (var cat in CATEGORY_KEYWORDS) {
+    if (CATEGORY_KEYWORDS[cat].some(function(k){ return q.includes(k); })) return cat;
+  }
+  return 'other';
+}
+
+function fmtVol(v) {
+  v = parseFloat(v) || 0;
+  if (v >= 1e6) return '$' + (v/1e6).toFixed(1) + 'M';
+  if (v >= 1e3) return '$' + (v/1e3).toFixed(0) + 'K';
+  return '$' + Math.round(v);
+}
+
+function daysUntil(dateStr) {
+  if (!dateStr) return 9999;
+  var d = new Date(dateStr) - new Date();
+  return Math.ceil(d / 86400000);
+}
+
+function loadMarkets() {
+  document.getElementById('market-status').textContent = 'Loading live markets from Polymarket...';
+  fetch('https://gamma-api.polymarket.com/markets?limit=200&active=true&closed=false&order=volume&ascending=false')
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      allMarkets = data.filter(function(m) {
+        var prices = m.outcomePrices;
+        if (!prices) return false;
+        try {
+          var p = typeof prices === 'string' ? JSON.parse(prices) : prices;
+          return p.every(function(x){ return parseFloat(x) > 0.01 && parseFloat(x) < 0.99; });
+        } catch(e){ return false; }
+      }).map(function(m) {
+        var prices = typeof m.outcomePrices === 'string' ? JSON.parse(m.outcomePrices) : m.outcomePrices;
+        var outcomes = typeof m.outcomes === 'string' ? JSON.parse(m.outcomes) : m.outcomes;
+        var vol = parseFloat(m.volume) || 0;
+        var liq = parseFloat(m.liquidity) || 0;
+        return {
+          id: m.id,
+          question: m.question,
+          slug: m.slug,
+          volume: vol,
+          liquidity: liq,
+          prices: prices,
+          outcomes: outcomes,
+          endDate: m.endDate,
+          category: categorize(m.question),
+          daysLeft: daysUntil(m.endDate)
+        };
+      });
+      applyFilters();
+      document.getElementById('market-status').textContent = '';
+    })
+    .catch(function(e) {
+      document.getElementById('market-status').innerHTML = '<span class="error-msg">Could not load Polymarket data. This server may be blocked by Polymarket\'s CORS policy from China IP. <br>Try opening <a href="https://polymarket.com" target="_blank" style="color:#00008b">polymarket.com</a> directly, or migrate server to US.</span>';
+    });
+}
+
+function applyFilters() {
+  filteredMarkets = allMarkets.filter(function(m) {
+    if (currentFilter !== 'all' && m.category !== currentFilter) return false;
+    if (searchQuery && !m.question.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    return true;
+  });
+
+  filteredMarkets.sort(function(a,b) {
+    if (currentSort === 'volume') return b.volume - a.volume;
+    if (currentSort === 'liquidity') return b.liquidity - a.liquidity;
+    if (currentSort === 'closing') return a.daysLeft - b.daysLeft;
+    return b.volume - a.volume;
+  });
+
+  displayCount = 20;
+  renderMarkets();
+}
+
+function renderMarkets() {
+  var grid = document.getElementById('market-grid');
+  var toShow = filteredMarkets.slice(0, displayCount);
+
+  if (toShow.length === 0) {
+    grid.innerHTML = '<div style="padding:20px;color:#888;text-align:center">No markets match your filters.</div>';
+    document.getElementById('load-more-wrap').style.display = 'none';
+    return;
+  }
+
+  grid.innerHTML = toShow.map(function(m) {
+    var pills = m.outcomes.map(function(o, i) {
+      var pct = (parseFloat(m.prices[i]) * 100).toFixed(1);
+      var cls = o.toLowerCase() === 'yes' ? 'yes' : o.toLowerCase() === 'no' ? 'no' : 'other';
+      return '<span class="outcome-pill ' + cls+ '">' + o + ' ' + pct + '%</span>';
+    }).join('');
+
+    var daysText = m.daysLeft < 1 ? 'Closes today' : m.daysLeft < 7 ? m.daysLeft + 'd left' : m.endDate ? m.endDate.slice(0,10) : '';
+    var polyUrl = 'https://polymarket.com/event/' + (m.slug || m.id);
+
+    return '<div class="mkt-card" id="mkt-' + m.id + '">' +
+      '<div>' +
+        '<div class="mkt-question">' + m.question + '</div>' +
+        '<div class="mkt-meta"><span>&#128197; ' + daysText + '</span><span>&#128200; Polymarket</span><span>&#127968; ' + m.category + '</span></div>' +
+        '<div class="outcome-row">' + pills + '</div>' +
+        '<div class="pm-links" style="margin-top:8px">' +
+          '<a class="pm-link" href="' + polyUrl + '" target="_blank">Trade on Polymarket →</a>' +
+          '<a class="pm-link" onclick="openAnalyzer(\'' + m.id + '\')">Analyze Edge</a>' +
+        '</div>' +
+      '</div>' +
+      '<div class="mkt-right">' +
+        '<div class="vol-num">' + fmtVol(m.volume) + '</div>' +
+        '<div class="vol-label">Volume</div>' +
+        '<div class="liq-num">' + fmtVol(m.liquidity) + '</div>' +
+        '<div class="vol-label">Liquidity</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  document.getElementById('load-more-wrap').style.display = filteredMarkets.length > displayCount ? 'block' : 'none';
+}
+
+function loadMore() {
+  displayCount += 20;
+  renderMarkets();
+}
+
+function filterMkts(cat, btn) {
+  currentFilter = cat;
+  document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function searchMkts(q) {
+  searchQuery = q;
+  applyFilters();
+}
+
+function sortMkts(v) {
+  currentSort = v;
+  applyFilters();
+}
+
+function openAnalyzer(id) {
+  showTab('analyzer');
+  var m = allMarkets.find(function(x){ return x.id === id; });
+  if (!m) return;
+  document.getElementById('a-mkt').value = m.question;
+  var yesIdx = m.outcomes.findIndex(function(o){ return o.toLowerCase() === 'yes'; });
+  if (yesIdx >= 0) {
+    document.getElementById('a-price').value = Math.round(parseFloat(m.prices[yesIdx]) * 100);
+  }
+}
+
+function runEdge() {
+  var mkt = document.getElementById('a-mkt').value.trim();
+  var price = parseFloat(document.getElementById('a-price').value) / 100;
+  var trueP = parseFloat(document.getElementById('a-true').value) / 100;
+  var platform = document.getElementById('a-platform').value;
+  var stake = parseFloat(document.getElementById('a-stake').value);
+  var bank = parseFloat(document.getElementById('a-bank').value);
+
+  if (!mkt || isNaN(price) || isNaN(trueP) || isNaN(stake) || isNaN(bank)) {
+    alert('Fill in all fields.'); return;
+  }
+
+  var fee = platform === 'kalshi' ? 0.025 : 0;
+  var effectivePrice = price + fee;
+  var payout = (1 - effectivePrice) / effectivePrice;
+  var edge = trueP - price;
+  var edgeAfterFee = trueP - effectivePrice;
+  var ev = (trueP * (1 - effectivePrice) * stake) - ((1 - trueP) * effectivePrice * stake);
+  var kelly = edgeAfterFee / payout;
+  var qKelly = Math.max(0, kelly / 4);
+  var kellySz = qKelly * bank;
+  var flat2 = bank * 0.02;
+  var suggested = Math.min(kellySz, flat2, 500);
+
+  var verdict, vClass;
+  if (edgeAfterFee > 0.05) { verdict = 'PLAY — Clear positive edge after fees. Size up to suggested amount.'; vClass = 'verdict-play'; }
+  else if (edgeAfterFee > 0.02) { verdict = 'MARGINAL — Thin edge. Reduce size or wait for better price.'; vClass = 'verdict-wait'; }
+  else if (edgeAfterFee > 0) { verdict = 'PASS — Edge too thin. Fees eat your profit at this size.'; vClass = 'verdict-pass'; }
+  else { verdict = 'PASS — Negative edge. The market is better informed than your estimate, or reconsider your probability.'; vClass = 'verdict-pass'; }
+
+  var out = document.getElementById('a-out');
+  out.className = 'ao show';
+  out.textContent = [
+    'MARKET: ' + mkt,
+    'PLATFORM: ' + platform.toUpperCase() + (platform === 'kalshi' ? ' (2.5% fee applied)' : ' (no fee)'),
+    '─────────────────────────────',
+    'Market price:          ' + (price*100).toFixed(1) + '%',
+    'Your true estimate:    ' + (trueP*100).toFixed(1) + '%',
+    'Raw edge:              ' + (edge >= 0 ? '+' : '') + (edge*100).toFixed(2) + 'pp',
+    'Edge after fees:       ' + (edgeAfterFee >= 0 ? '+' : '') + (edgeAfterFee*100).toFixed(2) + 'pp',
+    'Expected value ($' + stake + ' stake): ' + (ev >= 0 ? '+' : '') + '$' + ev.toFixed(2),
+    '─────────────────────────────',
+    'Quarter-Kelly stake:   $' + kellySz.toFixed(2),
+    'Flat 2% unit:          $' + flat2.toFixed(2),
+    'SUGGESTED STAKE:       $' + suggested.toFixed(2),
+    '─────────────────────────────',
+    verdict
+  ].join('\n');
+}
+
+function calcArb() {
+  var yes = parseFloat(document.getElementById('arb-yes').value) / 100;
+  var no = parseFloat(document.getElementById('arb-no').value) / 100;
+  var capital = parseFloat(document.getElementById('arb-capital').value);
+
+  var total = yes + no;
+  var profit = 1 - total;
+  var pct = (profit / total * 100).toFixed(2);
+  var yesStake = (capital * (1/yes) / (1/yes + 1/no));
+  var noStake = capital - yesStake;
+  var guaranteedProfit = (capital / total) - capital;
+
+  var out = document.getElementById('arb-out');
+  out.className = 'ao show';
+
+  if (total >= 1) {
+    out.textContent = [
+      'YES price: ' + (yes*100).toFixed(1) + '¢  |  NO price: ' + (no*100).toFixed(1) + '¢',
+      'Combined cost: ' + (total*100).toFixed(1) + '¢ (must be UNDER 100¢ to arb)',
+      '',
+      'NO ARB AVAILABLE.',
+      'Combined price (' + (total*100).toFixed(1) + '¢) is at or above 100¢.',
+      'Need: YES + NO < 100¢ to guarantee profit.',
+      'Current gap: ' + ((total-1)*100).toFixed(1) + '¢ in book\'s favor.',
+      '',
+      'Keep watching — prices shift as new information arrives.'
+    ].join('\n');
+  } else {
+    out.textContent = [
+      'YES price: ' + (yes*100).toFixed(1) + '¢  |  NO price: ' + (no*100).toFixed(1) + '¢',
+      'Combined cost: ' + (total*100).toFixed(1) + '¢  |  Arb spread: ' + (profit*100).toFixed(1) + '¢',
+      '',
+      'ARB CONFIRMED ✓',
+      '─────────────────────────────',
+      'Capital to deploy:    $' + capital.toFixed(2),
+      'Buy YES stake:        $' + yesStake.toFixed(2) + ' on Platform A',
+      'Buy NO stake:         $' + noStake.toFixed(2) + ' on Platform B',
+      'Guaranteed payout:    $' + (capital/total).toFixed(2),
+      'Risk-free profit:     $' + guaranteedProfit.toFixed(2) + ' (' + pct + '% return)',
+      '',
+      'ACTION: Execute both legs simultaneously.',
+      'Risk: Execution risk if one leg fills and other does not.',
+      'Fee impact: Subtract Kalshi 2.5% fee from profit if applicable.'
+    ].join('\n');
+  }
+}
+
+function showTab(tab) {
+  ['live','analyzer','kalshi','arb'].forEach(function(t) {
+    document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tab').forEach(function(b, i) {
+    b.classList.toggle('active', ['live','analyzer','kalshi','arb'][i] === tab);
+  });
+  if (tab === 'live' && allMarkets.length === 0) loadMarkets();
+}
+
+window.onload = function() { loadMarkets(); };
+</script>
+
+
+<script src="darkmode.js"></script>
+<script src="search.js"></script>
+</body>
+</html>

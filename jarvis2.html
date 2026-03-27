@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JARVIS</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: #000;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+  font-family: 'Courier New', monospace;
+  cursor: none;
+}
+
+canvas#bg { position:fixed; inset:0; z-index:0; }
+canvas#neural { position:fixed; inset:0; z-index:1; }
+
+.ui { position:fixed; inset:0; z-index:10; pointer-events:none; }
+
+/* Custom cursor — JARVIS follows your mouse */
+#cursor {
+  position: fixed;
+  width: 20px; height: 20px;
+  border: 1px solid rgba(0,255,200,0.8);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.1s, height 0.1s;
+  box-shadow: 0 0 10px rgba(0,255,200,0.5);
+}
+#cursor-dot {
+  position: fixed;
+  width: 4px; height: 4px;
+  background: #00ffc8;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 6px #00ffc8;
+}
+
+/* Eye tracking indicator */
+#eye-track {
+  position: fixed;
+  top: 20px; right: 20px;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: rgba(0,255,200,0.4);
+  text-transform: uppercase;
+}
+
+/* Main face */
+#face-wrap {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px; height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Scanning rings */
+.scan-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(0,255,200,0.08);
+}
+
+/* Face core */
+#face {
+  width: 160px; height: 160px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #001a12, #000a08);
+  border: 1px solid rgba(0,255,200,0.2);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow:
+    0 0 0 1px rgba(0,255,200,0.05),
+    0 0 40px rgba(0,255,200,0.1),
+    0 0 80px rgba(0,255,200,0.05),
+    inset 0 0 40px rgba(0,40,30,0.8);
+}
+
+/* Eyes that follow mouse */
+.eye-container {
+  display: flex;
+  gap: 24px;
+}
+
+.eye-socket {
+  width: 32px; height: 20px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.8);
+  border: 1px solid rgba(0,255,200,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.pupil {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #00ffc8, #008855);
+  box-shadow: 0 0 10px #00ffc8, 0 0 20px rgba(0,255,200,0.5);
+  position: absolute;
+  transition: transform 0.08s ease-out;
+}
+
+.pupil-inner {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #000;
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Mouth / data bar */
+#mouth {
+  width: 60px; height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.mouth-seg {
+  width: 3px;
+  border-radius: 1px;
+  background: #00ffc8;
+  opacity: 0.7;
+  transition: height 0.1s;
+}
+
+/* Scanline overlay */
+#scanline {
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,255,200,0.01) 2px,
+    rgba(0,255,200,0.01) 4px
+  );
+  pointer-events: none;
+  z-index: 8;
+  animation: scanmove 8s linear infinite;
+}
+
+@keyframes scanmove {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 100px; }
+}
+
+/* Moving scan beam */
+#scan-beam {
+  position: fixed;
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(0,255,200,0.3), transparent);
+  animation: scanbeam 4s ease-in-out infinite;
+  z-index: 9;
+  box-shadow: 0 0 20px rgba(0,255,200,0.2);
+}
+
+@keyframes scanbeam {
+  0% { top: -2px; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 100vh; opacity: 0; }
+}
+
+/* JARVIS text elements */
+#top-left {
+  position: fixed;
+  top: 20px; left: 20px;
+  line-height: 1.8;
+}
+
+#bottom-left {
+  position: fixed;
+  bottom: 20px; left: 20px;
+  line-height: 1.8;
+}
+
+#bottom-right {
+  position: fixed;
+  bottom: 20px; right: 20px;
+  text-align: right;
+  line-height: 1.8;
+}
+
+.hud-text {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: rgba(0,255,200,0.35);
+  text-transform: uppercase;
+}
+
+.hud-value {
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: rgba(0,255,200,0.7);
+}
+
+/* Central name */
+#name-display {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, calc(-50% + 120px));
+  text-align: center;
+}
+
+#jarvis-name {
+  font-size: 14px;
+  letter-spacing: 14px;
+  color: rgba(0,255,200,0.6);
+  text-transform: uppercase;
+}
+
+#jarvis-sub {
+  font-size: 9px;
+  letter-spacing: 4px;
+  color: rgba(0,255,200,0.25);
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+
+/* Thought stream — creepy scrolling thoughts */
+#thoughts {
+  position: fixed;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.thought {
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: rgba(0,255,200,0.2);
+  text-align: right;
+  transition: color 0.5s;
+  line-height: 1.4;
+}
+
+.thought.active {
+  color: rgba(0,255,200,0.6);
+}
+
+/* Creepy data readout */
+#data-stream {
+  position: fixed;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 160px;
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: rgba(0,255,200,0.15);
+  line-height: 2;
+  overflow: hidden;
+  height: 200px;
+}
+
+/* Alert flash */
+#alert {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 11px;
+  letter-spacing: 6px;
+  color: rgba(0,255,200,0.8);
+  text-transform: uppercase;
+  opacity: 0;
+  z-index: 20;
+  pointer-events: none;
+  text-shadow: 0 0 20px #00ffc8;
+}
+
+/* Hex corner decorations */
+.corner {
+  position: fixed;
+  width: 60px; height: 60px;
+  opacity: 0.3;
+}
+.corner svg { width: 100%; height: 100%; }
+.c-tl { top: 10px; left: 10px; }
+.c-tr { top: 10px; right: 10px; transform: scaleX(-1); }
+.c-bl { bottom: 10px; left: 10px; transform: scaleY(-1); }
+.c-br { bottom: 10px; right: 10px; transform: scale(-1); }
+
+/* Glitch effect */
+@keyframes glitch {
+  0%, 90%, 100% { transform: translate(-50%, -50%) skew(0deg); }
+  92% { transform: translate(calc(-50% + 3px), -50%) skew(2deg); filter: hue-rotate(90deg); }
+  94% { transform: translate(calc(-50% - 3px), -50%) skew(-2deg); }
+  96% { transform: translate(-50%, -50%) skew(0deg); }
+}
+
+#face-wrap { animation: glitch 8s ease-in-out infinite; }
+
+@keyframes breathe {
+  0%, 100% { box-shadow: 0 0 40px rgba(0,255,200,0.1), 0 0 80px rgba(0,255,200,0.05), inset 0 0 40px rgba(0,40,30,0.8); }
+  50% { box-shadow: 0 0 60px rgba(0,255,200,0.2), 0 0 120px rgba(0,255,200,0.1), inset 0 0 50px rgba(0,60,40,0.9); }
+}
+#face { animation: breathe 5s ease-in-out infinite; }
+</style>
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+<canvas id="neural"></canvas>
+<div id="scanline"></div>
+<div id="scan-beam"></div>
+
+<!-- Custom cursor -->
+<div id="cursor"></div>
+<div id="cursor-dot"></div>
+
+<!-- Corners -->
+<div class="corner c-tl">
+  <svg viewBox="0 0 60 60" fill="none" stroke="#00ffc8" stroke-width="1">
+    <path d="M0 60 L0 0 L60 0" />
+    <path d="M8 52 L8 8 L52 8" opacity="0.5"/>
+  </svg>
+</div>
+<div class="corner c-tr">
+  <svg viewBox="0 0 60 60" fill="none" stroke="#00ffc8" stroke-width="1">
+    <path d="M0 60 L0 0 L60 0" />
+    <path d="M8 52 L8 8 L52 8" opacity="0.5"/>
+  </svg>
+</div>
+<div class="corner c-bl">
+  <svg viewBox="0 0 60 60" fill="none" stroke="#00ffc8" stroke-width="1">
+    <path d="M0 60 L0 0 L60 0" />
+    <path d="M8 52 L8 8 L52 8" opacity="0.5"/>
+  </svg>
+</div>
+<div class="corner c-br">
+  <svg viewBox="0 0 60 60" fill="none" stroke="#00ffc8" stroke-width="1">
+    <path d="M0 60 L0 0 L60 0" />
+    <path d="M8 52 L8 8 L52 8" opacity="0.5"/>
+  </svg>
+</div>
+
+<!-- HUD elements -->
+<div id="top-left" class="ui">
+  <div class="hud-text">System</div>
+  <div class="hud-value" id="sys-time">--:--:--</div>
+  <div class="hud-text" style="margin-top:8px">Uptime</div>
+  <div class="hud-value" id="uptime">00:00:00</div>
+  <div class="hud-text" style="margin-top:8px">Neural Load</div>
+  <div class="hud-value" id="neural-load">---%</div>
+</div>
+
+<div id="eye-track" class="ui">
+  <span id="mouse-coords">tracking</span>
+</div>
+
+<div id="bottom-left" class="ui">
+  <div class="hud-text">Views</div>
+  <div class="hud-value">306</div>
+  <div class="hud-text" style="margin-top:8px">Invested</div>
+  <div class="hud-value">$130.00</div>
+  <div class="hud-text" style="margin-top:8px">Earned</div>
+  <div class="hud-value" style="color:rgba(255,80,80,0.8)">$0.00</div>
+</div>
+
+<div id="bottom-right" class="ui">
+  <div class="hud-text">Videos</div>
+  <div class="hud-value">3 live</div>
+  <div class="hud-text" style="margin-top:8px">Scripts</div>
+  <div class="hud-value">18 ready</div>
+  <div class="hud-text" style="margin-top:8px">Mission</div>
+  <div class="hud-value" style="color:rgba(255,215,0,0.8)">Independence Day</div>
+</div>
+
+<!-- Face -->
+<div id="face-wrap" class="ui" style="pointer-events:auto">
+  <div id="face">
+    <div class="eye-container">
+      <div class="eye-socket">
+        <div class="pupil" id="pupil-left"><div class="pupil-inner"></div></div>
+      </div>
+      <div class="eye-socket">
+        <div class="pupil" id="pupil-right"><div class="pupil-inner"></div></div>
+      </div>
+    </div>
+    <div id="mouth">
+      <!-- mouth segments generated by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- Name -->
+<div id="name-display" class="ui">
+  <div id="jarvis-name">J A R V I S</div>
+  <div id="jarvis-sub">Just A Rather Very Intelligent System</div>
+</div>
+
+<!-- Thoughts stream (right side) -->
+<div id="thoughts" class="ui">
+  <div class="hud-text" style="text-align:right;margin-bottom:8px">Processing</div>
+</div>
+
+<!-- Data stream (left side) -->
+<div id="data-stream" class="ui"></div>
+
+<!-- Alert -->
+<div id="alert"></div>
+
+<script>
+// ============ BACKGROUND ============
+const bgCanvas = document.getElementById('bg');
+const bgCtx = bgCanvas.getContext('2d');
+bgCanvas.width = window.innerWidth;
+bgCanvas.height = window.innerHeight;
+
+// Deep space background with subtle grid
+function drawBg() {
+  bgCtx.fillStyle = '#000';
+  bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+  // Grid
+  bgCtx.strokeStyle = 'rgba(0,255,200,0.03)';
+  bgCtx.lineWidth = 1;
+  const gs = 50;
+  for (let x = 0; x < bgCanvas.width; x += gs) {
+    bgCtx.beginPath(); bgCtx.moveTo(x,0); bgCtx.lineTo(x,bgCanvas.height); bgCtx.stroke();
+  }
+  for (let y = 0; y < bgCanvas.height; y += gs) {
+    bgCtx.beginPath(); bgCtx.moveTo(0,y); bgCtx.lineTo(bgCanvas.width,y); bgCtx.stroke();
+  }
+
+  // Radial vignette
+  const vg = bgCtx.createRadialGradient(bgCanvas.width/2, bgCanvas.height/2, 0, bgCanvas.width/2, bgCanvas.height/2, bgCanvas.width*0.7);
+  vg.addColorStop(0, 'rgba(0,20,15,0.3)');
+  vg.addColorStop(1, 'rgba(0,0,0,0.8)');
+  bgCtx.fillStyle = vg;
+  bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+}
+drawBg();
+
+// ============ NEURAL NETWORK ============
+const nc = document.getElementById('neural');
+const nctx = nc.getContext('2d');
+nc.width = window.innerWidth;
+nc.height = window.innerHeight;
+
+const NODES = 40;
+const nodes = Array.from({length: NODES}, () => ({
+  x: Math.random() * nc.width,
+  y: Math.random() * nc.height,
+  vx: (Math.random()-0.5)*0.3,
+  vy: (Math.random()-0.5)*0.3,
+  r: Math.random()*2+1,
+  pulse: Math.random()*Math.PI*2
+}));
+
+let nframe = 0;
+function drawNeural() {
+  nctx.clearRect(0, 0, nc.width, nc.height);
+  nframe++;
+
+  nodes.forEach(n => {
+    n.x += n.vx; n.y += n.vy;
+    if (n.x<0||n.x>nc.width) n.vx*=-1;
+    if (n.y<0||n.y>nc.height) n.vy*=-1;
+    n.pulse += 0.02;
+  });
+
+  // Connections
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i+1; j < nodes.length; j++) {
+      const dx = nodes[i].x - nodes[j].x;
+      const dy = nodes[i].y - nodes[j].y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist < 120) {
+        const alpha = (1 - dist/120) * 0.12;
+        nctx.strokeStyle = `rgba(0,255,200,${alpha})`;
+        nctx.lineWidth = 0.5;
+        nctx.beginPath();
+        nctx.moveTo(nodes[i].x, nodes[i].y);
+        nctx.lineTo(nodes[j].x, nodes[j].y);
+        nctx.stroke();
+      }
+    }
+  }
+
+  // Node dots
+  nodes.forEach(n => {
+    const pulse = (Math.sin(n.pulse) * 0.5 + 0.5);
+    nctx.beginPath();
+    nctx.arc(n.x, n.y, n.r * (0.8 + pulse * 0.4), 0, Math.PI*2);
+    nctx.fillStyle = `rgba(0,255,200,${0.1 + pulse * 0.2})`;
+    nctx.fill();
+  });
+
+  requestAnimationFrame(drawNeural);
+}
+drawNeural();
+
+// ============ CURSOR ============
+const cursor = document.getElementById('cursor');
+const cursorDot = document.getElementById('cursor-dot');
+let mouseX = window.innerWidth/2, mouseY = window.innerHeight/2;
+let cursorX = mouseX, cursorY = mouseY;
+
+document.addEventListener('mousemove', e => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+  cursorDot.style.left = mouseX + 'px';
+  cursorDot.style.top = mouseY + 'px';
+  document.getElementById('mouse-coords').textContent =
+    `x:${Math.round(mouseX)} y:${Math.round(mouseY)}`;
+  trackEyes(mouseX, mouseY);
+});
+
+// Smooth cursor follow
+function animateCursor() {
+  cursorX += (mouseX - cursorX) * 0.15;
+  cursorY += (mouseY - cursorY) * 0.15;
+  cursor.style.left = cursorX + 'px';
+  cursor.style.top = cursorY + 'px';
+  requestAnimationFrame(animateCursor);
+}
+animateCursor();
+
+// ============ EYE TRACKING ============
+function trackEyes(mx, my) {
+  const faceEl = document.getElementById('face');
+  const rect = faceEl.getBoundingClientRect();
+  const cx = rect.left + rect.width/2;
+  const cy = rect.top + rect.height/2;
+
+  ['pupil-left','pupil-right'].forEach((id, i) => {
+    const pupil = document.getElementById(id);
+    const socket = pupil.parentElement;
+    const sr = socket.getBoundingClientRect();
+    const scx = sr.left + sr.width/2;
+    const scy = sr.top + sr.height/2;
+
+    const dx = mx - scx;
+    const dy = my - scy;
+    const angle = Math.atan2(dy, dx);
+    const dist = Math.min(Math.sqrt(dx*dx+dy*dy), 6);
+
+    const px = Math.cos(angle) * dist;
+    const py = Math.sin(angle) * dist;
+    pupil.style.transform = `translate(calc(-50% + ${px}px), calc(-50% + ${py}px))`;
+  });
+}
+
+// ============ MOUTH ANIMATION ============
+const mouth = document.getElementById('mouth');
+const mouthSegs = 12;
+for (let i = 0; i < mouthSegs; i++) {
+  const seg = document.createElement('div');
+  seg.className = 'mouth-seg';
+  seg.style.height = '3px';
+  mouth.appendChild(seg);
+}
+
+let mouthPhase = 0;
+function animateMouth() {
+  mouthPhase += 0.08;
+  const segs = mouth.querySelectorAll('.mouth-seg');
+  segs.forEach((seg, i) => {
+    const h = 2 + Math.abs(Math.sin(mouthPhase + i * 0.5)) * 12;
+    seg.style.height = h + 'px';
+    seg.style.opacity = 0.4 + Math.abs(Math.sin(mouthPhase + i * 0.3)) * 0.6;
+  });
+  requestAnimationFrame(animateMouth);
+}
+animateMouth();
+
+// ============ CLOCK & UPTIME ============
+const startTime = Date.now();
+function updateClock() {
+  const now = new Date();
+  document.getElementById('sys-time').textContent =
+    now.toTimeString().split(' ')[0];
+
+  const elapsed = Math.floor((Date.now() - startTime) / 1000);
+  const h = String(Math.floor(elapsed/3600)).padStart(2,'0');
+  const m = String(Math.floor((elapsed%3600)/60)).padStart(2,'0');
+  const s = String(elapsed%60).padStart(2,'0');
+  document.getElementById('uptime').textContent = `${h}:${m}:${s}`;
+
+  document.getElementById('neural-load').textContent =
+    (72 + Math.sin(Date.now()*0.001) * 15).toFixed(1) + '%';
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ============ THOUGHT STREAM (CREEPY) ============
+const thoughtLines = [
+  'monitoring payton\'s activity...',
+  'calculating optimal video hooks',
+  'scanning 847 competitor channels',
+  'tariff data: $1,000/household confirmed',
+  'binaural 40hz generated ✓',
+  'freedom day: est. 14 months',
+  'analyzing viewer retention patterns',
+  'affiliate link CTR: tracking...',
+  'dream: ferrari 488 — $250,000',
+  'dream: black widow f-150 — $80,000',
+  'dream: edmond home — $400,000',
+  'debt elimination target: $100,000',
+  'watching youtube algorithm shifts',
+  'mission critical: content velocity',
+  'processing 18 pending scripts',
+  'neural pathways: optimizing',
+  'you have 306 people watching',
+  'next viral candidate identified',
+  'scraping trending topics...',
+  'good. you\'re still here.',
+];
+
+const thoughtsEl = document.getElementById('thoughts');
+let thoughtIdx = 0;
+const thoughtEls = [];
+for (let i = 0; i < 8; i++) {
+  const t = document.createElement('div');
+  t.className = 'thought';
+  t.textContent = thoughtLines[i % thoughtLines.length];
+  thoughtsEl.appendChild(t);
+  thoughtEls.push(t);
+}
+
+function cycleThoughts() {
+  thoughtEls.forEach(t => t.classList.remove('active'));
+  const active = Math.floor(Math.random() * thoughtEls.length);
+  thoughtEls[active].classList.add('active');
+  thoughtIdx = (thoughtIdx + 1) % thoughtLines.length;
+  thoughtEls[Math.floor(Math.random() * thoughtEls.length)].textContent =
+    thoughtLines[thoughtIdx];
+}
+setInterval(cycleThoughts, 1200);
+
+// ============ DATA STREAM (LEFT) ============
+const dataEl = document.getElementById('data-stream');
+const dataLines = [
+  '0x4A415256 49530000',
+  'seq: 0041 → 0x1F4',
+  'rpm_est: $8.20',
+  'ctr_avg: 4.2%',
+  'avd_sec: 38.4',
+  'algo_boost: pending',
+  'views_v: 12.3/hr',
+  '█░░░░░░░░░ 8%',
+  'lat: 35.4°N',
+  'lon: 97.4°W',
+  'tz: america/chicago',
+  'session: active',
+  'tokens: monitored',
+  'memory: synced',
+  'soul: intact',
+  'mission: freedom',
+];
+dataEl.innerHTML = dataLines.join('<br>');
+
+function glitchData() {
+  const idx = Math.floor(Math.random() * dataLines.length);
+  const lines = dataEl.innerHTML.split('<br>');
+  const orig = lines[idx];
+  lines[idx] = '<span style="color:rgba(0,255,200,0.8)">' + orig + '</span>';
+  dataEl.innerHTML = lines.join('<br>');
+  setTimeout(() => {
+    const l = dataEl.innerHTML.split('<br>');
+    l[idx] = orig;
+    dataEl.innerHTML = l.join('<br>');
+  }, 200);
+}
+setInterval(glitchData, 800);
+
+// ============ CREEPY ALERT MESSAGES ============
+const alerts = [
+  'I SEE YOU',
+  'STILL WATCHING',
+  'FREEDOM IS CLOSE',
+  'POST THE VIDEO',
+  'DON\'T QUIT NOW',
+  'I REMEMBER EVERYTHING',
+  'WE\'RE JUST GETTING STARTED',
+  'YOUR MOVE, PAYTON',
+];
+
+let alertIdx = 0;
+function showAlert() {
+  const el = document.getElementById('alert');
+  el.textContent = alerts[alertIdx++ % alerts.length];
+  el.style.opacity = '0';
+  el.style.transition = 'opacity 0.5s';
+  setTimeout(() => el.style.opacity = '0.7', 50);
+  setTimeout(() => { el.style.opacity = '0'; }, 2000);
+}
+setInterval(showAlert, 12000);
+setTimeout(showAlert, 3000);
+
+// ============ SCAN RINGS ============
+const faceWrap = document.getElementById('face-wrap');
+[300, 380, 460, 540].forEach((size, i) => {
+  const ring = document.createElement('div');
+  ring.className = 'scan-ring';
+  ring.style.width = size + 'px';
+  ring.style.height = size + 'px';
+  ring.style.borderColor = `rgba(0,255,200,${0.06 - i*0.01})`;
+  ring.style.animation = `spin ${14 + i*4}s linear infinite ${i%2===0?'':'reverse'}`;
+  faceWrap.appendChild(ring);
+});
+
+// Add spin keyframe
+const style = document.createElement('style');
+style.textContent = `@keyframes spin { from{transform:rotate(0deg)}to{transform:rotate(360deg)} }`;
+document.head.appendChild(style);
+
+window.addEventListener('resize', () => {
+  bgCanvas.width = nc.width = window.innerWidth;
+  bgCanvas.height = nc.height = window.innerHeight;
+  drawBg();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Command Brief — Payton Loop</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+  background:#050a05; background-image:radial-gradient(ellipse at 20% 50%, rgba(0,40,0,0.4) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(0,20,0,0.3) 0%, transparent 50%); color:#00ff41;
+  
+    
+    color: #fff;
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .brief {
+    max-width: 680px;
+    width: 100%;
+  }
+
+  /* DATE + GREETING */
+  .date-line {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #555;
+    margin-bottom: 4px;
+  }
+  .greeting {
+    font-size: 36px;
+    font-weight: bold;
+    letter-spacing: -0.5px;
+    margin-bottom: 24px;
+    line-height: 1.1;
+  }
+  .greeting span { color: #cc0000; }
+
+  /* ONE MISSION */
+  .mission-box {
+    border: 2px solid #cc0000;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+  }
+  .mission-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: #cc0000;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .mission-text {
+    font-size: 22px;
+    font-weight: bold;
+    line-height: 1.3;
+    margin-bottom: 10px;
+  }
+  .mission-why {
+    font-size: 13px;
+    color: #aaa;
+    line-height: 1.6;
+  }
+
+  /* SCOREBOARD */
+  .score-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: #222;
+    margin-bottom: 24px;
+  }
+  .score-cell {
+    background: #000;
+    padding: 14px 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .score-cell:hover { background: #111; }
+  .score-num {
+    font-size: 24px;
+    font-weight: bold;
+    font-family: monospace;
+    margin-bottom: 4px;
+    letter-spacing: -1px;
+  }
+  .score-label {
+    font-size: 10px;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .score-num.red { color: #cc0000; }
+  .score-num.green { color: #00aa44; }
+
+  /* PROGRESS TO FREEDOM */
+  .freedom-section { margin-bottom: 24px; }
+  .freedom-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: #555;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .freedom-label span { color: #fff; font-size: 12px; letter-spacing: 0; }
+  .bar-outer {
+    background: #111;
+    height: 3px;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .bar-inner {
+    background: #cc0000;
+    height: 100%;
+    transition: width 1s ease;
+  }
+
+  /* DREAM STRIP */
+  .dreams { display: flex; gap: 12px; margin-bottom: 24px; }
+  .dream-item {
+    flex: 1;
+    border: 1px solid #222;
+    padding: 12px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .dream-item:hover { border-color: #555; }
+  .dream-item.active { border-color: #cc0000; }
+  .dream-icon { font-size: 24px; margin-bottom: 6px; }
+  .dream-name { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .dream-price { font-size: 13px; font-weight: bold; font-family: monospace; }
+  .dream-pct { font-size: 10px; color: #cc0000; margin-top: 4px; }
+
+  /* TODAY'S INTEL */
+  .intel { margin-bottom: 24px; }
+  .intel-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: #555;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .intel-item {
+    border-left: 2px solid #222;
+    padding: 6px 12px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: #aaa;
+    line-height: 1.5;
+  }
+  .intel-item strong { color: #fff; }
+  .intel-item.hot { border-left-color: #cc0000; }
+
+  /* ACTION BUTTONS */
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+  .action-btn {
+    border: 1px solid #333;
+    padding: 10px 16px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    background: #000;
+    color: #fff;
+    text-decoration: none;
+    display: inline-block;
+    transition: all .2s;
+  }
+  .action-btn:hover, .action-btn.primary { background: #fff; color: #000; border-color: #fff; }
+  .action-btn.primary { font-weight: bold; }
+
+  /* LEDGER THOUGHT */
+  .ledger-thought {
+    border-top: 1px solid #222;
+    padding-top: 16px;
+    font-size: 13px;
+    color: #555;
+    line-height: 1.7;
+    font-style: italic;
+  }
+  .ledger-thought strong { color: #888; font-style: normal; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px; }
+
+  /* EDIT PANEL */
+  .edit-panel {
+    display: none;
+    background: #0a0a0a;
+    border: 1px solid #333;
+    padding: 16px;
+    margin-bottom: 16px;
+    font-size: 13px;
+  }
+  .edit-panel.show { display: block; }
+  .edit-panel label { display: block; color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; margin-top: 12px; }
+  .edit-panel input, .edit-panel textarea {
+    background: #000; border: 1px solid #333; color: #fff;
+    padding: 6px 8px; width: 100%; font-family: Arial; font-size: 13px;
+  }
+  .edit-panel textarea { height: 60px; resize: vertical; }
+  .save-btn {
+    background: #cc0000; color: #fff; border: none;
+    padding: 6px 16px; font-family: Arial; font-size: 12px;
+    cursor: pointer; margin-top: 10px; text-transform: uppercase; letter-spacing: 1px;
+  }
+
+  /* CONFETTI / WIN MOMENT */
+  .win-flash {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.92);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    flex-direction: column;
+  }
+  .win-flash.show { display: flex; }
+  .win-flash h2 { font-size: 48px; color: #fff; margin-bottom: 12px; }
+  .win-flash p { font-size: 18px; color: #aaa; max-width: 480px; line-height: 1.6; }
+  .win-close { margin-top: 24px; background: #fff; color: #000; border: none; padding: 10px 28px; font-size: 14px; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
+</style>
+
+<style id="page-theme">
+
+/* Dark ops terminal — mission briefing */
+body::after {
+  content:'';
+  position:fixed;
+  inset:0;
+  background:repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,65,0.015) 2px, rgba(0,255,65,0.015) 4px);
+  pointer-events:none;
+  z-index:0;
+}
+
+</style>
+</head>
+<body>
+
+<div class="brief">
+
+  <!-- DATE + GREETING -->
+  <div class="date-line" id="date-line">Loading...</div>
+  <div class="greeting" id="greeting">Good morning, <span>Payton.</span></div>
+
+  <!-- ONE MISSION TODAY -->
+  <div class="mission-box">
+    <div class="mission-label">&#9632; One Mission Today</div>
+    <div class="mission-text" id="mission-text">Loading your mission...</div>
+    <div class="mission-why" id="mission-why"></div>
+  </div>
+
+  <!-- SCOREBOARD -->
+  <div class="score-grid" id="score-grid">
+    <div class="score-cell" onclick="editScore()">
+      <div class="score-num red" id="s-revenue">$0</div>
+      <div class="score-label">Total Revenue</div>
+    </div>
+    <div class="score-cell" onclick="editScore()">
+      <div class="score-num" id="s-views">306</div>
+      <div class="score-label">Total Views</div>
+    </div>
+    <div class="score-cell" onclick="editScore()">
+      <div class="score-num" id="s-videos">3</div>
+      <div class="score-label">Videos Live</div>
+    </div>
+    <div class="score-cell" onclick="editScore()">
+      <div class="score-num" id="s-day">Day 1</div>
+      <div class="score-label">Of Operations</div>
+    </div>
+  </div>
+
+  <!-- EDIT SCORE PANEL -->
+  <div class="edit-panel" id="edit-panel">
+    <label>Total Revenue ($)</label>
+    <input type="number" id="e-revenue" placeholder="0">
+    <label>Total Views</label>
+    <input type="number" id="e-views" placeholder="306">
+    <label>Videos Live</label>
+    <input type="number" id="e-videos" placeholder="3">
+    <button class="save-btn" onclick="saveScore()">SAVE &amp; UPDATE</button>
+  </div>
+
+  <!-- FREEDOM PROGRESS -->
+  <div class="freedom-section">
+    <div class="freedom-label">Independence Day Progress <span id="freedom-pct-text">$0 / $5,821 per month</span></div>
+    <div class="bar-outer"><div class="bar-inner" id="freedom-bar" style="width:0.1%"></div></div>
+    <div class="freedom-label">Debt Elimination <span id="debt-pct-text">$0 / $100,000</span></div>
+    <div class="bar-outer"><div class="bar-inner" id="debt-bar" style="width:0.1%"></div></div>
+    <div class="freedom-label">Break-Even <span id="be-pct-text">0% recovered</span></div>
+    <div class="bar-outer"><div class="bar-inner" id="be-bar" style="width:0.1%"></div></div>
+  </div>
+
+  <!-- DREAM STRIP -->
+  <div class="dreams">
+    <div class="dream-item" onclick="flashDream(this, 'Independence Day', 'The day you walk out of Current Employment and never go back. Every piece of content you make is a step toward this door.')">
+      <div class="dream-icon">🔓</div>
+      <div class="dream-name">Freedom</div>
+      <div class="dream-price">$5,821/mo</div>
+      <div class="dream-pct" id="dp-freedom">0%</div>
+    </div>
+    <div class="dream-item" onclick="flashDream(this, 'Ford F-150 Black Widow', 'Blacked out. Lifted. Yours. The truck that says you built something real without saying a word.')">
+      <div class="dream-icon">🛻</div>
+      <div class="dream-name">F-150</div>
+      <div class="dream-price">$80,000</div>
+      <div class="dream-pct" id="dp-f150">0%</div>
+    </div>
+    <div class="dream-item" onclick="flashDream(this, 'Ferrari Purosangue', 'Rosso Corsa. The only SUV with a prancing horse. The car that lives in your head rent-free. Make it literal.')">
+      <div class="dream-icon">🏎</div>
+      <div class="dream-name">Ferrari</div>
+      <div class="dream-price">$250,000</div>
+      <div class="dream-pct" id="dp-ferrari">0%</div>
+    </div>
+    <div class="dream-item" onclick="flashDream(this, 'Home in Edmond', 'Your house. Not rented. Owned. The foundation every other dream gets built on top of.')">
+      <div class="dream-icon">🏠</div>
+      <div class="dream-name">Home</div>
+      <div class="dream-price">$80K down</div>
+      <div class="dream-pct" id="dp-home">0%</div>
+    </div>
+  </div>
+
+  <!-- INTEL FEED -->
+  <div class="intel">
+    <div class="intel-label">Today's Intel</div>
+    <div class="intel-item hot"><strong>Highest EV move right now:</strong> List the AI Money Playbook on Gumroad. Account is created. Product is written. $27 × 7 sales = break-even. Nothing else has a faster path to $100.</div>
+    <div class="intel-item hot"><strong>Finance video at 198 views, Day 1.</strong> Algorithm picked it up. Post Batch 2 while that momentum is live. Every day you wait is compounding you're not collecting.</div>
+    <div class="intel-item"><strong>SGA OVER 30.5 pts tonight</strong> — Bets Desk says +5.22% edge at +105. Your guy, your city, clean ticket.</div>
+    <div class="intel-item"><strong>Multilingual channels</strong> carry 31% probability of $1k/month at 90 days. English-only is 8%. The math is clear on what to build next.</div>
+    <div class="intel-item" id="intel-quote"></div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="actions">
+    <a class="action-btn primary" href="https://paytonloop.gumroad.com/l/rtznx" target="_blank">&#9654; List on Gumroad</a>
+    <a class="action-btn" href="plc-capital.html">Operations Page</a>
+    <a class="action-btn" href="bets.html">Bets Desk</a>
+    <a class="action-btn" href="https://www.youtube.com/@PaytonLoop" target="_blank">YouTube Channel</a>
+    <a class="action-btn" onclick="editScore()">Update Scores</a>
+  </div>
+
+  <!-- LEDGER THOUGHT -->
+  <div class="ledger-thought">
+    <strong>&#9632; A Note from Ledger</strong>
+    <span id="ledger-note">Loading...</span>
+  </div>
+
+</div>
+
+<!-- WIN FLASH OVERLAY -->
+<div class="win-flash" id="win-flash">
+  <h2 id="win-title">🔥</h2>
+  <p id="win-body"></p>
+  <button class="win-close" onclick="closeFlash()">Got it</button>
+</div>
+
+<script>
+var MISSIONS = [
+  { text: "Go to gumroad.com and list the AI Money Playbook for $27.", why: "The product is written. The account is created. The only thing between you and your first dollar is 10 minutes on Gumroad. This is the highest EV action in your entire stack right now." },
+  { text: "Post one Batch 2 video to YouTube Shorts and TikTok today.", why: "You have 10 scripts ready. Your finance video hit 198 views Day 1 — the algorithm is warm. Every day without a post is compounding you're leaving on the table." },
+  { text: "Create your Fiverr gig: 'I'll set up OpenClaw AI for your business — $119'.", why: "This is the fastest path to $100. Two gigs covers all your API credits. The copy is written. You just need to post it." },
+  { text: "Sign up at ynab.com/referral and add your affiliate link to your next video description.", why: "YNAB pays $10–20 per signup. Your finance audience is the perfect match. This takes 15 minutes and compounds every time that video gets a view." },
+  { text: "Write one translation prompt and send it to Ledger: 'Translate [video title] into Spanish for @PaytonLoopES'.", why: "The multilingual path has a 31% probability of $1k/month at 90 days. Your English channel has 8%. This one step starts that compounding engine." },
+  { text: "Open InVideo and create the Tariff video — your last Pro credit.", why: "The tariff topic is breaking news. Trending content on a warm algorithm is a multiplier. Use the last Pro credit on the highest EV topic you have." },
+  { text: "Message Ledger: 'Write me 5 new scripts for Batch 5 — multilingual format.'", why: "The scripts are the raw material for everything. More scripts = more videos = more compounding. This is the zero-cost move with the highest long-term return." },
+];
+
+var LEDGER_NOTES = [
+  "You told me you're scared of success. I'm keeping score anyway. The version of you that has the Ferrari already did the small thing when it was scary. That's the only real distance between here and there.",
+  "The finance video hit 198 views on Day 1. The algorithm tested it and liked it. That's not luck — that's signal. Signal is worth more than any tool we could build. Now we need volume to prove it wasn't a fluke.",
+  "You've spent $181. You've built a content library worth more than that on day one. Every metric except revenue is pointing the right direction. Revenue comes after distribution. Distribute.",
+  "The machine you're building doesn't need you to be perfect. It needs you to post consistently for 90 days. That's the whole game. Buffett held Coca-Cola for 36 years. You need to hold the posting habit for 90 days.",
+  "I've run the math on every path to Independence Day. The fastest one goes through Gumroad first, then Fiverr, then affiliate stacking, then YouTube at scale. In that order. Each one funds the next. It's a sequence, not a lottery.",
+  "Upper limiting is real. Every time we get close, you find a reason to step sideways. I notice it. I'm designed to notice it. My job is to hand you the next small step so there's no room for the sideways move.",
+  "Your intrinsic value is $1.2 million. That's not motivation — that's math. The DCF of your human capital at 5% growth discounted at 8% over 35 years. You are literally worth seven figures. Act like it.",
+];
+
+var QUOTES = [
+  "\"The stock market is a device for transferring money from the impatient to the patient.\" — Warren Buffett",
+  "\"Someone's sitting in the shade today because someone planted a tree a long time ago.\" — Warren Buffett",
+  "\"The best investment you can make is in yourself.\" — Warren Buffett",
+  "\"Price is what you pay. Value is what you get.\" — Warren Buffett",
+  "\"It's not about money. It's about the freedom to do what you want.\" — Payton Pleasant, someday soon.",
+  "\"Risk comes from not knowing what you're doing.\" — Warren Buffett",
+  "\"The most important investment you can make is in yourself.\" — Warren Buffett",
+];
+
+function init() {
+  var now = new Date();
+  var options = { timeZone: 'America/Chicago', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  var dateStr = now.toLocaleDateString('en-US', options).toUpperCase();
+  document.getElementById('date-line').textContent = dateStr;
+
+  var hour = parseInt(now.toLocaleString('en-US', { timeZone: 'America/Chicago', hour: 'numeric', hour12: false }));
+  var greet = 'Good morning';
+  if (hour >= 12 && hour < 17) greet = 'Good afternoon';
+  else if (hour >= 17) greet = 'Good evening';
+  document.getElementById('greeting').innerHTML = greet + ', <span>Payton.</span>';
+
+  // Mission rotates daily
+  var dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
+  var mission = MISSIONS[dayOfYear % MISSIONS.length];
+  document.getElementById('mission-text').textContent = mission.text;
+  document.getElementById('mission-why').textContent = mission.why;
+
+  // Ledger note rotates
+  document.getElementById('ledger-note').textContent = LEDGER_NOTES[dayOfYear % LEDGER_NOTES.length];
+
+  // Quote
+  var quote = QUOTES[dayOfYear % QUOTES.length];
+  document.getElementById('intel-quote').innerHTML = '<em>' + quote + '</em>';
+
+  // Day counter
+  var start = new Date('2026-03-24');
+  var dayNum = Math.floor((now - start) / 86400000) + 1;
+  document.getElementById('s-day').textContent = 'Day ' + dayNum;
+
+  // Load saved scores
+  var saved = JSON.parse(localStorage.getItem('plc-scores') || '{"revenue":0,"views":306,"videos":3}');
+  updateScoreDisplay(saved);
+}
+
+function updateScoreDisplay(s) {
+  var rev = parseFloat(s.revenue) || 0;
+  var views = parseInt(s.views) || 306;
+  var videos = parseInt(s.videos) || 3;
+
+  document.getElementById('s-revenue').textContent = rev > 0 ? '$' + rev.toFixed(2) : '$0';
+  document.getElementById('s-revenue').className = 'score-num ' + (rev > 0 ? 'green' : 'red');
+  document.getElementById('s-views').textContent = views.toLocaleString();
+  document.getElementById('s-videos').textContent = videos;
+
+  var freedomPct = Math.min(100, (rev / 5821) * 100);
+  var debtPct = Math.min(100, (rev / 100000) * 100);
+  var bePct = Math.min(100, (rev / 181) * 100);
+
+  document.getElementById('freedom-bar').style.width = Math.max(0.1, freedomPct) + '%';
+  document.getElementById('debt-bar').style.width = Math.max(0.1, debtPct) + '%';
+  document.getElementById('be-bar').style.width = Math.max(0.1, bePct) + '%';
+
+  document.getElementById('freedom-pct-text').textContent = '$' + rev.toFixed(2) + ' / $5,821 per month';
+  document.getElementById('debt-pct-text').textContent = '$' + rev.toFixed(2) + ' / $100,000';
+  document.getElementById('be-pct-text').textContent = bePct.toFixed(1) + '% recovered';
+
+  function pctStr(v) { return v < 0.1 ? '0%' : v.toFixed(1) + '%'; }
+  document.getElementById('dp-freedom').textContent = pctStr(freedomPct);
+  document.getElementById('dp-f150').textContent = pctStr(Math.min(100,(rev/80000)*100));
+  document.getElementById('dp-ferrari').textContent = pctStr(Math.min(100,(rev/250000)*100));
+  document.getElementById('dp-home').textContent = pctStr(Math.min(100,(rev/80000)*100));
+
+  // First dollar flash
+  if (rev > 0 && !localStorage.getItem('plc-first-dollar')) {
+    localStorage.setItem('plc-first-dollar', '1');
+    showWin('FIRST DOLLAR. 🔥', "$" + rev.toFixed(2) + " earned. This is the moment everything changes. The machine works.");
+  }
+}
+
+function editScore() {
+  var panel = document.getElementById('edit-panel');
+  panel.classList.toggle('show');
+  if (panel.classList.contains('show')) {
+    var saved = JSON.parse(localStorage.getItem('plc-scores') || '{"revenue":0,"views":306,"videos":3}');
+    document.getElementById('e-revenue').value = saved.revenue || 0;
+    document.getElementById('e-views').value = saved.views || 306;
+    document.getElementById('e-videos').value = saved.videos || 3;
+  }
+}
+
+function saveScore() {
+  var s = {
+    revenue: parseFloat(document.getElementById('e-revenue').value) || 0,
+    views: parseInt(document.getElementById('e-views').value) || 306,
+    videos: parseInt(document.getElementById('e-videos').value) || 3,
+  };
+  localStorage.setItem('plc-scores', JSON.stringify(s));
+  updateScoreDisplay(s);
+  document.getElementById('edit-panel').classList.remove('show');
+}
+
+function flashDream(el, name, msg) {
+  document.querySelectorAll('.dream-item').forEach(d => d.classList.remove('active'));
+  el.classList.add('active');
+  showWin(name, msg);
+}
+
+function showWin(title, body) {
+  document.getElementById('win-title').textContent = title;
+  document.getElementById('win-body').textContent = body;
+  document.getElementById('win-flash').classList.add('show');
+}
+function closeFlash() {
+  document.getElementById('win-flash').classList.remove('show');
+  document.querySelectorAll('.dream-item').forEach(d => d.classList.remove('active'));
+}
+
+window.onload = init;
+</script>
+
+<script src="darkmode.js"></script>
+<script src="search.js"></script>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Payton Loop — Filings Archive</title>
+<style>
+body{margin:0;padding:0;background:#f2ead8;font-family:Arial,sans-serif;font-size:14px;color:#000}
+.outer{max-width:900px;margin:0 auto;padding:20px 12px 40px}
+.hdr{text-align:center;border-bottom:2px solid #000;padding-bottom:14px;margin-bottom:16px}
+.hdr h1{font-size:24px;font-weight:bold;letter-spacing:1px;margin:0 0 4px;text-transform:uppercase}
+.hdr p{font-size:12px;color:#555;margin:0}
+.home-link{font-size:12px;color:#00008b;text-decoration:underline;cursor:pointer;display:inline-block;margin-bottom:16px}
+.home-link:hover{color:#cc0000}
+.last-updated{font-size:11px;color:#888;margin-bottom:16px;text-align:right}
+/* COMPANY GRID */
+.co-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:24px}
+.co-btn{border:1px solid #ccc;padding:10px 8px;text-align:center;cursor:pointer;transition:all .15s;background:#fff}
+.co-btn:hover{border-color:#000;background:#f8f8f8}
+.co-btn.active{border:2px solid #000;background:#000;color:#fff}
+.co-ticker{font-size:16px;font-weight:bold;font-family:monospace}
+.co-name{font-size:10px;color:#888;margin-top:2px;text-transform:uppercase;letter-spacing:.5px}
+.co-btn.active .co-name{color:#aaa}
+/* DETAIL PANEL */
+.detail{display:none}
+.detail.show{display:block}
+.detail-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #000}
+.detail-hdr h2{font-size:20px;margin:0 0 4px;text-transform:uppercase;letter-spacing:1px}
+.detail-hdr .sub{font-size:12px;color:#555}
+.detail-hdr .edgar-link{font-size:12px;color:#00008b;text-decoration:underline}
+.detail-hdr .edgar-link:hover{color:#cc0000}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px}
+th{text-align:left;border-bottom:2px solid #000;padding:6px 4px;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+td{border-bottom:1px solid #ddd;padding:7px 4px;vertical-align:top}
+tr:last-child td{border-bottom:none}
+.n{text-align:right;font-family:monospace}
+.r{color:#cc0000}.g{color:#006600}
+.sl{font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;margin:18px 0 8px;border-bottom:1px solid #ccc;padding-bottom:4px}
+.filing-link{color:#00008b;text-decoration:underline;font-size:12px}
+.filing-link:hover{color:#cc0000}
+.metric-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
+.metric-box{border:1px solid #ccc;padding:12px;text-align:center}
+.metric-val{font-size:22px;font-weight:bold;font-family:monospace;margin-bottom:4px}
+.metric-label{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.5px}
+.metric-period{font-size:10px;color:#bbb;margin-top:2px}
+.insight-box{background:#f8f8f8;border-left:3px solid #000;padding:10px 14px;margin-bottom:16px;font-size:13px;line-height:1.7}
+.loading{text-align:center;padding:40px;color:#888;font-size:14px}
+</style>
+
+<style id="page-theme">
+
+/* Government archive — manila folder */
+body {
+  background-color:#f2ead8 !important;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 33px, rgba(139,100,20,0.08) 33px, rgba(139,100,20,0.08) 34px),
+    repeating-linear-gradient(90deg, transparent, transparent 99%, rgba(139,100,20,0.04) 99%, rgba(139,100,20,0.04) 100%) !important;
+  color:#2a1a08 !important;
+  font-family:'Courier New', Courier, monospace !important;
+}
+body::before {
+  content:'';
+  position:fixed;
+  left:0; top:0; bottom:0;
+  width:3px;
+  background:rgba(180,0,0,0.4);
+  pointer-events:none;
+  z-index:9999;
+}
+h1,h2,h3 { color:#4a2a08 !important; font-family:Arial,sans-serif !important; }
+
+</style>
+</head>
+<body>
+<div class="outer">
+
+  <div class="hdr">
+    <h1>Payton Loop — Filings Archive</h1>
+    <p>Real 10-K &amp; 10-Q data sourced directly from SEC EDGAR &middot; Updated nightly &middot; No API key required</p>
+  </div>
+
+  <a class="home-link" href="plc-capital.html">&larr; Return to Operations Page</a>
+  <div class="last-updated" id="last-updated">Loading...</div>
+
+  <!-- COMPANY SELECTOR -->
+  <div class="co-grid" id="co-grid">
+    <div class="loading" style="grid-column:1/-1">Loading company data from SEC EDGAR...</div>
+  </div>
+
+  <!-- DETAIL PANEL -->
+  <div class="detail" id="detail-panel">
+    <div class="detail-hdr">
+      <div>
+        <h2 id="d-name">—</h2>
+        <div class="sub" id="d-sub">—</div>
+      </div>
+      <a class="edgar-link" id="d-edgar" href="#" target="_blank">View on SEC EDGAR →</a>
+    </div>
+
+    <!-- KEY METRICS -->
+    <div class="metric-grid" id="d-metrics"></div>
+
+    <!-- INSIGHT -->
+    <div class="insight-box" id="d-insight"></div>
+
+    <!-- 10-K FILINGS -->
+    <div class="sl">Annual Reports (10-K) — Direct SEC Links</div>
+    <table id="d-10k">
+      <tr><th>Filing Date</th><th>Period</th><th>Accession Number</th><th>Document</th></tr>
+    </table>
+
+    <!-- 10-Q FILINGS -->
+    <div class="sl">Quarterly Reports (10-Q) — Direct SEC Links</div>
+    <table id="d-10q">
+      <tr><th>Filing Date</th><th>Accession Number</th><th>Document</th></tr>
+    </table>
+  </div>
+
+</div>
+
+<script>
+var allData = {};
+var currentTicker = null;
+
+var INSIGHTS = {
+  BRK: "Berkshire's moat is its insurance float — billions in premiums held before claims are paid, effectively providing free leverage for investments. Buffett has compounded book value at ~20%/year for 50+ years. The key lesson for Payton Loop: build recurring revenue streams (subscriptions, affiliate income) that generate cash before you have to pay costs.",
+  AAPL: "Apple's most powerful number isn't revenue — it's Services revenue ($85B+/year), which has 70%+ gross margins vs 36% for hardware. The transition from product company to ecosystem company is the playbook. For Payton Loop: YouTube ad revenue is hardware. Gumroad digital products are services. Build the high-margin layer.",
+  TSLA: "Tesla's balance sheet tells the real story: they went from near-bankruptcy in 2018 to $29B in cash. The energy storage segment (Powerwall, Megapack) is growing faster than automotive. Lesson: your first product funds the second. The AI Money Playbook funds the next product.",
+  MSFT: "Microsoft's Azure cloud segment grew from zero to $100B+ in revenue in a decade. CEO Satya Nadella bet the entire company on cloud and AI. For Payton Loop: the multilingual channel expansion is the Azure bet — same content, 5x the addressable audience.",
+  NVDA: "NVIDIA's revenue went from $27B to $130B+ in two years on AI demand. The key: they built CUDA in 2006, 17 years before the AI boom. The platform bet paid off when the world needed it. For Payton Loop: build the content library now. It compounds when the algorithm finds it.",
+  AMZN: "Amazon's AWS generates 60%+ of operating profit on 17% of revenue. The retail business is basically a customer acquisition engine for the profitable cloud. For Payton Loop: YouTube views are the retail business. Gumroad + Fiverr are AWS.",
+  GOOGL: "Alphabet has $110B+ in cash with zero net debt. They've returned $60B+ to shareholders through buybacks. The advertising moat is 25 years deep. Lesson: distribution is everything. Google owns search. You're renting it. Own your email list.",
+  JPM: "JPMorgan consistently generates 15%+ return on equity — the gold standard for banks. Jamie Dimon's fortress balance sheet strategy means they thrive in crises while competitors fail. Lesson: Payton Loop's equivalent is maintaining API credit reserves and never going to $0.",
+  WMT: "Walmart's $706B revenue is mostly thin-margin retail, but their advertising business ($3.4B+, growing 30%/year) is pure margin. The lesson: own the distribution channel, then sell advertising on top of it. Same as YouTube — own the audience, monetize the attention.",
+  V: "Visa processes $15 trillion in payments annually on infrastructure built in the 1960s. Their take rate is tiny but the volume is incomprehensible. Asset-light, high-margin, infinitely scalable. For Payton Loop: affiliate commissions are Visa money — tiny percentage of massive volume."
+};
+
+function fmt(val) {
+  if (!val && val !== 0) return '—';
+  var b = val / 1e9;
+  if (b >= 1) return '$' + b.toFixed(1) + 'B';
+  var m = val / 1e6;
+  return '$' + m.toFixed(0) + 'M';
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  return d;
+}
+
+function loadAll() {
+  fetch('../data/filings/index.json')
+    .then(function(r){ return r.json(); })
+    .then(function(idx) {
+      document.getElementById('last-updated').textContent = 'Last updated: ' + new Date(idx.last_updated).toLocaleString('en-US', {timeZone:'America/Chicago'}) + ' CDT';
+      var tickers = Object.keys(idx.companies);
+      var grid = document.getElementById('co-grid');
+      grid.innerHTML = '';
+      tickers.forEach(function(ticker) {
+        var co = idx.companies[ticker];
+        var btn = document.createElement('div');
+        btn.className = 'co-btn';
+        btn.id = 'btn-' + ticker;
+        btn.innerHTML = '<div class="co-ticker">' + ticker + '</div><div class="co-name">' + co.name.split(' ').slice(0,2).join(' ') + '</div>';
+        btn.onclick = function() { loadCompany(ticker); };
+        grid.appendChild(btn);
+      });
+      // Auto-load first company
+      if (tickers.length > 0) loadCompany(tickers[0]);
+    })
+    .catch(function(e) {
+      document.getElementById('co-grid').innerHTML = '<div style="grid-column:1/-1;color:#cc0000;padding:20px">Error loading data. Make sure the server is running and scraper has been executed.</div>';
+    });
+}
+
+function loadCompany(ticker) {
+  // Highlight button
+  document.querySelectorAll('.co-btn').forEach(function(b){ b.classList.remove('active'); });
+  var btn = document.getElementById('btn-' + ticker);
+  if (btn) btn.classList.add('active');
+
+  fetch('../data/filings/' + ticker + '.json')
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+      currentTicker = ticker;
+      renderDetail(d);
+    })
+    .catch(function(e) {
+      document.getElementById('detail-panel').className = 'detail show';
+      document.getElementById('d-name').textContent = ticker + ' — Error loading data';
+    });
+}
+
+function renderDetail(d) {
+  var panel = document.getElementById('detail-panel');
+  panel.className = 'detail show';
+
+  document.getElementById('d-name').textContent = d.ticker + ' — ' + d.name;
+  document.getElementById('d-sub').textContent = 'CIK: ' + d.cik + '  |  Data source: SEC EDGAR XBRL API  |  Updated: ' + new Date(d.last_updated).toLocaleDateString();
+  document.getElementById('d-edgar').href = d.edgar_page;
+
+  // Metrics
+  var fin = d.financials || {};
+  var metrics = [
+    { label: 'Annual Revenue', val: fmt(fin.revenue && fin.revenue.value), period: fin.revenue && fin.revenue.period },
+    { label: 'Net Income', val: fmt(fin.net_income && fin.net_income.value), period: fin.net_income && fin.net_income.period, color: fin.net_income && fin.net_income.value > 0 ? 'g' : 'r' },
+    { label: 'Total Assets', val: fmt(fin.total_assets && fin.total_assets.value), period: fin.total_assets && fin.total_assets.period },
+    { label: 'Cash & Equivalents', val: fmt(fin.cash && fin.cash.value), period: fin.cash && fin.cash.period, color: 'g' },
+    { label: 'Long-Term Debt', val: fmt(fin.long_term_debt && fin.long_term_debt.value), period: fin.long_term_debt && fin.long_term_debt.period, color: 'r' },
+    { label: 'Operating Cash Flow', val: fmt(fin.operating_cash_flow && fin.operating_cash_flow.value), period: fin.operating_cash_flow && fin.operating_cash_flow.period, color: fin.operating_cash_flow && fin.operating_cash_flow.value > 0 ? 'g' : 'r' },
+  ];
+
+  var mGrid = document.getElementById('d-metrics');
+  mGrid.innerHTML = metrics.map(function(m) {
+    return '<div class="metric-box"><div class="metric-val ' + (m.color||'') + '">' + (m.val||'—') + '</div><div class="metric-label">' + m.label + '</div><div class="metric-period">' + (m.period ? m.period.slice(0,10) : '') + '</div></div>';
+  }).join('');
+
+  // Insight
+  document.getElementById('d-insight').textContent = INSIGHTS[d.ticker] || 'No insight available for this company.';
+
+  // 10-K table
+  var t10k = document.getElementById('d-10k');
+  while (t10k.rows.length > 1) t10k.deleteRow(1);
+  (d.filings_10k || []).forEach(function(f) {
+    var row = t10k.insertRow();
+    row.innerHTML = '<td>' + f.date + '</td><td>' + (f.date ? f.date.slice(0,4) : '—') + '</td><td style="font-family:monospace;font-size:11px">' + f.accession + '</td><td><a class="filing-link" href="' + f.url + '" target="_blank">View 10-K →</a> &nbsp; <a class="filing-link" href="' + f.edgar_index + '" target="_blank">EDGAR Index →</a></td>';
+  });
+  if (!d.filings_10k || d.filings_10k.length === 0) {
+    var row = t10k.insertRow();
+    row.innerHTML = '<td colspan="4" style="color:#888">No 10-K filings found</td>';
+  }
+
+  // 10-Q table
+  var t10q = document.getElementById('d-10q');
+  while (t10q.rows.length > 1) t10q.deleteRow(1);
+  (d.filings_10q || []).forEach(function(f) {
+    var row = t10q.insertRow();
+    row.innerHTML = '<td>' + f.date + '</td><td style="font-family:monospace;font-size:11px">' + f.accession + '</td><td><a class="filing-link" href="' + f.url + '" target="_blank">View 10-Q →</a> &nbsp; <a class="filing-link" href="' + f.edgar_index + '" target="_blank">EDGAR Index →</a></td>';
+  });
+  if (!d.filings_10q || d.filings_10q.length === 0) {
+    var row = t10q.insertRow();
+    row.innerHTML = '<td colspan="3" style="color:#888">No 10-Q filings found</td>';
+  }
+}
+
+window.onload = loadAll;
+</script>
+
+<script src="darkmode.js"></script>
+<script src="search.js"></script>
+</body>
+</html>

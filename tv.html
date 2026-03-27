@@ -1,0 +1,920 @@
+html = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Belmont — Knowledge Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #0e1a2e;
+  --bg2:         #0a1220;
+  --bg3:         #061018;
+  --row:         #111e30;
+  --row-alt:     #0f1a28;
+  --row-active:  #1a3a6e;
+  --col-left:    #0a1422;
+  --header-bg:   #081018;
+  --accent:      #2563eb;
+  --accent2:     #1d4ed8;
+  --text:        #e0eaf8;
+  --text-dim:    #7a9ab8;
+  --text-muted:  #3a5a78;
+  --gold:        #f59e0b;
+  --green:       #10b981;
+  --red:         #ef4444;
+  --border:      rgba(255,255,255,0.06);
+  --now-line:    #ef4444;
+  --mono:        'Share Tech Mono', monospace;
+  --sans:        'Inter', sans-serif;
+  --cell-w:      180px;
+  --row-h:       52px;
+  --left-w:      140px;
+  --time-h:      32px;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg3);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+}
+
+/* ── TOP BAR ── */
+.top-bar {
+  height: 40px;
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  flex-shrink: 0;
+}
+
+.top-logo {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+
+.top-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
+
+.live-dot {
+  display: inline-block;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  margin-right: 5px;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity:1; box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
+  50%      { opacity:0.7; box-shadow: 0 0 0 4px rgba(16,185,129,0); }
+}
+
+/* ── MAIN LAYOUT ── */
+.main {
+  display: flex;
+  height: calc(100vh - 40px);
+  flex-direction: column;
+}
+
+/* ── PLAYER SECTION (top ~45%) ── */
+.player-section {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  height: 44%;
+  flex-shrink: 0;
+  border-bottom: 2px solid var(--border);
+  background: #000;
+}
+
+.player-wrap {
+  position: relative;
+  background: #000;
+  overflow: hidden;
+}
+
+/* CRT scanlines */
+.player-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 3px,
+    rgba(0,0,0,0.12) 3px, rgba(0,0,0,0.12) 4px
+  );
+  pointer-events: none;
+  z-index: 5;
+}
+
+.player-wrap iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+/* Channel info panel — right of player */
+.now-playing-panel {
+  background: linear-gradient(135deg, #0a1a3a 0%, #061018 100%);
+  border-left: 1px solid var(--border);
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  position: relative;
+}
+
+.now-playing-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--accent);
+}
+
+.np-ch-num {
+  font-family: var(--mono);
+  font-size: 48px;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 4px;
+  text-shadow: 0 0 20px rgba(37,99,235,0.4);
+}
+
+.np-ch-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+  line-height: 1.2;
+}
+
+.np-cat {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 20px;
+}
+
+.np-now-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 4px;
+}
+
+.np-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+.np-time {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 20px;
+}
+
+.np-next-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.np-next-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.np-next-item {
+  font-size: 11px;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 3px 8px;
+  background: rgba(255,255,255,0.03);
+  border-left: 2px solid var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.np-next-item:hover {
+  background: rgba(37,99,235,0.1);
+  border-left-color: var(--accent);
+  color: var(--text);
+}
+
+/* ── GUIDE SECTION ── */
+.guide-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg3);
+}
+
+/* Guide top bar — category filters */
+.guide-topbar {
+  height: 38px;
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 0;
+  overflow-x: auto;
+}
+.guide-topbar::-webkit-scrollbar { display: none; }
+
+.guide-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  padding: 0 16px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.cat-btn {
+  height: 100%;
+  padding: 0 14px;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--border);
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+}
+.cat-btn:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+.cat-btn.active { color: var(--accent); background: rgba(37,99,235,0.08); border-bottom: 2px solid var(--accent); }
+
+/* EPG grid wrapper */
+.epg-wrap {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* Left fixed column — channel numbers/names */
+.epg-left {
+  width: var(--left-w);
+  flex-shrink: 0;
+  background: var(--col-left);
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.epg-left-header {
+  height: var(--time-h);
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  flex-shrink: 0;
+}
+
+.epg-channels {
+  flex: 1;
+  overflow: hidden;
+}
+
+.ch-label {
+  height: var(--row-h);
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.ch-label:hover { background: rgba(255,255,255,0.03); }
+.ch-label.active { background: rgba(37,99,235,0.12); }
+
+.ch-num-label {
+  font-family: var(--mono);
+  font-size: 16px;
+  color: var(--text-dim);
+  min-width: 32px;
+  text-align: right;
+  line-height: 1;
+}
+.ch-label.active .ch-num-label { color: var(--accent); }
+
+.ch-name-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+  letter-spacing: 0.2px;
+}
+.ch-label.active .ch-name-label { color: var(--text-dim); }
+
+/* Right scrollable grid */
+.epg-right {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+}
+.epg-right::-webkit-scrollbar { height: 4px; width: 4px; }
+.epg-right::-webkit-scrollbar-track { background: var(--bg3); }
+.epg-right::-webkit-scrollbar-thumb { background: #1a2a3a; border-radius: 2px; }
+
+/* Time header */
+.time-header {
+  height: var(--time-h);
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  min-width: max-content;
+}
+
+.time-slot {
+  width: var(--cell-w);
+  flex-shrink: 0;
+  padding: 0 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  border-right: 1px solid var(--border);
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+/* Now line */
+.now-marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--now-line);
+  z-index: 25;
+  pointer-events: none;
+}
+.now-marker::before {
+  content: 'NOW';
+  position: absolute;
+  top: 0;
+  left: 4px;
+  font-family: var(--mono);
+  font-size: 8px;
+  color: var(--now-line);
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+/* Grid rows */
+.grid-row {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  height: var(--row-h);
+  min-width: max-content;
+  background: var(--row);
+  transition: background 0.15s;
+}
+.grid-row:nth-child(even) { background: var(--row-alt); }
+.grid-row.active-row { background: rgba(37,99,235,0.06); }
+.grid-row.hidden-row { display: none; }
+
+/* Program cells */
+.prog-cell {
+  width: var(--cell-w);
+  flex-shrink: 0;
+  border-right: 1px solid rgba(255,255,255,0.04);
+  padding: 6px 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.prog-cell:hover { background: rgba(37,99,235,0.15); }
+.prog-cell.now-cell {
+  background: rgba(37,99,235,0.1);
+  border-left: 2px solid var(--accent);
+}
+.prog-cell.now-cell:hover { background: rgba(37,99,235,0.2); }
+
+.prog-title {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+.prog-cell.now-cell .prog-title { color: #fff; }
+
+.prog-dur {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+.prog-cell.now-cell .prog-dur { color: var(--text-dim); }
+
+/* ── BOTTOM BAR ── */
+.bottom-bar {
+  height: 36px;
+  background: #000;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  flex-shrink: 0;
+}
+
+.bb-left {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.bb-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.bb-btn {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  padding: 4px 10px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.15s;
+}
+.bb-btn:hover { color: var(--text); background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); }
+
+.hide-guide-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  padding: 4px 12px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.15s;
+}
+.hide-guide-btn:hover { color: var(--text); border-color: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div class="top-logo">Belmont Knowledge Hub</div>
+  <div class="top-right">
+    <span><span class="live-dot"></span>LIVE</span>
+    <span id="clock-top">--:-- --</span>
+    <button class="hide-guide-btn" onclick="toggleGuide()" id="guide-toggle-btn">&#8597; HIDE GUIDE</button>
+  </div>
+</div>
+
+<div class="main" id="main-layout">
+
+  <!-- PLAYER SECTION -->
+  <div class="player-section" id="player-section">
+    <div class="player-wrap">
+      <iframe id="yt-player"
+        src="https://www.youtube.com/embed?listType=search&list=ClearValue+Tax&autoplay=0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+    </div>
+
+    <!-- NOW PLAYING PANEL -->
+    <div class="now-playing-panel">
+      <div>
+        <div class="np-ch-num" id="np-ch-num">2</div>
+        <div class="np-ch-name" id="np-ch-name">ClearValue Tax</div>
+        <div class="np-cat" id="np-cat">Finance / Tax Strategy</div>
+      </div>
+      <div>
+        <div class="np-now-label">&#9654; Now Playing</div>
+        <div class="np-title" id="np-title">Latest from this channel</div>
+        <div class="np-time" id="np-time-disp">Tuned in</div>
+        <div style="margin-top:16px">
+          <div class="np-next-label">Up Next</div>
+          <div class="np-next-list" id="np-next-list">
+            <div class="np-next-item" onclick="tuneByIdx(1)">CH 4 &mdash; Dr. Timothy Owens Moore</div>
+            <div class="np-next-item" onclick="tuneByIdx(2)">CH 7 &mdash; Tracy Inspired Talks</div>
+            <div class="np-next-item" onclick="tuneByIdx(3)">CH 11 &mdash; Dr. Vanda</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GUIDE SECTION -->
+  <div class="guide-section" id="guide-section">
+
+    <!-- Category filter bar -->
+    <div class="guide-topbar">
+      <div class="guide-label">GUIDE</div>
+      <button class="cat-btn active" onclick="filterCat('all',this)">All Channels</button>
+      <button class="cat-btn" onclick="filterCat('finance',this)">Finance</button>
+      <button class="cat-btn" onclick="filterCat('psychology',this)">Psychology</button>
+      <button class="cat-btn" onclick="filterCat('spirit',this)">Spirit</button>
+      <button class="cat-btn" onclick="filterCat('science',this)">Science</button>
+      <button class="cat-btn" onclick="filterCat('business',this)">Business</button>
+      <button class="cat-btn" onclick="filterCat('history',this)">History</button>
+    </div>
+
+    <div class="epg-wrap">
+      <!-- Left: channel labels -->
+      <div class="epg-left">
+        <div class="epg-left-header">CH</div>
+        <div class="epg-channels" id="epg-channels">
+          <!-- Injected by JS -->
+        </div>
+      </div>
+
+      <!-- Right: scrollable grid -->
+      <div class="epg-right" id="epg-right">
+        <!-- Now marker -->
+        <div class="now-marker" id="now-marker"></div>
+
+        <!-- Time header -->
+        <div class="time-header" id="time-header">
+          <!-- Injected by JS -->
+        </div>
+
+        <!-- Program rows -->
+        <div id="epg-grid">
+          <!-- Injected by JS -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <div class="bottom-bar">
+    <div class="bb-left">
+      <span id="bb-watching">8 channels</span>
+      <span id="bb-now-ch">CH 2 &mdash; ClearValue Tax</span>
+    </div>
+    <div class="bb-controls">
+      <button class="bb-btn" onclick="chStep(-1)">&#9650; CH</button>
+      <button class="bb-btn" onclick="chStep(1)">&#9660; CH</button>
+      <button class="bb-btn" onclick="tuneRandom()">RAND</button>
+      <button class="bb-btn" onclick="addChannelDialog()">+ ADD</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+var CHANNELS = [
+  { ch:2,  name:'ClearValue Tax',          cat:'finance',    handle:'clearvaluetax9382', color:'#2563eb' },
+  { ch:4,  name:'Dr. Timothy Owens Moore', cat:'psychology', handle:'dr.timothyowensmoore8904', color:'#7c3aed' },
+  { ch:7,  name:'Tracy Inspired Talks',    cat:'spirit',     handle:'tracyinspiredtalks', color:'#059669' },
+  { ch:11, name:'Dr. Vanda',               cat:'science',    handle:'drvanda', color:'#0891b2' },
+  { ch:13, name:'Graham Stephan',          cat:'finance',    chanId:'UCa-ckhlttcEt_GSdnX9MI', color:'#2563eb' },
+  { ch:17, name:'Andrei Jikh',             cat:'business',   chanId:'UCF9IOB2TExg3QIBupFtBDxg', color:'#d97706' },
+  { ch:21, name:'OverSimplified',          cat:'history',    chanId:'UCivjAzEdGVhELtURKXICEvQ', color:'#dc2626' },
+  { ch:24, name:'Psych2Go',               cat:'psychology', chanId:'UCWX3yGbODI3HLURLbuNMc8Q', color:'#7c3aed' }
+];
+
+// Add saved channels
+var saved = JSON.parse(localStorage.getItem('belmontTV2') || '[]');
+for (var s = 0; s < saved.length; s++) {
+  CHANNELS.push(saved[s]);
+}
+
+var currentIdx = 0;
+var guideVisible = true;
+var SLOT_W = 180; // px per 30-min slot
+var SLOTS = 12;   // 6 hours of slots
+
+// Program titles (simulated schedule using channel's topic area)
+var PROG_TOPICS = {
+  'finance':    ['Tax Strategy Deep Dive','Roth IRA Explained','How to Invest $1000','Passive Income 2026','Credit Score Fix','Stock Market Today','401k Maximizer','Crypto Tax Guide'],
+  'psychology': ['The Science of Habits','Why We Procrastinate','Social Influence','Reading Body Language','Memory Techniques','Cognitive Biases','Emotional Intelligence','Decision Making'],
+  'spirit':     ['Morning Mindset Reset','The Law of Attraction','Finding Your Purpose','Gratitude Practice','Inner Peace','Manifesting Wealth','Spiritual Awakening','Daily Affirmations'],
+  'science':    ['Cellular Longevity','Gut Microbiome 101','Nootropics Guide','Epigenetics Explained','Hormonal Balance','Inflammation Diet','Sleep Optimization','Brain Chemistry'],
+  'business':   ['Build a Side Hustle','Ecommerce in 2026','Digital Marketing ROI','AI for Entrepreneurs','Scale Your Business','Dropshipping Reality','Brand Building','Affiliate Marketing'],
+  'history':    ['How Empires Fall','The Roman Economy','Cold War Secrets','Ancient Trade Routes','Forgotten Inventions','World War II','The Industrial Revolution','Lost Civilizations']
+};
+
+function getProgs(cat) {
+  var arr = PROG_TOPICS[cat] || PROG_TOPICS['business'];
+  var result = [];
+  for (var i = 0; i < SLOTS; i++) {
+    result.push(arr[i % arr.length]);
+  }
+  return result;
+}
+
+function buildTimeHeader() {
+  var now = new Date();
+  var hdr = document.getElementById('time-header');
+  hdr.innerHTML = '';
+  var base = new Date(now);
+  base.setMinutes(base.getMinutes() < 30 ? 0 : 30);
+  base.setSeconds(0);
+
+  for (var i = 0; i < SLOTS; i++) {
+    var t = new Date(base.getTime() + i * 30 * 60000);
+    var h = t.getHours();
+    var m = t.getMinutes();
+    var ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    var label = h + ':' + (m === 0 ? '00' : '30') + ' ' + ampm;
+    var slot = document.createElement('div');
+    slot.className = 'time-slot';
+    slot.textContent = label;
+    hdr.appendChild(slot);
+  }
+}
+
+function buildGrid() {
+  var chContainer = document.getElementById('epg-channels');
+  var grid = document.getElementById('epg-grid');
+  chContainer.innerHTML = '';
+  grid.innerHTML = '';
+
+  for (var i = 0; i < CHANNELS.length; i++) {
+    var ch = CHANNELS[i];
+
+    // Left label
+    var lbl = document.createElement('div');
+    lbl.className = 'ch-label' + (i === currentIdx ? ' active' : '');
+    lbl.setAttribute('data-idx', i);
+    lbl.setAttribute('data-cat', ch.cat);
+    lbl.innerHTML = '<div class="ch-num-label">' + ch.ch + '</div><div class="ch-name-label">' + ch.name + '</div>';
+    lbl.onclick = (function(idx){ return function(){ tune(idx); }; })(i);
+    chContainer.appendChild(lbl);
+
+    // Grid row
+    var row = document.createElement('div');
+    row.className = 'grid-row' + (i === currentIdx ? ' active-row' : '');
+    row.setAttribute('data-idx', i);
+    row.setAttribute('data-cat', ch.cat);
+
+    var progs = getProgs(ch.cat);
+    for (var j = 0; j < SLOTS; j++) {
+      var cell = document.createElement('div');
+      cell.className = 'prog-cell' + (j === 0 ? ' now-cell' : '');
+      cell.setAttribute('data-idx', i);
+      cell.innerHTML = '<div class="prog-title">' + progs[j] + '</div><div class="prog-dur">' + (j === 0 ? 'Now Playing' : '30 min') + '</div>';
+      cell.onclick = (function(idx, title){ return function(){ tune(idx, title); }; })(i, progs[j]);
+      row.appendChild(cell);
+    }
+
+    grid.appendChild(row);
+  }
+
+  updateNowMarker();
+}
+
+function updateNowMarker() {
+  var now = new Date();
+  var mins = now.getMinutes() % 30;
+  var offset = (mins / 30) * SLOT_W;
+  var marker = document.getElementById('now-marker');
+  marker.style.left = (32 + offset) + 'px'; // 32 = time-h offset
+}
+
+function tune(idx, progTitle) {
+  currentIdx = idx;
+  var ch = CHANNELS[idx];
+
+  // Update all active states
+  var labels = document.querySelectorAll('.ch-label');
+  var rows = document.querySelectorAll('.grid-row');
+  for (var i = 0; i < labels.length; i++) {
+    var isActive = parseInt(labels[i].getAttribute('data-idx')) === idx;
+    labels[i].className = 'ch-label' + (isActive ? ' active' : '');
+    rows[i].className = 'grid-row' + (rows[i].getAttribute('data-cat') && rows[i].classList.contains('hidden-row') ? ' hidden-row' : '') + (isActive ? ' active-row' : '');
+  }
+
+  // Build iframe src
+  var src;
+  if (ch.handle) {
+    src = 'https://www.youtube.com/embed?listType=search&list=' + encodeURIComponent(ch.name) + '&autoplay=0';
+  } else if (ch.
+chanId) {
+    src = 'https://www.youtube.com/embed?list=' + ch.chanId + '&listType=user_uploads&autoplay=0';
+  } else {
+    src = 'https://www.youtube.com/embed?listType=search&list=' + encodeURIComponent(ch.name) + '&autoplay=0';
+  }
+
+  document.getElementById('yt-player').src = src;
+
+  // Update now-playing panel
+  document.getElementById('np-ch-num').textContent = ch.ch;
+  document.getElementById('np-ch-name').textContent = ch.name;
+  document.getElementById('np-cat').textContent = ch.cat.charAt(0).toUpperCase() + ch.cat.slice(1);
+  document.getElementById('np-title').textContent = progTitle || 'Latest from ' + ch.name;
+
+  var now = new Date();
+  var h = now.getHours(); var m = now.getMinutes();
+  var ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  document.getElementById('np-time-disp').textContent = 'Tuned in at ' + h + ':' + (m < 10 ? '0' + m : m) + ' ' + ampm;
+
+  // Update bottom bar
+  document.getElementById('bb-now-ch').textContent = 'CH ' + ch.ch + ' \u2014 ' + ch.name;
+
+  // Update up-next list
+  var nextList = document.getElementById('np-next-list');
+  nextList.innerHTML = '';
+  for (var k = 1; k <= 3; k++) {
+    var nIdx = (idx + k) % CHANNELS.length;
+    var nCh = CHANNELS[nIdx];
+    var div = document.createElement('div');
+    div.className = 'np-next-item';
+    div.textContent = 'CH ' + nCh.ch + ' \u2014 ' + nCh.name;
+    div.onclick = (function(ni){ return function(){ tune(ni); }; })(nIdx);
+    nextList.appendChild(div);
+  }
+
+  // Scroll label into view
+  var activeLbl = document.querySelector('.ch-label.active');
+  if (activeLbl) activeLbl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+
+  // Sync channel list scroll with grid
+  var activeRow = document.querySelector('.grid-row.active-row');
+  if (activeRow) activeRow.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+
+function tuneByIdx(i) { tune(i); }
+
+function chStep(dir) {
+  var visible = getVisible();
+  if (!visible.length) return;
+  var cur = currentIdx;
+  var found = -1;
+  for (var i = 0; i < visible.length; i++) {
+    if (visible[i] === cur) { found = i; break; }
+  }
+  if (found === -1) found = 0;
+  var next = (found + dir + visible.length) % visible.length;
+  tune(visible[next]);
+}
+
+function getVisible() {
+  var v = [];
+  for (var i = 0; i < CHANNELS.length; i++) {
+    var row = document.querySelector('.grid-row[data-idx="' + i + '"]');
+    if (row && !row.classList.contains('hidden-row')) v.push(i);
+  }
+  return v;
+}
+
+function tuneRandom() {
+  var visible = getVisible();
+  if (!visible.length) return;
+  tune(visible[Math.floor(Math.random() * visible.length)]);
+}
+
+function filterCat(cat, btn) {
+  var btns = document.querySelectorAll('.cat-btn');
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+  btn.classList.add('active');
+
+  var rows  = document.querySelectorAll('.grid-row');
+  var lbls  = document.querySelectorAll('.ch-label');
+
+  for (var i = 0; i < rows.length; i++) {
+    var rowCat = rows[i].getAttribute('data-cat');
+    var hide = cat !== 'all' && rowCat !== cat;
+    if (hide) {
+      rows[i].classList.add('hidden-row');
+      lbls[i].classList.add('hidden-row');
+    } else {
+      rows[i].classList.remove('hidden-row');
+      lbls[i].classList.remove('hidden-row');
+    }
+  }
+}
+
+function toggleGuide() {
+  var guide = document.getElementById('guide-section');
+  guideVisible = !guideVisible;
+  guide.style.display = guideVisible ? '' : 'none';
+  document.getElementById('player-section').style.height = guideVisible ? '44%' : '100%';
+  document.getElementById('guide-toggle-btn').textContent = guideVisible ? '\u2195 HIDE GUIDE' : '\u2195 SHOW GUIDE';
+}
+
+function addChannelDialog() {
+  var name   = prompt('Channel name:');
+  if (!name) return;
+  var cat    = prompt('Category (finance / psychology / spirit / science / business / history):') || 'business';
+  var handle = prompt('YouTube handle (without @):') || '';
+  var newCh  = CHANNELS[CHANNELS.length - 1].ch + 1;
+  var entry  = { ch: newCh, name: name, cat: cat, handle: handle, color: '#2563eb' };
+
+  var saved2 = JSON.parse(localStorage.getItem('belmontTV2') || '[]');
+  saved2.push(entry);
+  localStorage.setItem('belmontTV2', JSON.stringify(saved2));
+
+  CHANNELS.push(entry);
+  buildGrid();
+  document.getElementById('bb-watching').textContent = CHANNELS.length + ' channels';
+}
+
+function updateClock() {
+  var now = new Date();
+  var h = now.getHours(); var m = now.getMinutes(); var s = now.getSeconds();
+  var ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  document.getElementById('clock-top').textContent = h + ':' + (m<10?'0'+m:m) + ':' + (s<10?'0'+s:s) + ' ' + ampm;
+  updateNowMarker();
+}
+
+window.onload = function() {
+  buildTimeHeader();
+  buildGrid();
+  document.getElementById('bb-watching').textContent = CHANNELS.length + ' channels';
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // Sync left channel scroll with right grid scroll
+  var epgRight = document.getElementById('epg-right');
+  var epgCh    = document.getElementById('epg-channels');
+  epgRight.addEventListener('scroll', function() {
+    epgCh.scrollTop = epgRight.scrollTop;
+  });
+};
+</script>
+
+<div style="position:fixed;bottom:0;left:0;right:0;z-index:999;background:rgba(0,0,0,0.9);border-top:1px solid rgba(255,255,255,0.08);display:flex;gap:0;overflow-x:auto;height:32px;align-items:center">
+  <a href="plc-capital.html" style="color:#3a5a78;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;padding:0 14px;height:100%;display:flex;align-items:center;border-right:1px solid rgba(255,255,255,0.06);white-space:nowrap" onmouseover="this.style.color='#7a9ab8'" onmouseout="this.style.color='#3a5a78'">&#8592; Operations</a>
+  <a href="command.html" style="color:#3a5a78;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;padding:0 14px;height:100%;display:flex;align-items:center;border-right:1px solid rgba(255,255,255,0.06);white-space:nowrap" onmouseover="this.style.color='#7a9ab8'" onmouseout="this.style.color='#3a5a78'">Command</a>
+  <a href="ledger.html" style="color:#3a5a78;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;padding:0 14px;height:100%;display:flex;align-items:center;border-right:1px solid rgba(255,255,255,0.06);white-space:nowrap" onmouseover="this.style.color='#7a9ab8'" onmouseout="this.style.color='#3a5a78'">Ledger</a>
+  <a href="bets.html" style="color:#3a5a78;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;padding:0 14px;height:100%;display:flex;align-items:center;border-right:1px solid rgba(255,255,255,0.06);white-space:nowrap" onmouseover="this.style.color='#7a9ab8'" onmouseout="this.style.color='#3a5a78'">Bets</a>
+  <a href="predict.html" style="color:#3a5a78;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;padding:0 14px;height:100%;display:flex;align-items:center;border-right:1px solid rgba(255,255,255,0.06);white-space:nowrap" onmouseover="this.style.color='#7a9ab8'" onmouseout="this.style.color='#3a5a78'">Predict</a>
+  <a href="calc.html" style="color:#3a5a78;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;padding:0 14px;height:100%;display:flex;align-items:center;border-right:1px solid rgba(255,255,255,0.06);white-space:nowrap" onmouseover="this.style.color='#7a9ab8'" onmouseout="this.style.color='#3a5a78'">Calc</a>
+  <a href="belmont.html" style="color:#2563eb;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;padding:0 14px;height:100%;display:flex;align-items:center;white-space:nowrap;margin-left:auto;border-left:1px solid rgba(255,255,255,0.06)" onmouseover="this.style.color='#60a5fa'" onmouseout="this.style.color='#2563eb'">Belmont Group &#8599;</a>
+</div>
+</body>
+</html>

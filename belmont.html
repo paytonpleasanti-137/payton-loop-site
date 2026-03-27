@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Belmont Group</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --black:   #0a0a0a;
+  --off-black: #111111;
+  --dark:    #1a1a1a;
+  --rule:    #2a2a2a;
+  --text:    #f0f0f0;
+  --muted:   #888888;
+  --dim:     #555555;
+  --white:   #ffffff;
+  --gold:    #c9a84c;
+  --serif:   'EB Garamond', Georgia, serif;
+  --sans:    'Inter', Arial, sans-serif;
+  --mono:    'Roboto Mono', monospace;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--black);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* NAV */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: rgba(10,10,10,0.96);
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 48px;
+  height: 64px;
+  backdrop-filter: blur(8px);
+}
+
+.nav-logo {
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  color: var(--white);
+  text-decoration: none;
+}
+
+.nav-logo span {
+  display: inline-block;
+  border: 1px solid var(--white);
+  padding: 4px 12px;
+  font-size: 13px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.nav-links {
+  display: flex;
+  gap: 36px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover { color: var(--white); }
+
+.nav-contact {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--muted);
+  text-decoration: none;
+  border: 1px solid var(--dim);
+  padding: 8px 18px;
+  transition: all 0.2s;
+}
+.nav-contact:hover {
+  color: var(--white);
+  border-color: var(--white);
+}
+
+/* HERO */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 48px 80px;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--rule);
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 70% 40%, rgba(30,30,30,0.8) 0%, transparent 60%),
+    linear-gradient(180deg, rgba(10,10,10,0) 40%, rgba(10,10,10,0.95) 100%);
+  z-index: 1;
+}
+
+/* Grid overlay — subtle */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 80px 80px;
+  z-index: 0;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 760px;
+}
+
+.hero-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.hero-eyebrow::before {
+  content: '';
+  display: block;
+  width: 32px;
+  height: 1px;
+  background: var(--gold);
+}
+
+.hero h1 {
+  font-family: var(--serif);
+  font-size: clamp(42px, 6vw, 80px);
+  font-weight: 400;
+  line-height: 1.12;
+  color: var(--white);
+  margin-bottom: 28px;
+  letter-spacing: -0.5px;
+}
+
+.hero-sub {
+  font-size: 15px;
+  font-weight: 300;
+  color: var(--muted);
+  max-width: 480px;
+  line-height: 1.8;
+  margin-bottom: 40px;
+  letter-spacing: 0.3px;
+}
+
+.hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--white);
+  text-decoration: none;
+  border-bottom: 1px solid var(--dim);
+  padding-bottom: 4px;
+  transition: all 0.2s;
+}
+.hero-cta:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+  gap: 18px;
+}
+.hero-cta::after { content: '\2192'; }
+
+/* METRICS STRIP */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid var(--rule);
+}
+
+.metric {
+  padding: 40px 48px;
+  border-right: 1px solid var(--rule);
+}
+.metric:last-child { border-right: none; }
+
+.metric-num {
+  font-family: var(--serif);
+  font-size: 42px;
+  font-weight: 400;
+  color: var(--white);
+  line-height: 1;
+  margin-bottom: 8px;
+  letter-spacing: -1px;
+}
+
+.metric-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+/* SECTION STANDARD */
+.section {
+  padding: 80px 48px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.section-eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 40px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.section-eyebrow::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+}
+
+/* SERVICES */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--rule);
+}
+
+.service-card {
+  background: var(--black);
+  padding: 40px;
+  transition: background 0.2s;
+}
+.service-card:hover { background: var(--off-black); }
+
+.service-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--dim);
+  letter-spacing: 2px;
+  margin-bottom: 24px;
+}
+
+.service-title {
+  font-family: var(--serif);
+  font-size: 24px;
+  font-weight: 400;
+  color: var(--white);
+  margin-bottom: 16px;
+  line-height: 1.3;
+}
+
+.service-desc {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.8;
+  margin-bottom: 24px;
+}
+
+.service-price {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--gold);
+  letter-spacing: 1px;
+  margin-bottom: 20px;
+}
+
+.service-link {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--dim);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+.service-link:hover { color: var(--white); gap: 14px; }
+.service-link::after { content: '\2192'; }
+
+/* ABOUT */
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: start;
+}
+
+.about-headline {
+  font-family: var(--serif);
+  font-size: 36px;
+  font-weight: 400;
+  color: var(--white);
+  line-height: 1.25;
+  letter-spacing: -0.3px;
+}
+
+.about-body {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.9;
+}
+.about-body p { margin-bottom: 20px; }
+.about-body p:last-child { margin-bottom: 0; }
+
+/* PROCESS */
+.process-list {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--rule);
+  margin-top: 0;
+}
+
+.process-step {
+  background: var(--black);
+  padding: 36px 32px;
+}
+
+.process-step-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--dim);
+  margin-bottom: 16px;
+}
+
+.process-step-title {
+  font-family: var(--serif);
+  font-size: 20px;
+  color: var(--white);
+  margin-bottom: 10px;
+  font-weight: 400;
+}
+
+.process-step-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+/* CONTACT */
+.contact-section {
+  padding: 80px 48px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: start;
+}
+
+.contact-headline {
+  font-family: var(--serif);
+  font-size: 42px;
+  font-weight: 400;
+  color: var(--white);
+  line-height: 1.2;
+  letter-spacing: -0.3px;
+  margin-bottom: 20px;
+}
+
+.contact-sub {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.9;
+  margin-bottom: 32px;
+}
+
+.contact-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.contact-item-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--dim);
+  min-width: 80px;
+  padding-top: 2px;
+}
+
+.contact-item-val {
+  font-size: 14px;
+  color: var(--text);
+}
+
+.contact-item-val a {
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: 1px solid var(--dim);
+  transition: border-color 0.2s, color 0.2s;
+}
+.contact-item-val a:hover { color: var(--gold); border-color: var(--gold); }
+
+/* FORM */
+.form-group { margin-bottom: 20px; }
+.form-group label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 8px;
+}
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--rule);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  padding: 10px 0;
+  outline: none;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+}
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus { border-color: var(--white); }
+.form-group input::placeholder,
+.form-group textarea::placeholder { color: var(--dim); }
+.form-group textarea { resize: none; height: 80px; }
+.form-group select { cursor: pointer; }
+.form-group select option { background: #111; color: var(--text); }
+
+.btn-submit {
+  background: var(--white);
+  color: var(--black);
+  border: none;
+  padding: 14px 36px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 8px;
+  width: 100%;
+}
+.btn-submit:hover {
+  background: var(--gold);
+  color: #000;
+}
+
+.form-note {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--dim);
+  margin-top: 12px;
+  letter-spacing: 0.5px;
+}
+
+#form-confirm {
+  display: none;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: #2ecc71;
+  letter-spacing: 1px;
+  margin-top: 16px;
+  padding: 12px;
+  border: 1px solid rgba(46,204,113,0.3);
+}
+
+/* FOOTER */
+footer {
+  padding: 40px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--rule);
+}
+
+.footer-logo {
+  font-family: var(--serif);
+  font-size: 13px;
+  color: var(--dim);
+  letter-spacing: 2px;
+}
+
+.footer-copy {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--dim);
+  letter-spacing: 1px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  nav { padding: 0 20px; }
+  .nav-links, .nav-contact { display: none; }
+  .hero { padding: 0 20px 60px; }
+  .metrics { grid-template-columns: 1fr 1fr; }
+  .metric { padding: 28px 20px; border-right: none; border-bottom: 1px solid var(--rule); }
+  .section { padding: 60px 20px; }
+  .services-grid, .process-list { grid-template-columns: 1fr; }
+  .about-grid, .contact-section { grid-template-columns: 1fr; gap: 40px; }
+  footer { flex-direction: column; gap: 12px; text-align: center; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#"><span>Belmont Group</span></a>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#process">Process</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a class="nav-contact" href="#contact">Inquire</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">AI-Powered Operations</div>
+    <h1>Intelligence<br>Built to Move<br>at Your Speed.</h1>
+    <p class="hero-sub">We build custom tools, automations, and digital infrastructure for businesses that cannot afford to wait. Delivered in 48 hours or less.</p>
+    <a class="hero-cta" href="#services">View Services</a>
+  </div>
+</section>
+
+<!-- METRICS -->
+<div class="metrics">
+  <div class="metric">
+    <div class="metric-num">48h</div>
+    <div class="metric-label">Delivery Guarantee</div>
+  </div>
+  <div class="metric">
+    <div class="metric-num">$0</div>
+    <div class="metric-label">Upfront Until Satisfied</div>
+  </div>
+  <div class="metric">
+    <div class="metric-num">AI</div>
+    <div class="metric-label">Powered Execution</div>
+  </div>
+  <div class="metric">
+    <div class="metric-num">1</div>
+    <div class="metric-label">Point of Contact</div>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<section class="section" id="services">
+  <div class="section-eyebrow">Services</div>
+  <div class="services-grid">
+    <div class="service-card">
+      <div class="service-num">01</div>
+      <div class="service-title">Custom Web Tools &amp; Applications</div>
+      <div class="service-desc">Interactive calculators, operations dashboards, financial trackers, and internal tools. Built to your exact specifications. No templates.</div>
+      <div class="service-price">From $500</div>
+      <a class="service-link" href="#contact">Inquire</a>
+    </div>
+    <div class="service-card">
+      <div class="service-num">02</div>
+      <div class="service-title">AI Automation &amp; Workflow Setup</div>
+      <div class="service-desc">Connect your tools. Automate your repetitive work. Customer service responses, data entry, email workflows — handled by AI so you aren't.</div>
+      <div class="service-price">From $750</div>
+      <a class="service-link" href="#contact">Inquire</a>
+    </div>
+    <div class="service-card">
+      <div class="service-num">03</div>
+      <div class="service-title">Digital Brand Infrastructure</div>
+      <div class="service-desc">Landing pages, service sites, and content systems that look institutional. Built fast, built to convert, built to last.</div>
+      <div class="service-price">From $350</div>
+      <a class="service-link" href="#contact">Inquire</a>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="section" id="about">
+  <div class="section-eyebrow">About the Firm</div>
+  <div class="about-grid">
+    <div class="about-headline">A small operation.<br>An outsized output.</div>
+    <div class="about-body">
+      <p>Belmont Group is an AI-powered operations firm based in Edmond, Oklahoma. We work directly with small business owners, entrepreneurs, and operators who need sophisticated tools built quickly and at a fraction of agency cost.</p>
+      <p>Our edge is simple: we use the same AI infrastructure that powers Fortune 500 operations — applied at the speed and price point that works for you. No account managers. No bloated timelines. Direct communication, direct delivery.</p>
+      <p>Every engagement is handled personally. You talk to the builder. You get the work.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section class="section" id="process">
+  <div class="section-eyebrow">How We Work</div>
+  <div class="process-list">
+    <div class="process-step">
+      <div class="process-step-num">Step 01</div>
+      <div class="process-step-title">Inquiry</div>
+      <div class="process-step-desc">Submit your project details. We respond within 4 hours with a scope and fixed price. No hourly rates.</div>
+    </div>
+    <div class="process-step">
+      <div class="process-step-num">Step 02</div>
+      <div class="process-step-title">Alignment</div>
+      <div class="process-step-desc">One conversation to confirm requirements. No back-and-forth. We ask the right questions once.</div>
+    </div>
+    <div class="process-step">
+      <div class="process-step-num">Step 03</div>
+      <div class="process-step-title">Build</div>
+      <div class="process-step-desc">We build. You wait less than 48 hours. No check-ins unless you want them.</div>
+    </div>
+    <div class="process-step">
+      <div class="process-step-num">Step 04</div>
+      <div class="process-step-title">Delivery</div>
+      <div class="process-step-desc">Live link or packaged files. Revisions included. You pay when you're satisfied.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact-section" id="contact">
+  <div>
+    <div class="section-eyebrow" style="margin-bottom:24px">Contact</div>
+    <div class="contact-headline">Start a<br>Conversation.</div>
+    <p class="contact-sub">Tell us what you need. We'll tell you what it costs and when it's done. No commitments until you're ready.</p>
+    <div class="contact-detail">
+      <div class="contact-item">
+        <div class="contact-item-label">Response</div>
+        <div class="contact-item-val">Within 4 business hours</div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-item-label">Email</div>
+        <div class="contact-item-val"><a href="mailto:hello@belmontgroup.co">hello@belmontgroup.co</a></div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-item-label">Based in</div>
+        <div class="contact-item-val">Edmond, Oklahoma — serving clients nationwide</div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <form onsubmit="submitForm(event)">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="f-name" placeholder="Your name" required>
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="f-email" placeholder="your@email.com" required>
+      </div>
+      <div class="form-group">
+        <label>Service Interest</label>
+        <select id="f-service">
+          <option value="">Select a service</option>
+          <option>Custom Web Tools &amp; Applications</option>
+          <option>AI Automation &amp; Workflow Setup</option>
+          <option>Digital Brand Infrastructure</option>
+          <option>Other / Not Sure Yet</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Project Description</label>
+        <textarea id="f-msg" placeholder="Describe what you need built..."></textarea>
+      </div>
+      <button type="submit" class="btn-submit">Submit Inquiry</button>
+      <div class="form-note">Your information is never shared or sold.</div>
+      <div id="form-confirm">&#10003; Inquiry received. We will respond within 4 hours.</div>
+    </form>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">BELMONT GROUP</div>
+  <div class="footer-copy">&#169; 2026 Belmont Group &nbsp;&mdash;&nbsp; Edmond, Oklahoma &nbsp;&mdash;&nbsp; AI-Powered Digital Operations</div>
+</footer>
+
+<script>
+function submitForm(e) {
+  e.preventDefault();
+  var name    = document.getElementById('f-name').value;
+  var email   = document.getElementById('f-email').value;
+  var service = document.getElementById('f-service').value;
+  var msg     = document.getElementById('f-msg').value;
+  if (!name || !email) return;
+  // Store locally
+  var inquiries = JSON.parse(localStorage.getItem('pl-inquiries') || '[]');
+  inquiries.push({ name: name, email: email, service: service, msg: msg, ts: new Date().toISOString() });
+  localStorage.setItem('pl-inquiries', JSON.stringify(inquiries));
+  document.getElementById('form-confirm').style.display = 'block';
+  e.target.reset();
+}
+
+// Smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+  a.addEventListener('click', function(e) {
+    var target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+});
+</script>
+
+</body>
+</html>

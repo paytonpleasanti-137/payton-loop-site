@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payton Loop — Master Mind Map</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0f;
+    font-family: 'Segoe UI', sans-serif;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+  }
+  canvas { display: block; }
+  #title {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ffffff;
+    font-size: 13px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    opacity: 0.5;
+  }
+  #tooltip {
+    position: fixed;
+    background: rgba(0,0,0,0.9);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.6;
+    max-width: 260px;
+    pointer-events: none;
+    display: none;
+    z-index: 100;
+  }
+</style>
+</head>
+<body>
+<div id="title">Payton Loop — Revenue Map</div>
+<div id="tooltip"></div>
+<canvas id="c"></canvas>
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const cx = canvas.width / 2;
+const cy = canvas.height / 2;
+
+const nodes = [
+  {
+    id: 'center',
+    label: 'PAYTON\nLOOP',
+    x: cx, y: cy,
+    r: 52,
+    color: '#f5c542',
+    textColor: '#000',
+    info: '🎯 Mission: Replace $69,850/year\nTarget: $5,821/month\nStatus: Day 1 — $0 earned',
+    children: ['shorts','binaural','multilingual','product','service','blog']
+  },
+  {
+    id: 'shorts',
+    label: '📺 SHORTS\n& TIKTOK',
+    angle: -90, dist: 200, r: 44,
+    color: '#ff4757',
+    textColor: '#fff',
+    info: '📺 YouTube Shorts + TikTok\nNiche: Financial Infotainment\nStatus: ACTIVE — 3 videos live\nViews: 306 Day 1\n18 scripts ready to post',
+    children: ['script','thumb','trending']
+  },
+  {
+    id: 'binaural',
+    label: '🧠 BINAURAL\nBEATS',
+    angle: -30, dist: 200, r: 44,
+    color: '#7c4dff',
+    textColor: '#fff',
+    info: '🧠 New Channel — Neurogenesis\nModel: Tim Janis (620M views, 67K subs)\nFormat: 3-10 hour ambient streams\n40Hz Gamma already generated ✅\nRevenue: AdSense per HOUR watched\nPotential: 10s of millions of views',
+    children: ['audio','visuals']
+  },
+  {
+    id: 'multilingual',
+    label: '🌍 MULTI\nLANGUAGE',
+    angle: 30, dist: 200, r: 44,
+    color: '#00bcd4',
+    textColor: '#fff',
+    info: '🌍 MrBeast Model\nChannels: ES, PT, FR, HI\nReach: 900M+ new viewers\nI translate every script instantly\nMath: 1 video × 4 langs = 4x revenue\nStatus: Not started yet',
+    children: []
+  },
+  {
+    id: 'product',
+    label: '💰 $27\nGUIDE',
+    angle: 90, dist: 200, r: 44,
+    color: '#00e676',
+    textColor: '#000',
+    info: '💰 AI Money Playbook — $27\n9 chapters written ✅\nNeeds: Gumroad signup (free)\nTake-home: $24.30/sale\nConverts at 30-50 videos\nLink goes in EVERY description',
+    children: []
+  },
+  {
+    id: 'service',
+    label: '🛠️ SETUP\nSERVICE',
+    angle: 150, dist: 200, r: 44,
+    color: '#ff9800',
+    textColor: '#fff',
+    info: '🛠️ OpenClaw Setup Service\nPrice: $119/setup\nReal case: $100K in 3 days\nPlatform: Fiverr\n5 setups = $595 = break even\nFastest path to first $100',
+    children: []
+  },
+  {
+    id: 'blog',
+    label: '📝 AI\nBLOG',
+    angle: 210, dist: 200, r: 44,
+    color: '#26a69a',
+    textColor: '#fff',
+    info: '📝 AI Blog — SEO Slow Burn\n4 posts written and ready ✅\nPlatform: bearblog.dev (free)\nTimeline: 3-6 months for traffic\nI auto-publish daily once API key set\nAffiliate links in every post',
+    children: []
+  },
+  // Children of SHORTS
+  {
+    id: 'script',
+    label: '✍️ Scripts',
+    angle: -120, dist: 340, r: 30,
+    color: '#ff6b81',
+    textColor: '#fff',
+    info: '✍️ Scripts\nBatch 2: 10 ready\nBatch 3: 5 ready\nBatch 4: 3 trending NOW\nNext: Hidden Tax $1,000 video',
+    children: []
+  },
+  {
+    id: 'thumb',
+    label: '🎨 Thumbs',
+    angle: -90, dist: 340, r: 30,
+    color: '#ff6b81',
+    textColor: '#fff',
+    info: '🎨 Thumbnails\nAll Batch 2 generated ✅\nTool: nano-banana-pro (Gemini)\nGenerated automatically by JARVIS',
+    children: []
+  },
+  {
+    id: 'trending',
+    label: '🔥 Trends',
+    angle: -60, dist: 340, r: 30,
+    color: '#ff6b81',
+    textColor: '#fff',
+    info: '🔥 Trend Research\nJARVIS browses live news daily\nToday: Tariffs = $1,000/household\nScript written and ready to post',
+    children: []
+  },
+  // Children of BINAURAL
+  {
+    id: 'audio',
+    label: '🎵 Audio',
+    angle: -15, dist: 340, r: 30,
+    color: '#9c77ff',
+    textColor: '#fff',
+    info: '🎵 Binaural Audio\n40Hz Gamma GENERATED ✅\nTool: Python math (pure sine waves)\nFormats: Delta/Theta/Alpha/Beta/Gamma\nCost: $0',
+    children: []
+  },
+  {
+    id: 'visuals',
+    label: '✨ Visuals',
+    angle: -45, dist: 340, r: 30,
+    color: '#9c77ff',
+    textColor: '#fff',
+    info: '✨ AI Visuals\nTool: nano-banana-pro\nStyle: Cosmic fractals, neural nets\nReference: 56M view thumbnails\nStatus: Ready to generate',
+    children: []
+  },
+];
+
+// Calculate x,y for non-center nodes
+nodes.forEach(n => {
+  if (n.angle !== undefined) {
+    const rad = n.angle * Math.PI / 180;
+    n.x = cx + Math.cos(rad) * n.dist;
+    n.y = cy + Math.sin(rad) * n.dist;
+  }
+});
+
+// Draw connections
+function drawConnections() {
+  nodes.forEach(node => {
+    if (node.children) {
+      node.children.forEach(childId => {
+        const child = nodes.find(n => n.id === childId);
+        if (child) {
+          const gradient = ctx.createLinearGradient(node.x, node.y, child.x, child.y);
+          gradient.addColorStop(0, node.color + '66');
+          gradient.addColorStop(1, child.color + '33');
+          ctx.beginPath();
+          ctx.moveTo(node.x, node.y);
+          ctx.lineTo(child.x, child.y);
+          ctx.strokeStyle = gradient;
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+        }
+      });
+    }
+  });
+}
+
+let hovered = null;
+let animFrame = 0;
+
+function draw() {
+  animFrame++;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Subtle grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.02)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < canvas.width; x += 60) {
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke();
+  }
+  for (let y = 0; y < canvas.height; y += 60) {
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke();
+  }
+
+  drawConnections();
+
+  nodes.forEach(node => {
+    const isHovered = hovered === node.id;
+    const pulse = Math.sin(animFrame * 0.03) * 3;
+    const r = node.r + (isHovered ? 6 : 0) + (node.id === 'center' ? pulse : 0);
+
+    // Glow
+    const glow = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, r * 2);
+    glow.addColorStop(0, node.color + '44');
+    glow.addColorStop(1, 'transparent');
+    ctx.beginPath();
+    ctx.arc(node.x, node.y, r * 2, 0, Math.PI * 2);
+    ctx.fillStyle = glow;
+    ctx.fill();
+
+    // Circle
+    ctx.beginPath();
+    ctx.arc(node.x, node.y, r, 0, Math.PI * 2);
+    ctx.fillStyle = node.color;
+    ctx.fill();
+
+    if (isHovered) {
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    // Label
+    const lines = node.label.split('\n');
+    ctx.fillStyle = node.textColor;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const fontSize = node.id === 'center' ? 13 : 11;
+    ctx.font = `bold ${fontSize}px Segoe UI`;
+    const lineH = fontSize + 3;
+    const startY = node.y - ((lines.length - 1) * lineH) / 2;
+    lines.forEach((line, i) => {
+      ctx.fillText(line, node.x, startY + i * lineH);
+    });
+  });
+
+  requestAnimationFrame(draw);
+}
+
+// Mouse interaction
+canvas.addEventListener('mousemove', e => {
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  const tooltip = document.getElementById('tooltip');
+
+  hovered = null;
+  for (const node of nodes) {
+    const dx = mx - node.x;
+    const dy = my - node.y;
+    if (Math.sqrt(dx*dx + dy*dy) < node.r + 10) {
+      hovered = node.id;
+      tooltip.style.display = 'block';
+      tooltip.style.left = (e.clientX + 16) + 'px';
+      tooltip.style.top = (e.clientY - 10) + 'px';
+      tooltip.innerHTML = node.info.replace(/\n/g, '<br>');
+      canvas.style.cursor = 'pointer';
+      return;
+    }
+  }
+  tooltip.style.display = 'none';
+  canvas.style.cursor = 'default';
+});
+
+canvas.addEventListener('mouseleave', () => {
+  document.getElementById('tooltip').style.display = 'none';
+  hovered = null;
+});
+
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+
+draw();
+</script>
+</body>
+</html>

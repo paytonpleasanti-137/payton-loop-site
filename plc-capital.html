@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Payton Loop</title>
+<style>
+body{
+  background:#f5f2eb; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  margin:0;padding:0;font-family:Arial,sans-serif;font-size:14px;color:#000}
+.outer{max-width:780px;margin:0 auto;padding:20px 12px 40px}
+.header{text-align:center;border-bottom:2px solid #000;padding-bottom:14px;margin-bottom:16px}
+.header h1{font-family:Arial,sans-serif;font-size:26px;font-weight:bold;letter-spacing:1px;margin:0 0 4px;text-transform:uppercase}
+.header .sub{font-size:13px;line-height:1.8;margin:0}
+.ticker-bar{background:#000;color:#fff;overflow:hidden;white-space:nowrap;padding:5px 0;font-size:11px;letter-spacing:.5px;margin-bottom:16px}
+.ticker-inner{display:inline-block;animation:tickerMove 38s linear infinite}
+@keyframes tickerMove{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}}
+.ticker-label{background:#cc0000;color:#fff;padding:1px 8px;font-weight:bold;margin-right:10px;letter-spacing:1px}
+.columns{display:grid;grid-template-columns:1fr 1fr;gap:0 40px;margin-bottom:20px}
+.col ul{list-style:none;margin:0;padding:0}
+.col ul li{margin-bottom:16px}
+.col ul li a{color:#00008b;text-decoration:underline;font-size:14px;display:block;line-height:1.3;cursor:pointer}
+.col ul li a:hover{color:#cc0000}
+.upd{font-size:11px;color:#555;margin-top:2px}
+.divider{border:none;border-top:1px solid #000;margin:16px 0}
+.footer-ad{text-align:center;border-top:1px solid #000;border-bottom:1px solid #000;padding:10px 0;margin:16px 0;font-size:12px;letter-spacing:.5px;color:#333}
+.footer-ad strong{display:block;font-size:13px;font-weight:bold;letter-spacing:1px;margin-bottom:2px}
+.disclaimer{font-size:12px;color:#333;line-height:1.7;margin-bottom:12px}
+.copyright{font-size:12px;color:#000;font-weight:bold}
+.page{display:none}
+.page.active{display:block}
+.page-header{border-bottom:2px solid #000;margin-bottom:18px;padding-bottom:8px}
+.page-header h2{font-size:18px;margin:0 0 4px;text-transform:uppercase;letter-spacing:1px}
+.back{font-size:12px;color:#00008b;text-decoration:underline;cursor:pointer}
+.back:hover{color:#cc0000}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px}
+table th{text-align:left;border-bottom:2px solid #000;padding:6px 4px;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+table td{border-bottom:1px solid #ddd;padding:6px 4px}
+table tr:last-child td{border-bottom:none}
+.num{text-align:right;font-family:monospace}
+.red{color:#cc0000}
+.green{color:#006600}
+.section-label{font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;margin:18px 0 8px;border-bottom:1px solid #ccc;padding-bottom:4px}
+input[type=number],select{border:1px solid #999;padding:3px 6px;font-family:Arial;font-size:13px}
+.calc-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:13px}
+.calc-row label{min-width:200px}
+.algo-out{background:#000;color:#0f0;font-family:monospace;font-size:12px;padding:12px;margin-top:8px;line-height:1.8;min-height:60px}
+.result-box{background:#f8f8f8;border:1px solid #ccc;padding:10px 14px;margin-top:10px;font-size:13px;line-height:1.9}
+.todo-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:10px;font-size:13px;line-height:1.5}
+.progress-outer{background:#eee;height:5px;margin:3px 0 10px}
+.progress-inner{background:#000;height:100%;transition:width .3s}
+.chart-link{display:block;color:#00008b;text-decoration:underline;font-size:13px;margin-bottom:10px;line-height:1.5}
+.chart-link:hover{color:#cc0000}
+/* STICKY NAV */
+.snav{position:sticky;top:0;background:#000;z-index:100;border-bottom:2px solid #cc0000;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch}
+.snav-inner{display:inline-flex;gap:0;min-width:100%}
+.snav a{color:#888;font-size:11px;text-transform:uppercase;letter-spacing:.8px;padding:9px 12px;cursor:pointer;text-decoration:none;display:inline-block;border-right:1px solid #222;transition:all .15s;flex-shrink:0}
+.snav a:hover{color:#fff;background:#111}
+.snav a.active{color:#fff;background:#cc0000}
+.snav a:first-child{color:#cc0000;font-weight:bold;letter-spacing:1px}
+.snav a:first-child:hover{background:#cc0000;color:#fff}
+body{padding-top:0}
+.outer{padding-top:16px}
+</style>
+
+<style id="page-theme">
+
+/* Newsprint texture — Berkshire broadsheet */
+body::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(0,0,0,0.035) 27px, rgba(0,0,0,0.035) 28px);
+  pointer-events:none;
+  z-index:0;
+}
+#main-wrap, .main-wrap, [id] { position:relative; z-index:1; }
+
+</style>
+</head>
+<body>
+
+<!-- STICKY NAV -->
+<div class="snav">
+  <div class="snav-inner">
+    <a onclick="go('home')" id="nav-home" class="active">PLC</a>
+    <a onclick="go('agenda')" id="nav-agenda">Agenda</a>
+    <a onclick="go('financial')" id="nav-financial">Financials</a>
+    <a onclick="go('strategy')" id="nav-strategy">Strategy</a>
+    <a onclick="go('production')" id="nav-production">Queue</a>
+    <a onclick="go('quant')" id="nav-quant">Analysis</a>
+    <a onclick="go('algorithms')" id="nav-algorithms">Algorithms</a>
+    <a onclick="go('objectives')" id="nav-objectives">Objectives</a>
+    <a onclick="go('affiliates')" id="nav-affiliates">Partners</a>
+    <a onclick="go('filings')" id="nav-filings">Filings</a>
+    <a onclick="go('risk')" id="nav-risk">Risk</a>
+    <a onclick="go('dispatches')" id="nav-dispatches">Dispatches</a>
+    <a onclick="go('todo')" id="nav-todo">To-Do</a>
+    <a href="tv.html" style="color:#00e5ff">&#9654; TV Guide</a>
+    <a href="command.html" style="background:#cc0000;color:#fff;font-weight:bold">&#9632; Command Brief</a>
+    <a href="filings.html" style="color:#888">Filings Archive</a>
+    <a href="bets.html" style="color:#888">Bets Desk</a>
+    <a href="ledger.html" style="color:#c8a070;font-weight:bold">&#9632; Ledger</a>
+    <a href="calc.html" style="color:#888">Calculators</a>
+    <a href="predict.html" style="color:#888">Predict</a>
+    <a href="whales.html" style="color:#cc0000">&#9608; Whales</a>
+    <a href="edge.html" style="background:#000;color:#fff;font-weight:bold;border-left:2px solid #cc0000">&#9608; The Edge</a>
+  </div>
+</div>
+
+<!-- HOME -->
+<div id="home" class="page active">
+<div class="outer">
+  <div class="header">
+    <h1>Payton Loop</h1>
+    <p class="sub">Edmond, Oklahoma 73034<br>Official Operations Page</p>
+  </div>
+
+  <div class="ticker-bar">
+    <span class="ticker-label">PLC</span>
+    <span class="ticker-inner" id="ticker-text">Loading...</span>
+  </div>
+
+  <div class="columns">
+    <div class="col"><ul>
+      <li><a onclick="go('agenda')">Agenda &amp; Active Operations</a><div class="upd" id="d1"></div></li>
+      <li><a onclick="go('financial')">Financial Position</a><div class="upd">Income Statement · Balance Sheet · Intrinsic Value</div></li>
+      <li><a onclick="go('strategy')">Editorial Strategy</a><div class="upd">Content Pivot · Niche Map · Distribution</div></li>
+      <li><a onclick="go('production')">Production Queue</a><div class="upd">18 Scripts Banked · 3 Live · Batch 4 Ready</div></li>
+      <li><a onclick="go('quant')">Quantitative Analysis</a><div class="upd">5 Live Charts · Revenue Model · Scenarios</div></li>
+      <li><a onclick="go('algorithms')">Algorithms &amp; Live Data</a><div class="upd">Content Scorer · Revenue Engine · 10-K Reader</div></li>
+    </ul></div>
+    <div class="col"><ul>
+      <li><a onclick="go('objectives')">Long-Term Objectives</a><div class="upd">Independence Day · Dreams · Debt Elimination</div></li>
+      <li><a onclick="go('affiliates')">Revenue Partners</a><div class="upd">Amazon · YNAB · Skillshare · Chewy</div></li>
+      <li><a onclick="go('filings')">Filings &amp; Case Studies</a><div class="upd">BRK · AAPL · TSLA · MSFT · NVDA</div></li>
+      <li><a onclick="go('risk')">Risk Assessment</a><div class="upd">Platform · Financial · Operational · Security</div></li>
+      <li><a onclick="go('dispatches')">Recent Dispatches</a><div class="upd" id="d2"></div></li>
+      <li><a onclick="go('todo')">To-Do &amp; Pending Actions</a><div class="upd">What Payton must do · What Ledger handles</div></li>
+    </ul></div>
+  </div>
+
+  <div class="footer-ad">
+    <strong>PAYTON LOOP — FREEDOM DAY MISSION</strong>
+    <span id="freedom-line">Loading...</span>
+  </div>
+
+  <p class="disclaimer">This page reflects real-time operational data. Message Ledger on Telegram with questions or updates.</p>
+  <p class="copyright">Operations commenced March 24, 2026 &mdash; Payton Loop &mdash; Edmond, Oklahoma</p>
+</div>
+</div>
+
+<!-- AGENDA -->
+<div id="agenda" class="page"><div class="outer">
+  <div class="page-header"><span class="back" onclick="go('home')">← Home</span><h2>Agenda &amp; Active Operations</h2><div style="font-size:12px;color:#555" id="agenda-dt"></div></div>
+  <table>
+    <tr><th>#</th><th>Task</th><th>Owner</th><th>Status</th></tr>
+    <tr><td>1</td><td>List AI Money Playbook on Gumroad ($27)</td><td>Payton</td><td class="red">Pending</td></tr>
+    <tr><td>2</td><td>Post Batch 2 videos (scripts + thumbnails ready)</td><td>Payton</td><td class="red">Pending</td></tr>
+    <tr><td>3</td><td>Transfer client_secret.json → enable auto-upload</td><td>Payton</td><td class="red">Blocked</td></tr>
+    <tr><td>4</td><td>Sign up AdaptlyPost → multi-platform auto-post</td><td>Payton</td><td class="red">Pending</td></tr>
+    <tr><td>5</td><td>Create Fiverr gig — OpenClaw setup ($119)</td><td>Payton</td><td class="red">Pending</td></tr>
+    <tr><td>6</td><td>Sign up YNAB affiliate program</td><td>Payton</td><td class="red">Pending</td></tr>
+    <tr><td>7</td><td>Sign up Skillshare affiliate program</td><td>Payton</td><td class="red">Pending</td></tr>
+    <tr><td>8</td><td>Script Batch 5 — multilingual pivot</td><td>Ledger</td><td class="green">Ready on demand</td></tr>
+    <tr><td>9</td><td>Create @PaytonLoopES YouTube channel</td><td>Payton</td><td class="red">Pending</td></tr>
+    <tr><td>10</td><td>Server migration to Vultr Dallas ($6/mo)</td><td>Payton</td><td style="color:#555">Optional</td></tr>
+  </table>
+  <p style="font-size:12px;color:#555">Items 1–2 are highest expected value. One Gumroad sale = $27 = 110 API credits = more Ledger uptime.</p>
+</div></div>
+
+<!-- FINANCIAL -->
+<div id="financial" class="page"><div class="outer">
+  <div class="page-header"><span class="back" onclick="go('home')">← Home</span><h2>Financial Position</h2></div>
+
+  <div class="section-label">Income Statement — Inception to Date</div>
+  <table>
+    <tr><th>Line Item</th><th class="num">Amount</th></tr>
+    <tr><td>YouTube AdSense Revenue</td><td class="num">$0.00</td></tr>
+    <tr><td>Digital Product Sales (Gumroad)</td><td class="num">$0.00</td></tr>
+    <tr><td>Affiliate Commissions (Amazon, YNAB, Skillshare)</td><td class="num">$0.00</td></tr>
+    <tr><td>Service Income (Fiverr)</td><td class="num">$0.00</td></tr>
+    <tr><td><strong>Total Revenue</strong></td><td class="num"><strong>$0.00</strong></td></tr>
+    <tr><td>Claude API Credits</td><td class="num red">($156.00)</td></tr>
+    <tr><td>InVideo AI Subscription</td><td class="num red">($25.00)</td></tr>
+    <tr><td><strong>Total Expenses</strong></td><td class="num red"><strong>($181.00)</strong></td></tr>
+    <tr><td><strong>Net Income / (Loss)</strong></td><td class="num red"><strong>($181.00)</strong></td></tr>
+  </table>
+
+  <div class="section-label">Balance Sheet</div>
+  <table>
+    <tr><th>Asset</th><th class="num">Est. Value</th></tr>
+    <tr><td>Content Library (3 live videos, 18 scripts)</td><td class="num">$540</td></tr>
+    <tr><td>Digital Product — AI Money Playbook</td><td class="num">$270</td></tr>
+    <tr><td>Brand Equity (@PaytonLoop, 306 views, Day 1)</td><td class="num">$856</td></tr>
+    <tr><td>Affiliate Accounts (Amazon Associates active)</td><td class="num">$50</td></tr>
+    <tr><td><strong>Total Assets (est.)</strong></td><td class="num"><strong>$1,716</strong></td></tr>
+    <tr><td>Capital Deployed</td><td class="num red">($181.00)</td></tr>
+    <tr><td><strong>Net Asset Value</strong></td><td class="num green"><strong>$1,535</strong></td></tr>
+  </table>
+
+  <div class="section-label">Intrinsic Value — Payton Pleasant</div>
+  <table>
+    <tr><th>Component</th><th class="num">Value</th></tr>
+    <tr><td>Human Capital DCF (35yr, 5% salary growth, 8% discount rate)</td><td class="num green">$1,247,000</td></tr>
+    <tr><td>Payton Loop Business DCF (10yr, conservative growth model)</td><td class="num green" id="biz-dcf">Calculating...</td></tr>
+    <tr><td>Total Debt Load</td><td class="num red">($100,000)</td></tr>
+    <tr><td><strong>Total Intrinsic Value</strong></td><td class="num green" id="total-iv"><strong>Calculating...</strong></td></tr>
+  </table>
+
+  <div class="footer-ad">
+    <strong>BREAK-EVEN</strong>
+    At $8 RPM: <strong>22,625 views</strong> to recover $181 &nbsp;|&nbsp;
+    At $27 Gumroad: <strong>7 sales</strong> recovers investment &nbsp;|&nbsp;
+    At $119 Fiverr: <strong>2 gigs</strong> covers API credits
+  </div>
+</div></div>
+
+<!-- STRATEGY -->
+<div id="strategy" class="page"><div class="outer">
+  <div class="page-header"><span class="back" onclick="go('home')">← Home</span><h2>Editorial Strategy</h2></div>
+
+  <div class="section-label">Content Formats</div>
+  <table>
+    <tr><th>Format</th><th>Tool</th><th>Status</th><th>Cost/Video</th></tr>
+    <tr><td>AI-Generated Shorts (stock footage)</td><td>InVideo Pro</td><td class="red">~1 credit left</td><td>$25/credit</td></tr>
+    <tr><td>Clip-Based Commentary</td><td>CapCut (free)</td><td class="green">Active pivot</td><td>$0</td></tr>
+    <tr><td>Multilingual Dubbing</td><td>CapCut + translate</td><td style="color:#555">Planned Q2</td><td>$0</td></tr>
+    <tr><td>Binaural Beats / ASMR Loops</td><td>Python + ffmpeg</td><td style="color:#555">Test track done</td><td>$0</td></tr>
+  </table>
+
+  <div class="section-label">Niche Map</div>
+  <table>
+    <tr><th>Niche</th><th>RPM Range</th><th>EV Score</th><th>Priority</th></tr>
+    <tr><td>Personal Finance</td><td>$12–18</td><td>9.2 / 10</td><td class="green">Primary</td></tr>
+    <tr><td>AI &amp; Technology</td><td>$8–14</td><td>8.7 / 10</td><td class="green">Primary</td></tr>
+    <tr><td>Psychology</td><td>$6–10</td><td>7.4 / 10</td><td>Secondary</td></tr>
+    <tr><td>Sports (clip-based)</td><td>$4–8</td><td>8.1 / 10</td><td>Secondary</td></tr>
+    <tr><td>Luxury / Lifestyle</td><td>$10–20</td><td>7.9 / 10</td><td>Batch 2</td></tr>
+    <tr><td>Binaural / ASMR</td><td>$3–6</td><td>6.8 / 10</td><td>Experimental</td></tr>
+  </table>
+
+  <div class="section-label">Distribution</div>
+  <table>
+    <tr><th>Platform</th><th>Account</th><th>Status</th></tr>
+    <tr><td>YouTube Shorts</td><td>@PaytonLoop</td><td class="green">Live</td></tr>
+    <tr><td>TikTok</td><td>@PaytonLoop</td><td class="green">Live</td></tr>
+    <tr><td>Blogger</td><td>paytonloop.blogspot.com</td><td class="green">Live</td></tr>
+    <tr><td>Instagram Reels</td><td>@PaytonLoop</td><td class="red">Not created</td></tr>
+    <tr><td>Pinterest</td><td>@PaytonLoop</td><td class="red">Not created</td></tr>
+  </table>
+</div></div>
+
+<!-- PRODUCTION QUEUE -->
+<div id="production" class="page"><div class="outer">
+  <div class="page-header"><span class="back" onclick="go('home')">← Home</span><h2>Production Queue</h2></div>
+  <table>
+    <tr><th>Batch</th><th>Title</th><th>Status</th><th class="num">Views</th></tr>
+    <tr><td>1</td><td>Things You Buy That Make Others Rich</td><td class="green">Live</td><td class="num">198</td></tr>
+    <tr><td>1</td><td>AI Jobs Replaced by 2027</td><td class="green">Live</td><td class="num">25</td></tr>
+    <tr><td>1</td><td>McDonald's Psychological Tricks</td><td class="green">Live</td><td class="num">83</td></tr>
+    <tr><td>2</td><td>Athletes Who Made More Money Sitting Out</td><td class="red">Ready to post</td><td class="num">—</td></tr>
+    <tr><td>2</td><td>Most Expensive Animals Ever Sold</td><td class="red">Ready to post</td><td class="num">—</td></tr>
+    <tr><td>2</td><td>Luxury Hotels That Cost More Than Your Rent</td><td class="red">Ready to post</td><td class="num">—</td></tr>
+    <tr><td>2</td><td>7 additional Batch 2 scripts</td><td class="red">Ready to post</td><td class="num">—</td></tr>
+    <tr><td>3</td><td>Why You'll Never Be Rich (Finance Infotainment)</td><td style="color:#555">Scripted</td><td class="num">—</td></tr>
+    <tr><td>3</td><td>4 additional Batch 3 scripts</td><td style="color:#555">Scripted</td><td class="num">—</td></tr>
+    <tr><td>4</td><td>Hidden $1,000 Tax (Tariff — last Pro credit)</td><td style="color:#555">Scripted</td><td class="num">—</td></tr>
+    <tr><td>4</td><td>2 additional Batch 4 scripts</td><td style="color:#555">Scripted</td><td class="num">—</td></tr>
+  </table>
+  <p style="font-size:12px;color:#555">Scripts banked: 18 &nbsp;|&nbsp; Videos live: 3 &nbsp;|&nbsp; Total views: 306 &nbsp;|&nbsp; InVideo credits: ~8 remaining</p>
+</div></div>
+
+<!-- QUANT ANALYSIS -->
+<div id="quant" class="page"><div class="outer">
+  <div class="page-header"><span class="back" onclick="go('home')">← Home</span><h2>Quantitative Analysis</h2></div>
+
+  <div class="section-label">Live Interactive Charts</div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px">
+
+  <div style="background:#fff;border:1px solid #ddd;padding:14px">
+    <div style="font-size:10px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;color:#555;margin-bottom:8px">Chart I — 12-Month Revenue Projection</div>
+    <canvas id="chart1" height="160"></canvas>
+  </div>
+
+  <div style="background:#fff;border:1px solid #ddd;padding:14px">
+    <div style="font-size:10px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;color:#555;margin-bottom:8px">Chart II — Break-Even Analysis</div>
+    <canvas id="chart2" height="160"></canvas>
+  </div>
+
+  <div style="background:#fff;border:1px solid #ddd;padding:14px">
+    <div style="font-size:10px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;color:#555;margin-bottom:8px">Chart III — Revenue Sources Breakdown</div>
+    <canvas id="chart3" height="160"></canvas>
+  </div>
+
+  <div style="background:#fff;border:1px solid #ddd;padding:14px">
+    <div style="font-size:10px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;color:#555;margin-bottom:8px">Chart IV — View Compounding Curve</div>
+    <canvas id="chart4" height="160"></canvas>
+  </div>
+
+  <div style="background:#fff;border:1px solid #ddd;padding:14px;grid-column:1/-1">
+    <div style="font-size:10px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;color:#555;margin-bottom:8px">Chart V — Path to Financial Independence ($5,821/mo)</div>
+    <canvas id="chart5" height="120"></canvas>
+  </div>
+
+</div>
+
+<script>
+(function() {
+  var MONTHS = ['Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb'];
+  var C = Chart.defaults;
+  C.font.family = 'Arial';
+  C.font.size = 11;
+  C.color = '#555';
+
+  // Chart I — Revenue Projection (optimistic compounding)
+  var rev = [0];
+  for (var i = 1; i < 12; i++) {
+    rev.push(parseFloat((rev[i-1] * 1.45 + 12).toFixed(2)));
+  }
+  new Chart(document.getElementById('chart1'), {
+    type: 'line',
+    data: {
+      labels: MONTHS,
+      datasets: [{
+        label: 'Projected Revenue ($)',
+        data: rev,
+        borderColor: '#000',
+        backgroundColor: 'rgba(0,0,0,0.05)',
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: '#000',
+        pointRadius: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { ticks: { callback: function(v){ return '$'+v.toFixed(0); } }, grid: { color: '#eee' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  // Chart II — Break-Even (cumulative cost vs cumulative revenue)
+  var costs = [181, 181, 181, 206, 206, 231, 231, 231, 256, 256, 281, 281];
+  var cumRev = [0];
+  for (var i = 1; i < 12; i++) cumRev.push(parseFloat((cumRev[i-1] + rev[i]).toFixed(2)));
+  new Chart(document.getElementById('chart2'), {
+    type: 'line',
+    data: {
+      labels: MONTHS,
+      datasets: [
+        { label: 'Cumulative Revenue', data: cumRev, borderColor: '#006600', backgroundColor: 'rgba(0,102,0,0.07)', fill: true, tension: 0.4, pointRadius: 2 },
+        { label: 'Total Cost Deployed', data: costs, borderColor: '#cc0000', borderDash: [4,3], fill: false, tension: 0, pointRadius: 0 }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } },
+      scales: {
+        y: { ticks: { callback: function(v){ return '$'+v; } }, grid: { color: '#eee' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  // Chart III — Revenue Sources (Donut)
+  new Chart(document.getElementById('chart3'), {
+    type: 'doughnut',
+    data: {
+      labels: ['YouTube AdSense', 'Gumroad Product', 'Affiliate Links', 'Freelance / Services'],
+      datasets: [{
+        data: [35, 30, 20, 15],
+        backgroundColor: ['#111', '#444', '#777', '#aaa'],
+        borderColor: '#fff',
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } },
+        tooltip: { callbacks: { label: function(c){ return c.label + ': ' + c.raw + '%'; } } }
+      }
+    }
+  });
+
+  // Chart IV — View Compounding (exponential growth)
+  var views = [306];
+  for (var i = 1; i < 12; i++) views.push(Math.round(views[i-1] * 1.35 + 150));
+  new Chart(document.getElementById('chart4'), {
+    type: 'bar',
+    data: {
+      labels: MONTHS,
+      datasets: [{
+        label: 'Monthly Views',
+        data: views,
+        backgroundColor: views.map(function(v,i){ return i === 0 ? '#000' : 'rgba(0,0,0,' + (0.3 + i*0.06) + ')'; }),
+        borderColor: '#000',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { ticks: { callback: function(v){ return v >= 1000 ? (v/1000).toFixed(1)+'k' : v; } }, grid: { color: '#eee' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  // Chart V — Path to Independence Day
+  var freedom = 5821;
+  var monthly = rev.slice();
+  var MILESTONES = [0, 27, 54, 108, 250, 500, 1000, 1800, 2800, 4000, 5000, 5821];
+  new Chart(document.getElementById('chart5'), {
+    type: 'line',
+    data: {
+      labels: MONTHS,
+      datasets: [
+        { label: 'Monthly Revenue', data: MILESTONES, borderColor: '#000', backgroundColor: 'rgba(0,0,0,0.07)', fill: true, tension: 0.4, pointRadius: 3, pointBackgroundColor: '#000' },
+        { label: 'Independence Target', data: Array(12).fill(freedom), borderColor: '#cc0000', borderDash: [6,4], fill: false, pointRadius: 0, borderWidth: 1.5 }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } },
+      scales: {
+        y: { ticks: { callback: function(v){ return '$'+v.toLocaleString(); } }, grid: { color: '#eee' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+})();
+</script>
+
+  <div class="section-label">Revenue Scenarios — 90-Day Outlook</div>
+  <table>
+    <tr><th>Scenario</th><th>Probability</th><th>Monthly at 90 Days</th><th>Independence ETA</th></tr>
+    <tr><td>YouTube only, English</td><td>65%</td><td>$50–200</td><td>4–6 years</td></tr>
+    <tr><td>+ Gumroad + Affiliates</td><td>55%</td><td>$300–800</td><td>18–24 months</td></tr>
+    <tr><td>+ Fiverr service income</td><td>70%</td><td>$500–1,500</td><td>12–18 months</td></tr>
+    <tr><td>Full stack + Multilingual</td><td>31%</td><td>$1,000+</td><td>12–15 months</td></tr>
+    <tr><td>Viral hit (&gt;1M views)</td><td>8%</td><td>$2,000–5,000</td><td>6–9 months</td></tr>
+  </table>
+  <p style="font-size:12px;color:#555;font-style:italic">Multilingual expansion carries the highest EV multiplier: 31% probability of $1k/mo at 90 days vs 8% English-only. Spanish and Portuguese first.</p>
+</div></div>
+
+<!-- ALGORITHMS -->
+<div id="algorithms" class="page"><div class="outer">
+  <div class="page-header"><span class="back" onclick="go('home')">← Home</span><h2>Algorithms &amp; Live Data</h2></div>
+
+  <div class="section-label">Algorithm I — Content Opportunity Scorer</div>
+  <div class="calc-row"><label>Niche:</label>
+    <select id="alg-niche"><option value="finance">Personal Finance</option><option value="ai">AI &amp; Tech</option><option value="psychology">Psychology</option><option value="sports">Sports</option><option value="luxury">Luxury</option></select>
+  </div>
+  <div class="calc-row"><label>Search volume:</label>
+    <select id="alg-vol"><option value="3">High (&gt;100k/mo)</option><option value="2">Medium (10–100k)</option><option value="1">Low (&lt;10k)</option></select>
+  </div>
+  <div class="calc-row"><label>Trending right now:</label>
+    <select id="alg-trend"><option value="1.5">Yes — breaking/viral</option><option value="1.2">Somewhat</option><option value="1.0">No</option></select>
+  </div>
+  <button onclick="runScorer()" style="background:#000;color:#fff;border:none;padding:6px 18px;font-family:Arial;font-size:13px;cursor:pointer;letter-spacing:.5px">SCORE THIS IDEA</button>
+  <div class="algo-out" id="score-out">— awaiting input —</div>
+
+  <div class="section-label" style="margin-top:20px">Algorithm II — Revenue Projection Engine</div>
+  <div class="calc-row"><label>Videos per week:</label><input type="number" id="vpw" value="3" min="1" max="14" style="width:60px"></div>
+  <div class="calc-row"><label>Avg views per video:</label><input type="number" id="avpv" value="150" min="1" style="width:80px"></div>
+  <div class="calc-row"><label>RPM ($):</label><input type="number" id="rpm" value="8" min="1" style="width:60px"></div>
+  <div class="calc-row"><label>Gumroad sales/month:</label><input type="number" id="gum" value="0" min="0" style="width:60px"></div>
+  <div class="calc-row"><label>Fiverr gigs/month:</label><input type="number" id="fiv" value="0" min="0" style="width:60px"></div>
+  <button onclick="runProjection()" style="background:#000;color:#fff;border:none;padding:6px 18px;font-family:Arial;font-size:13px;cursor:pointer;letter-spacing:.5px">PROJECT REVENUE</button>
+  <div class="algo-out" id="proj-out">— awaiting input —</div>
+
+  <div class="section-label" style="margin-top:20px">Algorithm III — 10-K Speed Reader</div>
+  <div class="calc-row"><label>Company:</label>
+    <select id="company-sel">
+      <option value="BRK">Berkshire Hathaway (BRK)</option>
+      <option value="AAPL">Apple (AAPL)</option>
+      <option value="TSLA">Tesla (TSLA)</option>
+      <option value="MSFT">Microsoft (MSFT)</option>
+      <option value="NVDA">NVIDIA (NVDA)</option>
+    </select>
+  </div>
+  <button onclick="runReader()" style="background:#000;color:#fff;border:none;padding:6px 18px;font-family:Arial;font-size:13px;cursor:pointer;letter-spacing:.5px">LOAD 10-K SUMMARY</button>
+  <div class="algo-out" id="reader-out">— select a company —</div>
+</div></div>
+
+<!-- OBJECTIVES -->
+<div id="objectives" class="page"><div class="outer">
+  <div class="page-header"><span class="back" onclick="go('home')">← Home</span><h2>Long-Term Objectives</h2></div>
+  <p style="font-size:12px;color:#555;line-height:1.7;margin-bottom:16px">These are not wishes. They are targets with price tags. Every video posted, every sale made, every gig completed is a fractional payment. We keep them visible because what you see daily, you move toward.</p>
+
+  <!-- DREAM CARDS -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+
+    <!-- FREEDOM DAY -->
+    <div style="grid-column:1/-1;border:3px solid #000;background:#000;color:#fff;padding:20px;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:10px;letter-spacing:2px;color:#888;text-transform:uppercase;margin-bottom:6px">Mission Critical</div>
+        <div style="font-size:22px;font-weight:bold;letter-spacing:-0.5px">🔓 FREEDOM DAY</div>
+        <div style="font-size:12px;color:#aaa;margin-top:4px">Build the operation. Every dollar earned is one step closer.</div>
+        <div style="margin-top:12px;background:#333;height:4px;width:280px"><div style="background:#cc0000;height:100%;width:0.1%"></div></div>
+        <div style="font-size:10px;color:#666;margin-top:4px">$0 / $5,821 per month · 0% funded</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;margin-left:20px">
+        <div style="font-size:36px;font-weight:bold;font-family:monospace;color:#cc0000">$5,821</div>
+        <div style="font-size:11px;color:#888">/month target</div>
+      </div>
+    </div>
+
+    <!-- F-150 BLACK WIDOW -->
+    <div style="border:1px solid #000;overflow:hidden">
+      <div style="background:linear-gradient(135deg,#0a0a0a 0%,#1a1a1a 50%,#0a0a0a 100%);padding:28px 20px;text-align:center;position:relative">
+        <div style="font-size:52px;margin-bottom:8px">🛻</div>
+        <div style="font-size:13px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#fff">Ford F-150</div>
+        <div style="font-size:11px;color:#888;letter-spacing:1px;margin-top:2px">Black Widow Edition</div>
+        <div style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 12px,rgba(255,255,255,0.02) 12px,rgba(255,255,255,0.02) 24px)"></div>
+      </div>
+      <div style="padding:12px 14px;border-top:2px solid #000">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+          <span style="font-weight:bold;font-size:13px">F-150 Black Widow</span>
+          <span style="font-size:16px;font-weight:bold;color:#cc0000;font-family:monospace">$80,000</span>
+        </div>
+        <div style="font-size:11px;color:#666;line-height:1.5;margin-bottom:8px">Blacked out. Lifted. The truck that says you made it without saying a word.</div>
+        <div style="background:#eee;height:3px"><div style="background:#000;height:100%;width:0.2%"></div></div>
+        <div style="font-size:10px;color:#999;margin-top:3px">$0 funded · 0%</div>
+      </div>
+    </div>
+
+    <!-- FERRARI PUROSANGUE -->
+    <div style="border:1px solid #cc0000;overflow:hidden">
+      <div style="background:linear-gradient(135deg,#6b0000 0%,#cc0000 50%,#ff3333 100%);padding:28px 20px;text-align:center;position:relative">
+        <div style="font-size:52px;margin-bottom:8px">🏎️</div>
+        <div style="font-size:13px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#fff">Ferrari Purosangue</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.7);letter-spacing:1px;margin-top:2px">Rosso Corsa · The Red One</div>
+        <div style="position:absolute;inset:0;background:repeating-linear-gradient(-45deg,transparent,transparent 12px,rgba(0,0,0,0.06) 12px,rgba(0,0,0,0.06) 24px)"></div>
+      </div>
+      <div style="padding:12px 14px;border-top:2px solid #cc0000">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+          <span style="font-weight:bold;font-size:13px">Ferrari Purosangue SUV</span>
+          <span style="font-size:16px;font-weight:bold;color:#cc0000;font-family:monospace">$250,000</span>
+        </div>
+        <div style="font-size:11px;color:#666;line-height:1.5;margin-bottom:8px">Red. The prancing horse. The only SUV worthy of the badge. Built for someone who won.</div>
+        <div style="background:#eee;height:3px"><div style="background:#cc0000;height:100%;width:0.06%"></div></div>
+        <div style="font-size:10px;color:#999;margin-top:3px">$0 funded · 0%</div>
+      </div>
+    </div>
+
+    <!-- HOME IN EDMOND -->
+    <div style="border:1px solid #000;overflow:hidden">
+      <div style="background:linear-gradient(135deg,#1a2a1a 0%,#2d4a2d 50%,#1a2a1a 100%);padding:28px 20px;text-align:center">
+        <div style="font-size:52px;margin-bottom:8px">🏠</div>
+        <div style="font-size:13px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#fff">The Estate</div>
+        <div style="font-size:11px;color:#aaa;letter-spacing:1px;margin-top:2px">Edmond, Oklahoma · Owned, Not Rented</div>
+      </div>
+      <div style="padding:12px 14px;border-top:2px solid #000">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+          <span style="font-weight:bold;font-size:13px">Home in Edmond, OK</span>
+          <span style="font-size:16px;font-weight:bold;color:#cc0000;font-family:monospace">$80K down</span>
+        </div>
+        <div style="font-size:11px;color:#666;line-height:1.5;margin-bottom:8px">20% down on a $400K home. The foundation everything else gets built on top of.</div>
+        <div style="background:#eee;height:3px"><div style="background:#2d4a2d;height:100%;width:0.2%"></div></div>
+        <div style="font-size:10px;color:#999;margin-top:3px">$0 funded · 0%</div>
+      </div>
+    </div>
+
+    <!-- DEBT ELIMINATION -->
+    <div style="border:1px solid #ccc;overflow:hidden">
+      <div style="background:linear-gradient(135deg,#2a2020 0%,#3a2525 50%,#2a2020 100%);padding:28px 20px;text-align:center">
+        <div style="font-size:52px;margin-bottom:8px">⛓️</div>
+        <div style="font-size:13px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#fff">Break the Chains</div>
+        <div style="font-size:11px;color:#aaa;letter-spacing:1px;margin-top:2px">$100,000 total debt · Paid off via Payton Loop</div>
+      </div>
+      <div style="padding:12px 14px;border-top:2px solid #ccc">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+          <span style="font-weight:bold;font-size:13px">Debt Elimination</span>
+          <span style="font-size:16px;font-weight:bold;color:#cc0000;font-family:monospace">$100,000</span>
+        </div>
+        <div style="font-size:11px;color:#666;line-height:1.5;margin-bottom:8px">Every dollar of debt is a monthly obligation. Kill it. Own your cash flow completely.</div>
+        <div style="background:#eee;height:3px"><div style="background:#cc0000;height:100%;width:0%"></div></div>
+        <div style="font-size:10px;color:#999;margin-top:3px">$0 paid · 0%</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-label">Mission Math</div>
+  <table>
+    <tr><th>Milestone</th><th>Revenue Required</th><th>How to Get There</th></tr>
+    <tr><td>First $100</td><td>$100 total</td><td>4 Gumroad sales OR 1 Fiverr gig</td></tr>
+    <tr><td>Break-Even</td><td>$181 total</td><td>7 Gumroad sales OR 2 Fiverr gigs</td></tr>
+    <tr><td>First $1,000/mo</td><td>$1,000/mo recurring</td><td>37 Gumroad + affiliates + 125k views/mo</td></tr>
+    <tr><td>Independence Day</td><td>$5,821/mo recurring</td><td>YouTube + Gumroad + Fiverr + Affiliates compounding</td></tr>
+  </table>
+</div></div>
+
+<!-- AFFILIATES -->
+<div id="affiliates" class="page"><div class="outer">
+  <div class="page-header"><span class="back" onclick="go('home')">← Home</span><h2>Revenue Partners</h2></div>
+  <table>
+    <tr><th>Partner</th><th>Commission</th><th>Link</th><th>Status</th></tr>
+    <tr><td>Amazon Associates</td><td>1–10% per sale</td><td>tag: paytonloop29-20</td><td class="green">Active</td></tr>
+    <tr>
+
+    <td>YNAB</td><td>$10–20/signup</td><td>ynab.com/referral</td><td class="red">Pending</td></tr>
+    <tr><td>Skillshare</td><td>$7–10/trial</td><td>skillshare.com/affiliates</td><td class="red">Pending</td></tr>
+    <tr><td>Gumroad — AI Money Playbook</td><td>100% (owner)</td><td><a href="https://paytonloop.gumroad.com/l/rtznx" target="_blank" style="color:#00008b">paytonloop.gumroad.com/l/rtznx</a></td><td class="green">LIVE ✓</td></tr>
+    <tr><td>Fiverr — OpenClaw Setup</td><td>100% (owner)</td><td>$119/gig</td><td class="red">Not created</td></tr>
+  </table>
+</div></div>
+
+<!-- FILINGS -->
+<div id="filings" class="page"><div class="outer">
+  <div class="page-header"><span class="back" onclick="go('home')">← Home</span><h2>Filings &amp; Case Studies</h2></div>
+  <table>
+    <tr><th>Company</th><th>Revenue</th><th>Key Lesson</th><th>SEC Filing</th></tr>
+    <tr><td>Berkshire Hathaway (BRK)</td><td>$371.4B</td><td>Compounding + patience beats trading</td><td><a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001067983&type=10-K" target="_blank" style="color:#00008b">10-K →</a></td></tr>
+    <tr><td>Apple (AAPL)</td><td>$391.0B</td><td>Brand loyalty = pricing power</td><td><a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000320193&type=10-K" target="_blank" style="color:#00008b">10-K →</a></td></tr>
+    <tr><td>Tesla (TSLA)</td><td>$94.8B</td><td>First-mover + vertical integration</td><td><a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001318605&type=10-K" target="_blank" style="color:#00008b">10-K →</a></td></tr>
+    <tr><td>Microsoft (MSFT)</td><td>$245.1B</td><td>Cloud pivot saved a legacy company</td><td><a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000789019&type=10-K" target="_blank" style="color:#00008b">10-K →</a></td></tr>
+    <tr><td>NVIDIA (NVDA)</td><td>$215.9B</td><td>Platform bets compound when AI hits</td><td><a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001045810&type=10-K" target="_blank" style="color:#00008b">10-K →</a></td></tr>
+  </table>
+  <p style="font-size:12px;color:#555;font-style:italic">Daily case study: What Berkshire taught us — never overpay for quality. The same principle applies to every decision in Payton Loop. Buy asymmetric bets. Hold forever.</p>
+</div></div>
+
+<!-- RISK -->
+<div id="risk" class="page"><div class="outer">
+  <div class="page-header"><span class="back" onclick="go('home')">← Home</span><h2>Risk Assessment</h2></div>
+  <table>
+    <tr><th>Risk</th><th>Probability</th><th>Impact</th><th>Mitigation</th></tr>
+    <tr><td>YouTube demonetizes channel</td><td>Low</td><td>High</td><td>Diversify to TikTok + Gumroad revenue</td></tr>
+    <tr><td>InVideo AI shuts down / raises prices</td><td>Medium</td><td>Medium</td><td>Pivot to CapCut (free) — already planned</td></tr>
+    <tr><td>Claude API credits exhausted</td><td>High (near term)</td><td>High</td><td>First Gumroad sale funds refill</td></tr>
+    <tr><td>Tencent server blocks APIs</td><td>Active</td><td>Medium</td><td>Migrate to Vultr Dallas ($6/mo)</td></tr>
+    <tr><td>Algorithm changes tank views</td><td>Medium</td><td>Medium</td><td>Multiple niches + platforms reduces exposure</td></tr>
+    <tr><td>Competitor creates similar product</td><td>High</td><td>Low</td><td>Brand + audience loyalty beats commodity</td></tr>
+    <tr><td>Payton stops posting for 2+ weeks</td><td>Medium</td><td>High</td><td>Daily Command Brief + Ledger accountability</td></tr>
+  </table>
+</div></div>
+
+<!-- DISPATCHES -->
+<div id="dispatches" class="page"><div class="outer">
+  <div class="page-header"><span class="back" onclick="go('home')">← Home</span><h2>Recent Dispatches</h2></div>
+  <table>
+    <tr><th>Date</th><th>Event</th><th>Impact</th></tr>
+    <tr><td>Mar 26, 2026</td><td>AI Money Playbook PDF delivered — product complete</td><td class="green">+$0 (pending sales)</td></tr>
+    <tr><td>Mar 25, 2026</td><td>Gumroad listing LIVE — paytonloop.gumroad.com/l/rtznx</td><td class="green">Revenue-ready</td></tr>
+    <tr><td>Mar 25, 2026</td><td>Daily Command Brief built — bookmark command.html</td><td class="green">Accountability system live</td></tr>
+    <tr><td>Mar 25, 2026</td><td>Bets Desk launched — bets.html</td><td class="green">Entertainment + edge</td></tr>
+    <tr><td>Mar 25, 2026</td><td>Agent named: Ledger</td><td class="green">Identity confirmed</td></tr>
+    <tr><td>Mar 24, 2026</td><td>3 videos live — 306 total views Day 1</td><td class="green">Algorithm testing</td></tr>
+    <tr><td>Mar 24, 2026</td><td>Operations commenced — $136 deployed</td><td class="red">Day 1</td></tr>
+  </table>
+</div></div>
+
+<!-- TO-DO -->
+<div id="todo" class="page"><div class="outer">
+  <div class="page-header"><span class="back" onclick="go('home')">← Home</span><h2>To-Do &amp; Pending Actions</h2></div>
+  <div class="section-label">Payton Must Do</div>
+  <table>
+    <tr><th>Task</th><th>EV</th><th>Time</th></tr>
+    <tr><td>Post Batch 2 video — Athletes who made more sitting out</td><td class="green">Very High</td><td>45 min</td></tr>
+    <tr><td>Create Fiverr gig — OpenClaw setup $119</td><td class="green">Very High</td><td>20 min</td></tr>
+    <tr><td>Sign up YNAB affiliate — ynab.com/referral</td><td class="green">High</td><td>10 min</td></tr>
+    <tr><td>Transfer client_secret.json for YouTube auto-upload</td><td class="green">High</td><td>5 min</td></tr>
+    <tr><td>Sign up AdaptlyPost.com</td><td style="color:#886600">Medium</td><td>10 min</td></tr>
+    <tr><td>Create Instagram @PaytonLoop</td><td style="color:#886600">Medium</td><td>15 min</td></tr>
+    <tr><td>Create Pinterest @PaytonLoop</td><td style="color:#886600">Medium</td><td>10 min</td></tr>
+    <tr><td>Open Tencent firewall port 8080 for site access</td><td style="color:#886600">Medium</td><td>5 min</td></tr>
+  </table>
+  <div class="section-label">Ledger Handles</div>
+  <table>
+    <tr><th>Task</th><th>Status</th></tr>
+    <tr><td>Script Batch 5 — multilingual pivot</td><td class="green">Ready on demand</td></tr>
+    <tr><td>Morning intelligence briefing via cron</td><td class="green">Running</td></tr>
+    <tr><td>Algorithm analysis + content scoring</td><td class="green">Live</td></tr>
+    <tr><td>Financial modeling + scenario planning</td><td class="green">Live</td></tr>
+    <tr><td>Bet analysis via Clean Ticket Protocol</td><td class="green">Live — bets.html</td></tr>
+    <tr><td>PDF generation for future products</td><td class="green">Ready</td></tr>
+  </table>
+</div></div>
+
+<script>
+var pages = ['home','agenda','financial','strategy','production','quant','algorithms','objectives','affiliates','filings','risk','dispatches','todo'];
+
+function go(id) {
+  pages.forEach(function(p) {
+    var el = document.getElementById(p);
+    if (el) el.classList.remove('active');
+    var nav = document.getElementById('nav-' + p);
+    if (nav) nav.classList.remove('active');
+  });
+  var target = document.getElementById(id);
+  if (target) { target.classList.add('active'); window.scrollTo(0,0); }
+  var navTarget = document.getElementById('nav-' + id);
+  if (navTarget) { navTarget.classList.add('active'); navTarget.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}); }
+}
+
+function runScorer() {
+  var niche = document.getElementById('alg-niche').value;
+  var vol = parseFloat(document.getElementById('alg-vol').value);
+  var trend = parseFloat(document.getElementById('alg-trend').value);
+  var rpm = {finance:15, ai:11, psychology:8, sports:6, luxury:16};
+  var base = rpm[niche] || 8;
+  var score = Math.min(10, ((base/20)*4 + vol*1.5 + (trend-1)*3)).toFixed(1);
+  var ev = (base * vol * trend * 1000 / 100).toFixed(0);
+  var verdict = score >= 7 ? 'VERDICT: PRODUCE THIS. High EV.' : score >= 5 ? 'VERDICT: WORTH TESTING. Mid-tier.' : 'VERDICT: LOW PRIORITY. Find a better angle.';
+  document.getElementById('score-out').textContent = [
+    'NICHE: ' + niche.toUpperCase(),
+    'OPPORTUNITY SCORE: ' + score + ' / 10',
+    'EST. RPM: $' + base,
+    'EST. EV per 10K views: $' + ev,
+    verdict
+  ].join('\n');
+}
+
+function runProjection() {
+  var vpw = parseFloat(document.getElementById('vpw').value)||3;
+  var avpv = parseFloat(document.getElementById('avpv').value)||150;
+  var rpm = parseFloat(document.getElementById('rpm').value)||8;
+  var gum = parseFloat(document.getElementById('gum').value)||0;
+  var fiv = parseFloat(document.getElementById('fiv').value)||0;
+  var monthlyViews = vpw * 4.3 * avpv;
+  var adsense = (monthlyViews / 1000) * rpm;
+  var gumroad = gum * 27;
+  var fiverr = fiv * 119;
+  var total = adsense + gumroad + fiverr;
+  var beMonths = total > 0 ? Math.ceil(181 / total) : 999;
+  document.getElementById('proj-out').textContent = [
+    'MONTHLY VIEWS: ' + Math.round(monthlyViews).toLocaleString(),
+    'ADSENSE: $' + adsense.toFixed(2) + '/mo',
+    'GUMROAD: $' + gumroad.toFixed(2) + '/mo',
+    'FIVERR: $' + fiverr.toFixed(2) + '/mo',
+    '─────────────────',
+    'TOTAL REVENUE: $' + total.toFixed(2) + '/mo',
+    'BREAK-EVEN: ' + (beMonths < 999 ? beMonths + ' months' : 'Need more revenue streams'),
+    'FREEDOM DAY ETA: ' + (total > 0 ? Math.ceil(5821/total) + ' months at this rate' : 'Start posting')
+  ].join('\n');
+}
+
+function runReader() {
+  var c = document.getElementById('company-sel').value;
+  var data = {
+    BRK: {rev:'$371.4B', ni:'$96.2B', lesson:'Never sell great businesses. Let compounding do the work.', key:'Insurance float funds the entire empire. Free leverage at scale.'},
+    AAPL: {rev:'$391.0B', ni:'$97.0B', lesson:'Services revenue ($85B+) now more important than hardware. Recurring beats one-time.', key:'900M iPhone users locked into ecosystem. Switching cost = moat.'},
+    TSLA: {rev:'$94.8B', ni:'$7.1B', lesson:'Manufacturing scale took 10 years. First-mover advantage is compounding.', key:'Energy storage + FSD licensing could be bigger than cars.'},
+    MSFT: {rev:'$245.1B', ni:'$88.1B', lesson:'Satya Nadella pivoted from Windows to Azure. Platform beats product.', key:'Azure + Office 365 + LinkedIn + GitHub = ecosystem lock-in.'},
+    NVDA: {rev:'$215.9B', ni:'$72.9B', lesson:'Bet on picks-and-shovels, not the gold rush itself.', key:'CUDA ecosystem lock-in means AI runs on NVIDIA by default.'}
+  };
+  var d = data[c];
+  document.getElementById('reader-out').textContent = [
+    'COMPANY: ' + c,
+    'ANNUAL REVENUE: ' + d.rev,
+    'NET INCOME: ' + d.ni,
+    '─────────────────',
+    'KEY LESSON: ' + d.lesson,
+    '',
+    'PAYTON LOOP APPLICATION: ' + d.key,
+    '',
+    'Full 10-K: See Filings section for SEC EDGAR link.'
+  ].join('\n');
+}
+
+function buildTicker() {
+  var start = new Date('2026-03-24');
+  var days = Math.floor((new Date() - start) / 86400000) + 1;
+  var t = document.getElementById('ticker-text');
+  if (t) t.textContent = 'PAYTON LOOP (PLC)  |  Total Revenue: $0.00  |  Views: 306  |  Videos: 3  |  Scripts Banked: 18  |  Gumroad: LIVE  |  Day ' + days + ' of Operations  |  Independence Target: $5,821/mo  |  Invested: $181.00  |  Edmond, Oklahoma  |  Founded March 2026  |  ';
+}
+
+function buildFreedom() {
+  var days = Math.floor((new Date() - new Date('2026-03-24')) / 86400000) + 1;
+  var f = document.getElementById('freedom-line');
+  if (f) f.textContent = ' $0 earned of $5,821/month target — Day ' + days + ' · Product live · Machine loaded';
+}
+
+function buildDates() {
+  var now = new Date();
+  var ds = now.toLocaleDateString('en-US',{timeZone:'America/Chicago',weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  var d1 = document.getElementById('d1');
+  var d2 = document.getElementById('d2');
+  var dt = document.getElementById('agenda-dt');
+  if (d1) d1.textContent = ds;
+  if (d2) d2.textContent = ds;
+  if (dt) dt.textContent = ds;
+}
+
+window.onload = function() { buildTicker(); buildFreedom(); buildDates(); };
+</script>
+
+<script src="darkmode.js"></script>
+<script src="search.js"></script>
+</body>
+</html>

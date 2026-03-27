@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JARVIS — Payton Loop Command Center</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #050508;
+  font-family: 'Segoe UI', sans-serif;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+/* Ambient background */
+.bg {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 40%, #0d1b3e 0%, #050508 70%);
+  z-index: 0;
+}
+
+/* Floating particles */
+.particles {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Main container */
+.container {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+/* Avatar ring system */
+.avatar-wrap {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid;
+  animation: spin linear infinite;
+}
+
+.ring-1 {
+  width: 220px; height: 220px;
+  border-color: rgba(99, 179, 255, 0.15);
+  animation-duration: 20s;
+}
+.ring-2 {
+  width: 190px; height: 190px;
+  border-color: rgba(99, 179, 255, 0.25);
+  animation-duration: 12s;
+  animation-direction: reverse;
+  border-style: dashed;
+}
+.ring-3 {
+  width: 160px; height: 160px;
+  border-color: rgba(99, 179, 255, 0.35);
+  animation-duration: 8s;
+}
+
+/* Orbital dots */
+.orbital {
+  position: absolute;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #63b3ff;
+  box-shadow: 0 0 12px #63b3ff;
+}
+
+/* Core face */
+.avatar-core {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #1a3a6e, #0a1a3e 60%, #050a1e);
+  border: 2px solid rgba(99, 179, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow:
+    0 0 30px rgba(99, 179, 255, 0.2),
+    0 0 60px rgba(99, 179, 255, 0.1),
+    inset 0 0 30px rgba(0, 50, 120, 0.5);
+  animation: breathe 4s ease-in-out infinite;
+}
+
+.avatar-face {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.eyes {
+  display: flex;
+  gap: 18px;
+}
+
+.eye {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #63b3ff;
+  box-shadow: 0 0 16px #63b3ff, 0 0 32px rgba(99, 179, 255, 0.5);
+  animation: blink 4s ease-in-out infinite;
+}
+
+.eye.left { animation-delay: 0s; }
+.eye.right { animation-delay: 0.1s; }
+
+.mouth {
+  width: 30px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #63b3ff, transparent);
+  border-radius: 2px;
+  animation: talk 2s ease-in-out infinite;
+}
+
+/* Name + status */
+.identity {
+  text-align: center;
+}
+
+.name {
+  font-size: 28px;
+  font-weight: 200;
+  letter-spacing: 10px;
+  color: #e8f4ff;
+  text-transform: uppercase;
+  text-shadow: 0 0 20px rgba(99, 179, 255, 0.5);
+}
+
+.tagline {
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: rgba(99, 179, 255, 0.6);
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+
+/* Status bar */
+.status-bar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: rgba(99, 179, 255, 0.05);
+  border: 1px solid rgba(99, 179, 255, 0.15);
+  border-radius: 20px;
+  padding: 8px 20px;
+}
+
+.status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #00e676;
+  box-shadow: 0 0 8px #00e676;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.status-text {
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.7);
+  text-transform: uppercase;
+}
+
+/* Stats row */
+.stats {
+  display: flex;
+  gap: 16px;
+}
+
+.stat {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(99, 179, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px 20px;
+  text-align: center;
+  min-width: 90px;
+  transition: all 0.3s;
+}
+
+.stat:hover {
+  background: rgba(99, 179, 255, 0.08);
+  border-color: rgba(99, 179, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 300;
+  color: #63b3ff;
+}
+
+.stat-label {
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.4);
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+/* Waveform */
+.waveform {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 30px;
+}
+
+.wave-bar {
+  width: 3px;
+  border-radius: 2px;
+  background: rgba(99, 179, 255, 0.6);
+  animation: wave 1.2s ease-in-out infinite;
+}
+
+/* Bottom text */
+.bottom {
+  position: fixed;
+  bottom: 24px;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.2);
+  text-transform: uppercase;
+}
+
+/* Keyframes */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes breathe {
+  0%, 100% { box-shadow: 0 0 30px rgba(99,179,255,0.2), 0 0 60px rgba(99,179,255,0.1), inset 0 0 30px rgba(0,50,120,0.5); }
+  50% { box-shadow: 0 0 50px rgba(99,179,255,0.4), 0 0 100px rgba(99,179,255,0.2), inset 0 0 40px rgba(0,80,180,0.6); }
+}
+
+@keyframes blink {
+  0%, 90%, 100% { transform: scaleY(1); opacity: 1; }
+  95% { transform: scaleY(0.1); opacity: 0.3; }
+}
+
+@keyframes talk {
+  0%, 100% { width: 30px; opacity: 0.6; }
+  25% { width: 22px; opacity: 0.9; }
+  50% { width: 36px; opacity: 1; }
+  75% { width: 26px; opacity: 0.8; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+@keyframes wave {
+  0%, 100% { height: 4px; opacity: 0.4; }
+  50% { height: 24px; opacity: 1; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.6; }
+  50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+
+<!-- Particles canvas -->
+<canvas class="particles" id="particles"></canvas>
+
+<div class="container">
+
+  <!-- Avatar -->
+  <div class="avatar-wrap">
+    <div class="ring ring-1"></div>
+    <div class="ring ring-2"></div>
+    <div class="ring ring-3"></div>
+    <div class="avatar-core">
+      <div class="avatar-face">
+        <div class="eyes">
+          <div class="eye left"></div>
+          <div class="eye right"></div>
+        </div>
+        <div class="mouth"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Identity -->
+  <div class="identity">
+    <div class="name">JARVIS</div>
+    <div class="tagline">Just A Rather Very Intelligent System</div>
+  </div>
+
+  <!-- Status -->
+  <div class="status-bar">
+    <div class="status-dot"></div>
+    <div class="status-text" id="statusText">Online — Monitoring Markets</div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value" id="views">306</div>
+      <div class="stat-label">Views</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="videos">3</div>
+      <div class="stat-label">Videos</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" style="color: #ff6b6b;">$0</div>
+      <div class="stat-label">Earned</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" style="color: #ffd700;">$130</div>
+      <div class="stat-label">Invested</div>
+    </div>
+  </div>
+
+  <!-- Waveform -->
+  <div class="waveform" id="waveform"></div>
+
+</div>
+
+<div class="bottom">Payton Loop — Operation Independence</div>
+
+<script>
+// Particles
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const particles = Array.from({length: 60}, () => ({
+  x: Math.random() * canvas.width,
+  y: Math.random() * canvas.height,
+  r: Math.random() * 1.5 + 0.5,
+  vx: (Math.random() - 0.5) * 0.3,
+  vy: (Math.random() - 0.5) * 0.3,
+  opacity: Math.random() * 0.5 + 0.1
+}));
+
+function drawParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach(p => {
+    p.x += p.vx;
+    p.y += p.vy;
+    if (p.x < 0) p.x = canvas.width;
+    if (p.x > canvas.width) p.x = 0;
+    if (p.y < 0) p.y = canvas.height;
+    if (p.y > canvas.height) p.y = 0;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(99, 179, 255, ${p.opacity})`;
+    ctx.fill();
+  });
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
+
+// Waveform bars
+const waveform = document.getElementById('waveform');
+for (let i = 0; i < 20; i++) {
+  const bar = document.createElement('div');
+  bar.className = 'wave-bar';
+  bar.style.animationDelay = (i * 0.06) + 's';
+  bar.style.animationDuration = (0.8 + Math.random() * 0.8) + 's';
+  waveform.appendChild(bar);
+}
+
+// Rotating status messages
+const statuses = [
+  'Online — Monitoring Markets',
+  'Analyzing Trending Topics',
+  'Scripts Ready — 18 Videos Banked',
+  'Watching Your Back',
+  'Building Toward Independence Day',
+  '40Hz Gamma Binaural — Generated',
+  'Affiliate Links Active',
+  'Ready to Deploy'
+];
+
+let si = 0;
+setInterval(() => {
+  si = (si + 1) % statuses.length;
+  const el = document.getElementById('statusText');
+  el.style.opacity = 0;
+  setTimeout(() => {
+    el.textContent = statuses[si];
+    el.style.opacity = 1;
+    el.style.transition = 'opacity 0.5s';
+  }, 300);
+}, 4000);
+
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+</script>
+</body>
+</html>

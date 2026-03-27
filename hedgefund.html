@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payton Loop Capital — Digital Hedge Fund</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: #060608;
+  font-family: 'Courier New', monospace;
+  color: #e0e0e0;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Grid layout */
+.dashboard {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-rows: auto;
+  gap: 1px;
+  background: #111;
+  min-height: 100vh;
+  padding: 1px;
+}
+
+.panel {
+  background: #08090c;
+  border: 1px solid #1a1f2e;
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #00ff88, transparent);
+  opacity: 0.3;
+}
+
+/* Panel sizes */
+.span2 { grid-column: span 2; }
+.span3 { grid-column: span 3; }
+.span4 { grid-column: span 4; }
+
+/* Header */
+.header {
+  background: #06070a;
+  border-bottom: 1px solid #1a1f2e;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  grid-column: span 4;
+}
+
+.logo {
+  font-size: 13px;
+  letter-spacing: 6px;
+  color: #00ff88;
+  text-transform: uppercase;
+}
+
+.logo span { color: #ffffff; opacity: 0.4; }
+
+.header-right {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #00ff88;
+}
+
+.live-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #00ff88;
+  animation: livepulse 1s ease-in-out infinite;
+}
+
+@keyframes livepulse {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* Panel headers */
+.panel-title {
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: #444;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #111;
+  padding-bottom: 8px;
+}
+
+/* BIG NUMBERS */
+.big-number {
+  font-size: 36px;
+  font-weight: 300;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+
+.big-label {
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: #444;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.red { color: #ff4444; }
+.green { color: #00ff88; }
+.yellow { color: #ffd700; }
+.blue { color: #4488ff; }
+.white { color: #ffffff; }
+
+/* P&L Display */
+.pnl-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid #0f1118;
+  font-size: 11px;
+}
+
+.pnl-label { color: #555; letter-spacing: 1px; }
+.pnl-value { font-weight: 500; }
+
+/* Chart */
+canvas.chart {
+  width: 100%;
+  margin-top: 8px;
+  display: block;
+}
+
+/* EV Table */
+.ev-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10px;
+}
+
+.ev-table th {
+  text-align: left;
+  padding: 6px 8px;
+  color: #333;
+  letter-spacing: 2px;
+  font-size: 9px;
+  border-bottom: 1px solid #111;
+}
+
+.ev-table td {
+  padding: 7px 8px;
+  border-bottom: 1px solid #0d0e12;
+  vertical-align: middle;
+}
+
+.ev-table tr:hover td { background: #0d0f14; }
+
+/* Bar */
+.bar-wrap {
+  background: #0d0e12;
+  border-radius: 2px;
+  height: 4px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 1s ease;
+}
+
+/* Monte Carlo */
+.scenario {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #0d0e12;
+}
+
+.scenario-label {
+  font-size: 10px;
+  color: #555;
+  width: 60px;
+  flex-shrink: 0;
+}
+
+.scenario-bar-wrap {
+  flex: 1;
+  background: #0d0e12;
+  border-radius: 2px;
+  height: 6px;
+  overflow: hidden;
+}
+
+.scenario-bar { height: 100%; border-radius: 2px; }
+
+.scenario-value {
+  font-size: 10px;
+  width: 40px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* Activity feed */
+.feed-item {
+  display: flex;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid #0d0e12;
+  align-items: flex-start;
+}
+
+.feed-time {
+  font-size: 9px;
+  color: #333;
+  flex-shrink: 0;
+  margin-top: 1px;
+  width: 40px;
+}
+
+.feed-text {
+  font-size: 10px;
+  color: #666;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.feed-text .highlight { color: #00ff88; }
+
+/* Ticker */
+.ticker-wrap {
+  overflow: hidden;
+  white-space: nowrap;
+  border-top: 1px solid #111;
+  padding: 8px 0 0;
+  margin-top: 8px;
+}
+
+.ticker {
+  display: inline-block;
+  animation: ticker 20s linear infinite;
+  font-size: 10px;
+  color: #333;
+  letter-spacing: 2px;
+}
+
+@keyframes ticker {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+/* Gauge */
+.gauge-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Sparkline */
+.sparkline {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 40px;
+}
+
+.spark-bar {
+  flex: 1;
+  border-radius: 1px 1px 0 0;
+  min-height: 2px;
+  transition: height 0.5s;
+}
+
+/* Status badges */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 2px;
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.badge-active { background: rgba(0,255,136,0.1); color: #00ff88; border: 1px solid rgba(0,255,136,0.2); }
+.badge-pending { background: rgba(255,215,0,0.1); color: #ffd700; border: 1px solid rgba(255,215,0,0.2); }
+.badge-locked { background: rgba(255,68,68,0.1); color: #ff4444; border: 1px solid rgba(255,68,68,0.2); }
+
+/* Risk meter */
+.risk-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  font-size: 10px;
+}
+.risk-label { color: #555; }
+.risk-bar-wrap {
+  flex: 1;
+  margin: 0 10px;
+  background: #0d0e12;
+  height: 3px;
+  border-radius: 2px;
+}
+.risk-bar { height: 100%; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div class="dashboard">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">Payton Loop <span>// </span>Digital Hedge Fund <span>// </span>Operation Independence</div>
+    <div class="header-right">
+      <div style="font-size:10px;color:#333;letter-spacing:2px" id="clock">--:--:--</div>
+      <div class="live-indicator">
+        <div class="live-dot"></div>
+        LIVE
+      </div>
+    </div>
+  </div>
+
+  <!-- P&L OVERVIEW -->
+  <div class="panel">
+    <div class="panel-title">Net P&amp;L</div>
+    <div class="big-number red" id="pnl">-$130.00</div>
+    <div class="big-label">Total Position</div>
+    <div style="margin-top:16px">
+      <div class="pnl-row">
+        <span class="pnl-label">Deployed</span>
+        <span class="pnl-value white">$130.00</span>
+      </div>
+      <div class="pnl-row">
+        <span class="pnl-label">Earned</span>
+        <span class="pnl-value red">$0.00</span>
+      </div>
+      <div class="pnl-row">
+        <span class="pnl-label">ROI</span>
+        <span class="pnl-value red">-100%</span>
+      </div>
+      <div class="pnl-row">
+        <span class="pnl-label">Days Active</span>
+        <span class="pnl-value white" id="days-active">1</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW VELOCITY -->
+  <div class="panel">
+    <div class="panel-title">View Velocity</div>
+    <div class="big-number white">306</div>
+    <div class="big-label">Total Views — Day 1</div>
+    <div style="margin-top:12px">
+      <div class="sparkline" id="sparkline"></div>
+    </div>
+    <div style="margin-top:12px">
+      <div class="pnl-row">
+        <span class="pnl-label">V1 Finance</span>
+        <span class="pnl-value green">198 views</span>
+      </div>
+      <div class="pnl-row">
+        <span class="pnl-label">V2 AI Jobs</span>
+        <span class="pnl-value white">25 views</span>
+      </div>
+      <div class="pnl-row">
+        <span class="pnl-label">V3 McDonalds</span>
+        <span class="pnl-value white">83 views</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- INCOME STREAMS STATUS -->
+  <div class="panel">
+    <div class="panel-title">Revenue Streams</div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:10px;color:#888">Amazon Affiliate</span>
+        <span class="badge badge-active">Active</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:10px;color:#888">YouTube AdSense</span>
+        <span class="badge badge-locked">Pre-Threshold</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:10px;color:#888">AI Money Playbook</span>
+        <span class="badge badge-pending">Not Listed</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:10px;color:#888">Fiverr Setup Service</span>
+        <span class="badge badge-pending">Not Listed</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:10px;color:#888">Multilingual Channels</span>
+        <span class="badge badge-locked">Not Started</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:10px;color:#888">AI Blog SEO</span>
+        <span class="badge badge-pending">Not Published</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MISSION PROGRESS -->
+  <div class="panel">
+    <div class="panel-title">Independence Target</div>
+    <div class="big-number yellow">$5,821</div>
+    <div class="big-label">Monthly Target</div>
+    <div style="margin-top:12px">
+      <div style="font-size:9px;color:#333;letter-spacing:1px;margin-bottom:6px">PROGRESS TO TARGET</div>
+      <div class="bar-wrap" style="height:8px">
+        <div class="bar-fill" style="width:0%;background:linear-gradient(90deg,#ff4444,#ffd700)"></div>
+      </div>
+      <div style="font-size:9px;color:#333;margin-top:4px">0% — $0 of $5,821/mo</div>
+      <div style="margin-top:12px">
+        <div class="pnl-row">
+          <span class="pnl-label">Ferrari</span>
+          <span class="pnl-value" style="color:#333">$250,000</span>
+        </div>
+        <div class="pnl-row">
+          <span class="pnl-label">F-150 Black Widow</span>
+          <span class="pnl-value" style="color:#333">$80,000</span>
+        </div>
+        <div class="pnl-row">
+          <span class="pnl-label">Edmond Home</span>
+          <span class="pnl-value" style="color:#333">$80,000 down</span>
+        </div>
+        <div class="pnl-row">
+          <span class="pnl-label">Debt Payoff</span>
+          <span class="pnl-value" style="color:#333">$100,000</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EV TABLE -->
+  <div class="panel span2">
+    <div class="panel-title">Expected Value Matrix — Actions Ranked by EV/Hour</div>
+    <table class="ev-table">
+      <thead>
+        <tr>
+          <th>Action</th>
+          <th>Time</th>
+          <th>Best Case $</th>
+          <th>Probability</th>
+          <th>EV/Hour</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="color:#fff">Fiverr Setup Listing</td>
+          <td style="color:#666">30 min</td>
+          <td class="green">$119</td>
+          <td>
+            <div class="bar-wrap"><div class="bar-fill" style="width:65%;background:#00ff88"></div></div>
+            <div style="font-size:9px;color:#444;margin-top:2px">65%</div>
+          </td>
+          <td class="green">$238/hr</td>
+          <td><span class="badge badge-pending">Do Now</span></td>
+        </tr>
+        <tr>
+          <td style="color:#fff">Gumroad — List Product</td>
+          <td style="color:#666">15 min</td>
+          <td class="green">$27</td>
+          <td>
+            <div class="bar-wrap"><div class="bar-fill" style="width:40%;background:#ffd700"></div></div>
+            <div style="font-size:9px;color:#444;margin-top:2px">40%</div>
+          </td>
+          <td class="yellow">$97/hr</td>
+          <td><span class="badge badge-pending">Do Now</span></td>
+        </tr>
+        <tr>
+          <td style="color:#fff">Post Video (3 platforms)</td>
+          <td style="color:#666">15 min</td>
+          <td class="blue">+views</td>
+          <td>
+            <div class="bar-wrap"><div class="bar-fill" style="width:95%;background:#4488ff"></div></div>
+            <div style="font-size:9px;color:#444;margin-top:2px">95%</div>
+          </td>
+          <td class="blue">Compounds</td>
+          <td><span class="badge badge-pending">Daily</span></td>
+        </tr>
+        <tr>
+          <td style="color:#fff">Create @PaytonLoopES</td>
+          <td style="color:#666">2 hrs</td>
+          <td class="white">3-5x mult</td>
+          <td>
+            <div class="bar-wrap"><div class="bar-fill" style="width:80%;background:#888"></div></div>
+            <div style="font-size:9px;color:#444;margin-top:2px">80%</div>
+          </td>
+          <td style="color:#888">This week</td>
+          <td><span class="badge badge-locked">Queued</span></td>
+        </tr>
+        <tr>
+          <td style="color:#fff">YouTube API OAuth</td>
+          <td style="color:#666">45 min</td>
+          <td style="color:#444">5min/video</td>
+          <td>
+            <div class="bar-wrap"><div class="bar-fill" style="width:90%;background:#444"></div></div>
+            <div style="font-size:9px;color:#444;margin-top:2px">90%</div>
+          </td>
+          <td style="color:#444">Low</td>
+          <td><span class="badge badge-locked">Later</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- MONTE CARLO -->
+  <div class="panel span2">
+    <div class="panel-title">Monte Carlo — P(Salary Replacement) by Month 12</div>
+    <div style="margin-top:8px">
+      <div class="scenario">
+        <div class="scenario-label" style="color:#ff4444">BEAR</div>
+        <div class="scenario-bar-wrap">
+          <div class="scenario-bar" style="width:8%;background:#ff4444"></div>
+        </div>
+        <div class="scenario-value red">8%</div>
+        <div style="font-size:9px;color:#444;margin-left:8px">No viral, slow growth</div>
+      </div>
+      <div class="scenario">
+        <div class="scenario-label" style="color:#ffd700">BASE</div>
+        <div class="scenario-bar-wrap">
+          <div class="scenario-bar" style="width:23%;background:#ffd700"></div>
+        </div>
+        <div class="scenario-value yellow">23%</div>
+        <div style="font-size:9px;color:#444;margin-left:8px">1 viral hit 100K+</div>
+      </div>
+      <div class="scenario">
+        <div class="scenario-label" style="color:#00ff88">BULL</div>
+        <div class="scenario-bar-wrap">
+          <div class="scenario-bar" style="width:41%;background:#00ff88"></div>
+        </div>
+        <div class="scenario-value green">41%</div>
+        <div style="font-size:9px;color:#444;margin-left:8px">Multilingual + viral</div>
+      </div>
+      <div class="scenario">
+        <div class="scenario-label" style="color:#4488ff">BULL+</div>
+        <div class="scenario-bar-wrap">
+          <div class="scenario-bar" style="width:67%;background:#4488ff"></div>
+        </div>
+        <div class="scenario-value blue">67%</div>
+        <div style="font-size:9px;color:#444;margin-left:8px">+ Service income</div>
+      </div>
+    </div>
+    <div style="margin-top:16px;border-top:1px solid #111;padding-top:12px">
+      <div style="font-size:9px;color:#333;letter-spacing:2px;margin-bottom:8px">PROJECTED MONTHLY REVENUE</div>
+      <canvas id="projChart" height="80"></canvas>
+    </div>
+  </div>
+
+  <!-- RISK REGISTER -->
+  <div class="panel">
+    <div class="panel-title">Risk Register</div>
+    <div style="margin-top:4px">
+      <div class="risk-row">
+        <span class="risk-label">Token Budget</span>
+        <div class="risk-bar-wrap"><div class="risk-bar" style="width:75%;background:#ff4444"></div></div>
+        <span style="font-size:9px;color:#ff4444">HIGH</span>
+      </div>
+      <div class="risk-row">
+        <span class="risk-label">No Viral Hit</span>
+        <div class="risk-bar-wrap"><div class="risk-bar" style="width:55%;background:#ffd700"></div></div>
+        <span style="font-size:9px;color:#ffd700">MED</span>
+      </div>
+      <div class="risk-row">
+        <span class="risk-label">InVideo Quality</span>
+        <div class="risk-bar-wrap"><div class="risk-bar" style="width:60%;background:#ffd700"></div></div>
+        <span style="font-size:9px;color:#ffd700">MED</span>
+      </div>
+      <div class="risk-row">
+        <span class="risk-label">Channel Strike</span>
+        <div class="risk-bar-wrap"><div class="risk-bar" style="width:15%;background:#00ff88"></div></div>
+        <span style="font-size:9px;color:#00ff88">LOW</span>
+      </div>
+      <div class="risk-row">
+        <span class="risk-label">Algorithm Shift</span>
+        <div class="risk-bar-wrap"><div class="risk-bar" style="width:40%;background:#ffd700"></div></div>
+        <span style="font-size:9px;color:#ffd700">MED</span>
+      </div>
+      <div class="risk-row">
+        <span class="risk-label">No Service Sales</span>
+        <div class="risk-bar-wrap"><div class="risk-bar" style="width:35%;background:#ffd700"></div></div>
+        <span style="font-size:9px;color:#ffd700">MED</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIVITY FEED -->
+  <div class="panel">
+    <div class="panel-title">Intelligence Feed</div>
+    <div id="feed">
+      <div class="feed-item">
+        <div class="feed-time">06:36</div>
+        <div class="feed-text"><span class="highlight">QUANT FRAMEWORK</span> deployed. ROI tracking active.</div>
+      </div>
+      <div class="feed-item">
+        <div class="feed-time">20:58</div>
+        <div class="feed-text"><span class="highlight">NVIDIA GTC 2026</span> — NemoClaw announced. OpenClaw + Nemotron. 5.5M impressions.</div>
+      </div>
+      <div class="feed-item">
+        <div class="feed-time">20:40</div>
+        <div class="feed-text"><span class="highlight">40Hz GAMMA</span> binaural beat generated. New channel concept validated.</div>
+      </div>
+      <div class="feed-item">
+        <div class="feed-time">19:56</div>
+        <div class="feed-text">Scoreboard created. Capital deployed: <span class="highlight">$130</span>. Revenue: $0.</div>
+      </div>
+      <div class="feed-item">
+        <div class="feed-time">19:00</div>
+        <div class="feed-text"><span class="highlight">BATCH 4</span> — 3 trending scripts written. Tariff video = highest EV.</div>
+      </div>
+      <div class="feed-item">
+        <div class="feed-time">18:30</div>
+        <div class="feed-text">V1 Finance: <span class="highlight">198 views</span> in Day 1. Algorithm pickup confirmed.</div>
+      </div>
+      <div class="feed-item">
+        <div class="feed-time">15:36</div>
+        <div class="feed-text"><span class="highlight">TIKTOK</span> @PaytonLoop claimed. Metricool connected.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT PIPELINE -->
+  <div class="panel span2">
+    <div class="panel-title">Content Pipeline — 18 Scripts Ready</div>
+    <table class="ev-table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Batch</th>
+          <th>Hook Type</th>
+          <th>Est. Viral Ceiling</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="color:#fff">Hidden Tax $1,000/Year (Tariffs)</td>
+          <td class="green">B4</td>
+          <td style="color:#888">Outrage</td>
+          <td class="green">HIGH</td>
+          <td><span class="badge badge-pending">Post Today</span></td>
+        </tr>
+        <tr>
+          <td style="color:#fff">$100 Now vs 2020</td>
+          <td class="green">B4</td>
+          <td style="color:#888">Visual Compare</td>
+          <td class="green">HIGH</td>
+          <td><span class="badge badge-pending">Tomorrow</span></td>
+        </tr>
+        <tr>
+          <td style="color:#fff">Why You'll Never Be Rich</td>
+          <td style="color:#4488ff">B3</td>
+          <td style="color:#888">Controversy</td>
+          <td class="green">HIGH</td>
+          <td><span class="badge badge-pending">Queued</span></td>
+        </tr>
+        <tr>
+          <td style="color:#fff">I Asked AI to Double $1,000</td>
+          <td style="color:#4488ff">B3</td>
+          <td style="color:#888">Story+AI</td>
+          <td class="yellow">MED-HIGH</td>
+          <td><span class="badge badge-pending">Queued</span></td>
+        </tr>
+        <tr>
+          <td style="color:#fff">What Happens When You Deposit $</td>
+          <td style="color:#4488ff">B3</td>
+          <td style="color:#888">Mind-bending</td>
+          <td class="yellow">MED-HIGH</td>
+          <td><span class="badge badge-pending">Queued</span></td>
+        </tr>
+        <tr>
+          <td style="color:#fff">Athletes Paid Millions Not Playing</td>
+          <td style="color:#888">B2</td>
+          <td style="color:#888">Envy</td>
+          <td class="yellow">MED-HIGH</td>
+          <td><span class="badge badge-locked">Ready</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="ticker-wrap">
+      <div class="ticker">// BATCH 2: 10 SCRIPTS // BATCH 3: 5 SCRIPTS // BATCH 4: 3 SCRIPTS // THUMBNAILS: BATCH 2 COMPLETE // TOTAL SCRIPTS BANKED: 18 // NEXT ACTION: POST TODAY'S VIDEO // TARIFF CONTENT TRENDING NOW //</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Clock
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toTimeString().split(' ')[0];
+  // Days active
+  const start = new Date('2026-03-24');
+  const diff = Math.floor((now - start) / 86400000) + 1;
+  document.getElementById('days-active').textContent = diff;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Sparkline
+const sparkData = [10, 18, 25, 40, 65, 85, 110, 145, 180, 210, 250, 306];
+const sparkEl = document.getElementById('sparkline');
+const maxSpark = Math.max(...sparkData);
+sparkData.forEach((v, i) => {
+  const bar = document.createElement('div');
+  bar.className = 'spark-bar';
+  bar.style.height = (v / maxSpark * 38) + 'px';
+  bar.style.background = i === sparkData.length - 1 ? '#00ff88' : `rgba(0,255,136,${0.2 + i/sparkData.length*0.5})`;
+  sparkEl.appendChild(bar);
+});
+
+// Projection chart
+const projCanvas = document.getElementById('projChart');
+projCanvas.width = projCanvas.offsetWidth || 400;
+const pctx = projCanvas.getContext('2d');
+
+const months = ['M1','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M12'];
+const bearData = [0,0,5,10,20,35,50,80,100,150,200,300];
+const baseData = [0,5,20,50,100,200,400,600,800,1200,1800,2500];
+const bullData = [0,20,80,200,400,800,1500,2500,3500,4500,5500,6500];
+
+const pw = projCanvas.width;
+const ph = 80;
+const maxVal = Math.max(...bullData);
+const pad = 20;
+
+function projX(i) { return pad + (i / (months.length - 1)) * (pw - pad*2); }
+function projY(v) { return ph - 4 - (v / maxVal) * (ph - 8); }
+
+// Grid lines
+pctx.strokeStyle = 'rgba(255,255,255,0.03)';
+pctx.lineWidth = 1;
+for (let i = 0; i <= 4; i++) {
+  const y = 4 + (i/4) * (ph - 8);
+  pctx.beginPath(); pctx.moveTo(0, y); pctx.lineTo(pw, y); pctx.stroke();
+}
+
+// Target line
+pctx.strokeStyle = 'rgba(255,215,0,0.2)';
+pctx.setLineDash([4,4]);
+pctx.beginPath();
+pctx.moveTo(0, projY(5821));
+pctx.lineTo(pw, projY(5821));
+pctx.stroke();
+pctx.setLineDash([]);
+
+// Draw scenarios
+[[bearData,'#ff4444',0.5],[baseData,'#ffd700',0.6],[bullData,'#00ff88',0.8]].forEach(([data,color,opacity]) => {
+  pctx.beginPath();
+  data.forEach((v,i) => { i===0 ? pctx.moveTo(projX(i),projY(v)) : pctx.lineTo(projX(i),projY(v)); });
+  pctx.strokeStyle = color;
+  pctx.globalAlpha = opacity;
+  pctx.lineWidth = 1.5;
+  pctx.stroke();
+  pctx.globalAlpha = 1;
+});
+
+// Month labels
+months.forEach((m, i) => {
+  pctx.fillStyle = 'rgba(255,255,255,0.15)';
+  pctx.font = '8px Courier New';
+  pctx.fillText(m, projX(i) - 6, ph);
+});
+
+// Target label
+pctx.fillStyle = 'rgba(255,215,0,0.4)';
+pctx.font = '8px Courier New';
+pctx.fillText('$5,821 TARGET', pw - 80, projY(5821) - 3);
+</script>
+</body>
+</html>

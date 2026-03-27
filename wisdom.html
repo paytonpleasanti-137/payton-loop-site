@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Wisdom Engine — Payton Loop</title>
+<style>
+  @import url('data:text/css,');
+
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8C97A;
+    --gold-dim: #8A6E2F;
+    --bg: #0D0D0D;
+    --rule: rgba(201,168,76,0.2);
+    --text: #D4C5A0;
+    --text-dim: rgba(212,197,160,0.45);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  /* Subtle texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse at 20% 20%, rgba(201,168,76,0.04) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(201,168,76,0.03) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page {
+    position: relative;
+    z-index: 1;
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 60px 40px 80px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 56px;
+  }
+
+  .issue-label {
+    font-size: 10px;
+    letter-spacing: 3.5px;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    font-family: 'Courier New', monospace;
+  }
+
+  .date-display {
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: var(--gold);
+    font-family: 'Courier New', monospace;
+    text-align: right;
+  }
+
+  /* Top rule */
+  .rule-top {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin-bottom: 56px;
+  }
+
+  /* ── Section label ── */
+  .section-label {
+    font-size: 9px;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    font-family: 'Courier New', monospace;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  /* ── Fact number ── */
+  .fact-number {
+    font-size: 72px;
+    font-weight: 900;
+    font-family: Georgia, 'Times New Roman', serif;
+    color: rgba(201,168,76,0.08);
+    line-height: 1;
+    margin-bottom: -16px;
+    letter-spacing: -4px;
+    user-select: none;
+  }
+
+  /* ── Main fact text ── */
+  .fact-text {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 28px;
+    line-height: 1.65;
+    color: var(--text);
+    font-weight: 400;
+    letter-spacing: 0.2px;
+    position: relative;
+  }
+
+  .fact-text::before {
+    content: '\201C';
+    font-size: 90px;
+    color: var(--gold);
+    opacity: 0.25;
+    position: absolute;
+    left: -18px;
+    top: -20px;
+    line-height: 1;
+    font-family: Georgia, serif;
+    pointer-events: none;
+  }
+
+  .fact-text .highlight {
+    color: var(--gold-light);
+    font-style: italic;
+  }
+
+  /* ── Divider ── */
+  .fact-divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 52px 0;
+  }
+
+  .fact-divider::before,
+  .fact-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  .divider-ornament {
+    color: var(--gold);
+    font-size: 18px;
+    opacity: 0.6;
+  }
+
+  /* ── Second fact ── */
+  .fact-2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 22px;
+    line-height: 1.7;
+    color: rgba(212,197,160,0.8);
+    font-weight: 400;
+    letter-spacing: 0.1px;
+    font-style: italic;
+  }
+
+  .fact-2 .highlight {
+    color: var(--gold-light);
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  .fact-2-tag {
+    display: inline-block;
+    background: rgba(201,168,76,0.1);
+    border: 1px solid rgba(201,168,76,0.2);
+    color: var(--gold-dim);
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: 'Courier New', monospace;
+    padding: 3px 8px;
+    margin-bottom: 18px;
+    border-radius: 2px;
+  }
+
+  /* ── Spacer ── */
+  .spacer { flex: 1; }
+
+  /* ── Footer ── */
+  .footer {
+    margin-top: 64px;
+    padding-top: 28px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .brand {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 14px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .brand span {
+    color: var(--gold-dim);
+    font-size: 11px;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 2px;
+  }
+
+  .footer-tag {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    font-family: 'Courier New', monospace;
+  }
+
+  /* Subtle fade-in animation */
+  .fact-text, .fact-2 {
+    animation: fadeUp 1.2s ease both;
+  }
+
+  .fact-2 { animation-delay: 0.3s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .header { animation: fadeUp 0.8s ease both; }
+  .rule-top { animation: expandWidth 1s ease both 0.1s; }
+
+  @keyframes expandWidth {
+    from { opacity: 0; transform: scaleX(0); }
+    to   { opacity: 1; transform: scaleX(1); }
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .page { padding: 40px 24px 60px; }
+    .fact-text { font-size: 22px; }
+    .fact-2 { font-size: 18px; }
+    .fact-number { font-size: 52px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="issue-label">Daily Wisdom Engine &nbsp;/&nbsp; Vol. I</div>
+    <div class="date-display" id="dateDisplay">—</div>
+  </div>
+
+  <div class="rule-top"></div>
+
+  <!-- Fact 1 -->
+  <div class="section-label">Today's Curiosity No. 1</div>
+  <div class="fact-number">01</div>
+  <p class="fact-text">
+    The inventor of the Pringles can was <span class="highlight">buried in one</span>.
+    Fredric Baur patented the tube design in 1975 and was so proud of it that his ashes
+    were buried inside a Pringles can in <span class="highlight">2008</span>.
+  </p>
+
+  <div class="fact-divider">
+    <div class="divider-ornament">✦</div>
+  </div>
+
+  <!-- Fact 2 -->
+  <div class="section-label">Today's Curiosity No. 2</div>
+  <div class="fact-2-tag">Money &amp; Contracts</div>
+  <div class="fact-number" style="font-size:60px;">02</div>
+  <p class="fact-2">
+    Bobby Bonilla hasn't played baseball since 2001.
+    The Mets pay him <span class="highlight">$1.19 million every July 1st</span> until 2035
+    because of a deferred contract. He's earned more retired than most active players.
+  </p>
+
+  <div class="spacer"></div>
+
+  <div class="footer">
+    <div class="brand">
+      Payton Loop
+      <br><span>Daily Brain Food</span>
+    </div>
+    <div class="footer-tag">Knowledge is compound interest</div>
+  </div>
+
+</div>
+
+<script>
+  // Date display
+  const d = new Date();
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December'];
+  document.getElementById('dateDisplay').textContent =
+    days[d.getDay()] + ' · ' + months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+</script>
+</body>
+</html>

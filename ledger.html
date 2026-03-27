@@ -1,0 +1,911 @@
+
+html = r"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Payton Loop — General Ledger</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root {
+  --ink:    #1a1108;
+  --red:    #8b0000;
+  --green:  #004400;
+  --paper:  #faf6ee;
+  --rule:   #c8b89a;
+  --stamp:  #8b0000;
+  --fade:   #888070;
+  --line:   #ddd0bb;
+}
+
+body {
+  background: #e8e0d0;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(180,160,120,0.15) 27px, rgba(180,160,120,0.15) 28px);
+  font-family: Arial, sans-serif;
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+/* ---- LEDGER BOOK WRAPPER ---- */
+.book {
+  max-width: 1000px;
+  margin: 0 auto;
+  background: var(--paper);
+  box-shadow: -4px 0 12px rgba(0,0,0,0.15), 4px 0 12px rgba(0,0,0,0.15), 0 8px 32px rgba(0,0,0,0.3);
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Left binding spine */
+.book::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 28px;
+  background: linear-gradient(to right, #3a2a1a, #6b4c2a, #8b6a3a, #c8a070, #a07848, #6b4c2a);
+  box-shadow: inset -3px 0 6px rgba(0,0,0,0.3);
+  z-index: 10;
+}
+
+/* Ruling lines on the spine */
+.book::after {
+  content: '';
+  position: absolute;
+  left: 28px; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--red);
+  opacity: .6;
+  z-index: 10;
+}
+
+.book-inner {
+  margin-left: 48px;
+  padding: 0 24px 60px;
+}
+
+/* ---- HEADER / COVER ---- */
+.ledger-cover {
+  padding: 32px 0 20px;
+  border-bottom: 3px double var(--rule);
+  margin-bottom: 0;
+  text-align: center;
+  position: relative;
+}
+
+.ledger-cover::after {
+  content: '';
+  display: block;
+  height: 2px;
+  background: var(--red);
+  margin-top: 8px;
+  opacity: .5;
+}
+
+.ledger-name {
+  font-family: 'Special Elite', 'Courier New', monospace;
+  font-size: 28px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.ledger-sub {
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--fade);
+  margin-top: 4px;
+}
+
+.ledger-period {
+  font-size: 11px;
+  color: var(--fade);
+  margin-top: 8px;
+  font-style: italic;
+  letter-spacing: 1px;
+}
+
+/* ---- NAV ---- */
+.ledger-nav {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--rule);
+  background: rgba(200,184,154,0.2);
+  flex-wrap: wrap;
+}
+.ledger-nav a {
+  font-size: 10px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--fade);
+  text-decoration: none;
+  padding: 8px 14px;
+  border-right: 1px solid var(--rule);
+  white-space: nowrap;
+}
+.ledger-nav a:hover { color: var(--ink); background: rgba(200,184,154,0.3); }
+.ledger-nav a.home { color: var(--ink); font-weight: bold; }
+
+/* ---- SECTION LABELS ---- */
+.section-rule {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 28px 0 12px;
+}
+.section-rule span {
+  font-size: 10px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--fade);
+  white-space: nowrap;
+}
+.section-rule::before, .section-rule::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+}
+
+/* ---- SUMMARY STRIP ---- */
+.summary-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--ink);
+  margin-bottom: 4px;
+}
+.summary-cell {
+  padding: 12px 14px;
+  border-right: 1px solid var(--rule);
+  text-align: center;
+}
+.summary-cell:last-child { border-right: none; }
+.summary-cell .sc-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--fade);
+  margin-bottom: 4px;
+}
+.summary-cell .sc-val {
+  font-size: 22px;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+}
+.summary-cell .sc-val.pos { color: var(--green); }
+.summary-cell .sc-val.neg { color: var(--red); }
+.summary-cell .sc-val.neut { color: var(--ink); }
+
+/* ---- LEDGER TABLE ---- */
+.ledger-table-wrap {
+  border: 1px solid var(--rule);
+  border-top: none;
+  overflow-x: auto;
+}
+.ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.ledger-table thead tr {
+  background: var(--ink);
+  color: #faf6ee;
+}
+.ledger-table thead th {
+  padding: 8px 10px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: bold;
+  text-align: left;
+  white-space: nowrap;
+}
+.ledger-table thead th.n { text-align: right; }
+
+.ledger-table tbody tr {
+  border-bottom: 1px solid var(--line);
+}
+.ledger-table tbody tr:nth-child(even) {
+  background: rgba(200,184,154,0.12);
+}
+.ledger-table tbody tr:hover {
+  background: rgba(200,184,154,0.28);
+}
+.ledger-table tbody td {
+  padding: 8px 10px;
+  vertical-align: middle;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+}
+.ledger-table tbody td.desc {
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  max-width: 280px;
+}
+.ledger-table tbody td.n { text-align: right; }
+.ledger-table tbody td.debit  { color: var(--red); text-align: right; }
+.ledger-table tbody td.credit { color: var(--green); text-align: right; }
+.ledger-table tbody td.balance-pos { color: var(--green); text-align: right; font-weight: bold; }
+.ledger-table tbody td.balance-neg { color: var(--red); text-align: right; font-weight: bold; }
+.ledger-table tbody td.balance-zero { color: var(--ink); text-align: right; font-weight: bold; }
+
+/* STAMPS */
+.stamp {
+  display: inline-block;
+  font-size: 8px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 1px 6px;
+  border: 1px solid;
+  border-radius: 1px;
+  opacity: .8;
+  transform: rotate(-1deg);
+  display: inline-block;
+}
+.stamp-posted   { color: var(--green); border-color: var(--green); }
+.stamp-pending  { color: #886600; border-color: #886600; }
+.stamp-milestone{ color: var(--red); border-color: var(--red); background: rgba(139,0,0,0.06); }
+
+/* Category pill */
+.cat {
+  font-size: 9px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  padding: 1px 6px;
+  background: rgba(0,0,0,0.06);
+  color: var(--fade);
+  display: inline-block;
+  margin-left: 6px;
+}
+
+/* ---- ADD ENTRY FORM ---- */
+.entry-form {
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--ink);
+  padding: 18px;
+  margin-top: 20px;
+  background: rgba(200,184,154,0.1);
+}
+.entry-form h3 {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--ink);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.entry-form h3::after { content:''; flex:1; height:1px; background:var(--rule); }
+.entry-grid {
+  display: grid;
+  grid-template-columns: 110px 1fr 140px 130px 130px 120px;
+  gap: 8px;
+  margin-bottom: 10px;
+  align-items: end;
+}
+.entry-field label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--fade);
+  display: block;
+  margin-bottom: 4px;
+}
+.entry-field input,
+.entry-field select {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--rule);
+  padding: 5px 4px;
+  font-size: 12px;
+  font-family: 'Courier New', monospace;
+  background: transparent;
+  color: var(--ink);
+  outline: none;
+}
+.entry-field input:focus,
+.entry-field select:focus {
+  border-bottom-color: var(--ink);
+}
+.entry-field select {
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+}
+.btn-post {
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  padding: 8px 20px;
+  font-size: 10px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+}
+.btn-post:hover { background: #000; }
+.btn-clear {
+  background: transparent;
+  border: 1px solid var(--rule);
+  color: var(--fade);
+  padding: 8px 16px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  margin-left: 8px;
+}
+
+/* ---- TOTALS ROW ---- */
+.totals-row {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  border: 1px solid var(--rule);
+  border-top: 2px solid var(--ink);
+  margin-top: -1px;
+}
+.totals-cell {
+  padding: 10px 14px;
+  border-right: 1px solid var(--rule);
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  font-weight: bold;
+}
+.totals-cell:last-child { border-right: none; }
+.totals-cell .tl { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--fade); margin-bottom: 2px; font-family: Arial; }
+
+/* ---- ACCOUNT LEDGERS ---- */
+.account-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 4px;
+}
+.account-card {
+  border: 1px solid var(--rule);
+}
+.account-card-header {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 6px 12px;
+  font-size: 10px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  display: flex;
+  justify-content: space-between;
+}
+.account-card-header .acct-num {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  opacity: .7;
+}
+.account-card table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+.account-card table td {
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--line);
+  font-family: 'Courier New', monospace;
+}
+.account-card table td.desc2 { font-family: Arial; font-size: 11px; }
+.account-card table td.n { text-align: right; }
+.account-card table td.pos { color: var(--green); text-align: right; }
+.account-card table td.neg { color: var(--red); text-align: right; }
+.account-card .acct-total {
+  padding: 6px 8px;
+  font-size: 12px;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+  border-top: 2px solid var(--ink);
+  display: flex;
+  justify-content: space-between;
+}
+.account-card .acct-total .pos { color: var(--green); }
+.account-card .acct-total .neg { color: var(--red); }
+
+/* ---- PROGRESS BAR ---- */
+.progress-section {
+  border: 1px solid var(--rule);
+  padding: 14px 16px;
+  margin-bottom: 4px;
+}
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  margin-bottom: 6px;
+  color: var(--fade);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.progress-label strong { color: var(--ink); }
+.progress-track {
+  height: 8px;
+  background: var(--line);
+  position: relative;
+  border: 1px solid var(--rule);
+}
+.progress-fill {
+  height: 100%;
+  background: var(--green);
+  position: absolute;
+  left: 0; top: 0;
+  transition: width .5s;
+}
+.progress-fill.negative { background: var(--red); }
+
+/* ---- EXPLANATORY NOTES ---- */
+.ledger-note {
+  padding: 12px 16px;
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--red);
+  font-size: 11px;
+  color: var(--fade);
+  line-height: 1.8;
+  margin-top: 16px;
+  background: rgba(200,184,154,0.1);
+  font-style: italic;
+}
+.ledger-note strong { color: var(--ink); font-style: normal; }
+
+/* ---- DOUBLE ENTRY EXPLAINER ---- */
+.explainer {
+  border: 1px solid var(--rule);
+  padding: 16px;
+}
+.explainer h4 {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--fade);
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 6px;
+}
+.explainer-row {
+  display: flex;
+  gap: 20px;
+  font-size: 11px;
+  margin-bottom: 8px;
+  align-items: flex-start;
+}
+.explainer-row .er-num {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  font-weight: bold;
+  color: var(--red);
+  min-width: 24px;
+}
+.explainer-row .er-text { color: var(--fade); line-height: 1.6; }
+.explainer-row .er-text strong { color: var(--ink); }
+
+/* ---- FOOTER ---- */
+.ledger-footer {
+  margin-top: 40px;
+  padding-top: 12px;
+  border-top: 3px double var(--rule);
+  font-size: 10px;
+  color: var(--fade);
+  display: flex;
+  justify-content: space-between;
+  font-style: italic;
+}
+</style>
+</head>
+<body>
+<div class="book">
+  <div class="book-inner">
+
+    <!-- COVER -->
+    <div class="ledger-cover">
+      <div class="ledger-name">Payton Loop</div>
+      <div class="ledger-sub">General Ledger &nbsp;&middot;&nbsp; Est. March 24, 2026</div>
+      <div class="ledger-period">Fiscal Year Commencing March 24, 2026 &nbsp;&nbsp;|&nbsp;&nbsp; All entries in United States Dollars</div>
+    </div>
+
+    <!-- NAV -->
+    <div class="ledger-nav">
+      <a href="plc-capital.html" class="home">&#8592; Operations</a>
+      <a href="calc.html">Calculators</a>
+      <a href="predict.html">Predict</a>
+      <a href="whales.html">Whales</a>
+      <a href="edge.html">The Edge</a>
+      <a href="bets.html">Bets</a>
+      <a href="filings.html">Filings</a>
+    </div>
+
+    <!-- RUNNING BALANCE STRIP -->
+    <div class="section-rule"><span>Account Summary</span></div>
+
+    <div class="progress-section">
+      <div class="progress-label">
+        <span>Break-Even Progress</span>
+        <strong id="be-pct-label">0%</strong>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="be-bar" style="width:0%"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--fade);margin-top:4px">
+        <span>Capital Deployed: $181.00</span>
+        <span id="be-mid"></span>
+        <span>Break-Even: $181.00</span>
+      </div>
+    </div>
+
+    <div class="summary-strip" id="summary-strip">
+      <div class="summary-cell">
+        <div class="sc-label">Total Debits (Out)</div>
+        <div class="sc-val neg" id="sum-debit">$0.00</div>
+      </div>
+      <div class="summary-cell">
+        <div class="sc-label">Total Credits (In)</div>
+        <div class="sc-val pos" id="sum-credit">$0.00</div>
+      </div>
+      <div class="summary-cell">
+        <div class="sc-label">Net Balance</div>
+        <div class="sc-val" id="sum-balance">$0.00</div>
+      </div>
+      <div class="summary-cell">
+        <div class="sc-label">Independence Target</div>
+        <div class="sc-val neut">$5,821/mo</div>
+      </div>
+    </div>
+
+    <!-- JOURNAL ENTRIES TABLE -->
+    <div class="section-rule"><span>Journal — Chronological Entries</span></div>
+
+    <div class="ledger-table-wrap">
+      <table class="ledger-table" id="journal-table">
+        <thead>
+          <tr>
+            <th style="width:90px">Date</th>
+            <th>Description</th>
+            <th style="width:80px">Category</th>
+            <th class="n" style="width:110px">Debit (Out)</th>
+            <th class="n" style="width:110px">Credit (In)</th>
+            <th class="n" style="width:120px">Balance</th>
+            <th style="width:80px">Status</th>
+          </tr>
+        </thead>
+        <tbody id="journal-body">
+        </tbody>
+      </table>
+    </div>
+
+    <div class="totals-row" id="totals-row">
+      <div class="totals-cell"><div class="tl">Total Debits</div><span class="neg" id="tot-debit">$0.00</span></div>
+      <div class="totals-cell"><div class="tl">Total Credits</div><span class="pos" id="tot-credit">$0.00</span></div>
+      <div class="totals-cell"><div class="tl">Net Position</div><span id="tot-net">$0.00</span></div>
+    </div>
+
+    <!-- ADD ENTRY FORM -->
+    <div class="entry-form">
+      <h3>Post New Entry</h3>
+      <div class="entry-grid">
+        <div class="entry-field">
+          <label>Date</label>
+          <input type="date" id="e-date">
+        </div>
+        <div class="entry-field">
+          <label>Description</label>
+          <input type="text" id="e-desc" placeholder="e.g. Gumroad sale — AI Money Playbook">
+        </div>
+        <div class="entry-field">
+          <label>Category</label>
+          <select id="e-cat">
+            <option value="Revenue">Revenue</option>
+            <option value="Capital">Capital</option>
+            <option value="Expense">Expense</option>
+            <option value="Affiliate">Affiliate</option>
+            <option value="Tools">Tools</option>
+            <option value="Milestone">Milestone</option>
+            <option value="Transfer">Transfer</option>
+          </select>
+        </div>
+        <div class="entry-field">
+          <label>Debit ($) — Money Out</label>
+          <input type="number" id="e-debit" placeholder="0.00" step="0.01" min="0">
+        </div>
+        <div class="entry-field">
+          <label>Credit ($) — Money In</label>
+          <input type="number" id="e-credit" placeholder="0.00" step="0.01" min="0">
+        </div>
+        <div class="entry-field">
+          <label>Status</label>
+          <select id="e-status">
+            <option value="posted">Posted</option>
+            <option value="pending">Pending</option>
+            <option value="milestone">Milestone</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-post" onclick="postEntry()">&#9632; Post Entry</button>
+      <button class="btn-clear" onclick="clearForm()">Clear</button>
+    </div>
+
+    <!-- ACCOUNT LEDGERS (T-Accounts) -->
+    <div class="section-rule"><span>Account Ledgers — Double-Entry View</span></div>
+
+    <div class="account-grid" id="account-grid">
+      <!-- dynamically built -->
+    </div>
+
+    <!-- WHAT IS A LEDGER -->
+    <div class="section-rule"><span>About This Ledger</span></div>
+
+    <div class="explainer">
+      <h4>What is a General Ledger &amp; Why Does It Matter?</h4>
+      <div class="explainer-row">
+        <div class="er-num">I.</div>
+        <div class="er-text"><strong>The oldest financial technology.</strong> Double-entry bookkeeping was invented in 1494 by Luca Pacioli — the same mathematics underlying every Fortune 500 company, every bank, and every investment portfolio today. For every transaction, something is debited (goes out or increases an asset) and something is credited (comes in or creates a liability). The books always balance.</div>
+      </div>
+      <div class="explainer-row">
+        <div class="er-num">II.</div>
+        <div class="er-text"><strong>Why Buffett reads ledgers, not headlines.</strong> Warren Buffett has said he can evaluate a business in under an hour if he has the right financial statements. A ledger tells you: where does money come from? Where does it go? Is the business generating cash or consuming it? Every entry in this ledger is an answer to those questions for Payton Loop.</div>
+      </div>
+      <div class="explainer-row">
+        <div class="er-num">III.</div>
+        <div class="er-text"><strong>Debits and Credits — the rule.</strong> A <strong>Debit</strong> increases assets or expenses (money leaves the account or you spend it). A <strong>Credit</strong> increases revenue or liabilities (money enters or you owe it). In this ledger: Debits = money deployed (expenses, investments). Credits = money earned (sales, affiliate commissions). Net = your position.</div>
+      </div>
+      <div class="explainer-row">
+        <div class="er-num">IV.</div>
+        <div class="er-text"><strong>Why this matters for Payton Loop.</strong> Without a ledger, you can't answer: Am I profitable? What's my ROI? When do I break even? What's my burn rate? With this ledger, those answers are always current, always visible, always honest. This is how serious operators think — not in impressions or follower counts, but in entries, balances, and returns.</div>
+      </div>
+    </div>
+
+    <div class="ledger-note">
+      <strong>Ledger Principle:</strong> All entries are permanent. Errors are corrected by posting a new offsetting entry — never by deleting. This creates an immutable audit trail. Every entry you post here is timestamped and stored in your browser's localStorage. Export your ledger at any time using the button below.
+    </div>
+
+    <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn-post" onclick="exportLedger()">&#8595; Export Ledger (CSV)</button>
+      <button class="btn-clear" onclick="if(confirm('Reset all entries? This cannot be undone.')) resetLedger()">Reset to Seed Data</button>
+    </div>
+
+    <div class="ledger-footer">
+      <span>Payton Loop &mdash; General Ledger</span>
+      <span id="footer-date"></span>
+      <span>Maintained by Ledger &mdash; All figures in USD</span>
+    </div>
+
+  </div><!-- /book-inner -->
+</div><!-- /book -->
+
+<script>
+var STORAGE_KEY = 'plc-ledger-entries';
+
+// Seed entries — the founding transactions of Payton Loop
+var SEED_ENTRIES = [
+  {id:1, date:'2026-03-24', desc:'Claude API credits — initial deployment capital', cat:'Capital', debit:105.00, credit:0, status:'posted'},
+  {id:2, date:'2026-03-24', desc:'InVideo AI — Plus Monthly subscription', cat:'Tools', debit:25.00, credit:0, status:'posted'},
+  {id:3, date:'2026-03-24', desc:'YouTube Shorts — Video 1 published (@PaytonLoop)', cat:'Milestone', debit:0, credit:0, status:'milestone'},
+  {id:4, date:'2026-03-24', desc:'YouTube Shorts — Video 2 published (@PaytonLoop)', cat:'Milestone', debit:0, credit:0, status:'milestone'},
+  {id:5, date:'2026-03-24', desc:'YouTube Shorts — Video 3 published (@PaytonLoop)', cat:'Milestone', debit:0, credit:0, status:'milestone'},
+  {id:6, date:'2026-03-24', desc:'Amazon Associates connected — store ID: paytonloop29-20', cat:'Milestone', debit:0, credit:0, status:'milestone'},
+  {id:7, date:'2026-03-25', desc:'Claude API additional credits', cat:'Capital', debit:51.00, credit:0, status:'posted'},
+  {id:8, date:'2026-03-25', desc:'Gumroad account created — AI Money Playbook listed at $27', cat:'Milestone', debit:0, credit:0, status:'milestone'},
+  {id:9, date:'2026-03-25', desc:'AI Money Playbook PDF — product live at paytonloop.gumroad.com', cat:'Milestone', debit:0, credit:0, status:'milestone'},
+  {id:10, date:'2026-03-26', desc:'Day 1 views: 306 across 3 videos (Finance: 198, Psychology: 83, AI: 25)', cat:'Milestone', debit:0, credit:0, status:'milestone'},
+];
+
+var entries = [];
+var nextId = 100;
+
+function loadEntries() {
+  var saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try {
+      var parsed = JSON.parse(saved);
+      entries = parsed.entries || SEED_ENTRIES;
+      nextId  = parsed.nextId  || 100;
+    } catch(e) {
+      entries = SEED_ENTRIES.slice();
+    }
+  } else {
+    entries = SEED_ENTRIES.slice();
+  }
+}
+
+function saveEntries() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({entries:entries, nextId:nextId}));
+}
+
+function fmtMoney(v) {
+  if (v === 0) return '—';
+  return '$' + v.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+function fmtMoneyFull(v) {
+  var sign = v < 0 ? '-' : '';
+  return sign + '$' + Math.abs(v).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+function stampHTML(status) {
+  if (status === 'posted')    return '<span class="stamp stamp-posted">Posted</span>';
+  if (status === 'pending')   return '<span class="stamp stamp-pending">Pending</span>';
+  if (status === 'milestone') return '<span class="stamp stamp-milestone">&#9733; Milestone</span>';
+  return '';
+}
+
+function render() {
+  var body = document.getElementById('journal-body');
+  var totalDebit = 0, totalCredit = 0, runBal = 0;
+  var rows = '';
+
+  for (var i = 0; i < entries.length; i++) {
+    var e = entries[i];
+    var d = parseFloat(e.debit)  || 0;
+    var c = parseFloat(e.credit) || 0;
+    totalDebit  += d;
+    totalCredit += c;
+    runBal      += (c - d);
+
+    var balClass = runBal > 0 ? 'balance-pos' : runBal < 0 ? 'balance-neg' : 'balance-zero';
+    var isMilestone = e.status === 'milestone';
+
+    rows += '<tr' + (isMilestone ? ' style="opacity:.85;font-style:italic"' : '') + '>';
+    rows += '<td>' + e.date + '</td>';
+    rows += '<td class="desc">' + e.desc + '<span class="cat">' + e.cat + '</span></td>';
+    rows += '<td></td>';
+    rows += '<td class="debit">'  + (d > 0 ? fmtMoney(d) : '—') + '</td>';
+    rows += '<td class="credit">' + (c > 0 ? fmtMoney(c) : '—') + '</td>';
+    rows += '<td class="' + (isMilestone ? '' : balClass) + '">' + (isMilestone ? '—' : fmtMoneyFull(runBal)) + '</td>';
+    rows += '<td>' + stampHTML(e.status) + '</td>';
+    rows += '</tr>';
+  }
+
+  body.innerHTML = rows || '<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--fade);font-style:italic">No entries yet. Post your first entry below.</td></tr>';
+
+  // Summary
+  var net = totalCredit - totalDebit;
+  document.getElementById('sum-debit').textContent   = '-' + fmtMoney(totalDebit);
+  document.getElementById('sum-credit').textContent  = fmtMoney(totalCredit);
+  document.getElementById('sum-balance').textContent = fmtMoneyFull(net);
+  document.getElementById('sum-balance').className   = 'sc-val ' + (net > 0 ? 'pos' : net < 0 ? 'neg' : 'neut');
+
+  document.getElementById('tot-debit').textContent   = fmtMoney(totalDebit);
+  document.getElementById('tot-credit').textContent  = fmtMoney(totalCredit);
+  document.getElementById('tot-net').textContent     = fmtMoneyFull(net);
+  document.getElementById('tot-net').className       = net > 0 ? 'pos' : net < 0 ? 'neg' : '';
+
+  // Break-even progress
+  var breakEven = 181;
+  var pct = Math.min(100, Math.max(0, (totalCredit / breakEven) * 100));
+  document.getElementById('be-bar').style.width = pct + '%';
+  document.getElementById('be-pct-label').textContent = pct.toFixed(1) + '%';
+  document.getElementById('be-mid').textContent = 'Revenue: ' + fmtMoney(totalCredit);
+
+  renderAccounts(entries);
+}
+
+function renderAccounts(entries) {
+  var accounts = {};
+  for (var i = 0; i < entries.length; i++) {
+    var e = entries[i];
+    var cat = e.cat;
+    if (!accounts[cat]) accounts[cat] = {debit:0, credit:0, items:[]};
+    accounts[cat].debit  += parseFloat(e.debit)  || 0;
+    accounts[cat].credit += parseFloat(e.credit) || 0;
+    if ((e.debit || 0) > 0 || (e.credit || 0) > 0) {
+      accounts[cat].items.push(e);
+    }
+  }
+
+  var cats = Object.keys(accounts);
+  var ACCT_NUMS = {Capital:'1000', Revenue:'4000', Expense:'5000', Affiliate:'4100', Tools:'5100', Milestone:'9000', Transfer:'2000'};
+  var html = '';
+  for (var ci = 0; ci < cats.length; ci++) {
+    var cat = cats[ci];
+    var acct = accounts[cat];
+    if (acct.items.length === 0) continue;
+    var acctNum = ACCT_NUMS[cat] || '9999';
+    var net = acct.credit - acct.debit;
+
+    html += '<div class="account-card">';
+    html += '<div class="account-card-header"><span>' + cat + ' Account</span><span class="acct-num">Acct #' + acctNum + '</span></div>';
+    html += '<table>';
+    html += '<tr><td style="background:#f5f0e8;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--fade);padding:4px 8px" colspan="3">Date</td><td style="background:#f5f0e8;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--fade);padding:4px 8px" class="n">Debit</td><td style="background:#f5f0e8;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--fade);padding:4px 8px" class="n">Credit</td></tr>';
+    for (var ii = 0; ii < acct.items.length; ii++) {
+      var item = acct.items[ii];
+      html += '<tr><td class="desc2" colspan="3">' + item.date + ' — ' + item.desc.substring(0,45) + (item.desc.length>45?'...':'') + '</td>';
+      html += '<td class="neg">' + (item.debit > 0 ? fmtMoney(item.debit) : '—') + '</td>';
+      html += '<td class="pos">' + (item.credit > 0 ? fmtMoney(item.credit) : '—') + '</td></tr>';
+    }
+    html += '</table>';
+    html += '<div class="acct-total"><span>Net</span><span class="' + (net > 0 ? 'pos' : net < 0 ? 'neg' : '') + '">' + fmtMoneyFull(net) + '</span></div>';
+    html += '</div>';
+  }
+  document.getElementById('account-grid').innerHTML = html || '<div style="padding:20px;color:var(--fade);font-size:12px">No account activity yet.</div>';
+}
+
+function postEntry() {
+  var date   = document.getElementById('e-date').value;
+  var desc   = document.getElementById('e-desc').value.trim();
+  var cat    = document.getElementById('e-cat').value;
+  var debit  = parseFloat(document.getElementById('e-debit').value)  || 0;
+  var credit = parseFloat(document.getElementById('e-credit').value) || 0;
+  var status = document.getElementById('e-status').value;
+
+  if (!date) { alert('Date is required.'); return; }
+  if (!desc) { alert('Description is required.'); return; }
+  if (debit === 0 && credit === 0 && status !== 'milestone') {
+    alert('Enter a debit or credit amount (or set status to Milestone for non-monetary entries).'); return;
+  }
+
+  var entry = {id:nextId++, date:date, desc:desc, cat:cat, debit:debit, credit:credit, status:status};
+  entries.push(entry);
+  // Sort by date
+  entries.sort(function(a,b){ return a.date < b.date ? -1 : a.date > b.date ? 1 : a.id - b.id; });
+  saveEntries();
+  render();
+  clearForm();
+
+  // Visual feedback
+  var btn = document.querySelector('.btn-post');
+  var orig = btn.innerHTML;
+  btn.innerHTML = '&#10003; Posted';
+  btn.style.background = '#004400';
+  setTimeout(function(){ btn.innerHTML = orig; btn.style.background = ''; }, 1500);
+}
+
+function clearForm() {
+  document.getElementById('e-desc').value   = '';
+  document.getElementById('e-debit').value  = '';
+  document.getElementById('e-credit').value = '';
+  document.getElementById('e-status').value = 'posted';
+}
+
+function exportLedger() {
+  var csv = 'Date,Description,Category,Debit,Credit,Status\n';
+  for (var i = 0; i < entries.length; i++) {
+    var e = entries[i];
+    csv += '"' + e.date + '","' + e.desc.replace(/"/g,'""') + '","' + e.cat + '",' + (e.debit||0).toFixed(2) + ',' + (e.credit||0).toFixed(2) + ',"' + e.status + '"\n';
+  }
+  var a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'payton-loop-ledger.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function resetLedger() {
+  entries = SEED_ENTRIES.slice();
+  nextId = 100;
+  saveEntries();
+  render();
+}
+
+// Init
+window.onload = function() {
+  // Set today's date as default
+  var now = new Date();
+  var y = now.getFullYear();
+  var m = ('0'+(now.getMonth()+1)).slice(-2);
+  var d = ('0'+now.getDate()).slice(-2);
+  document.getElementById('e-date').value = y + '-' + m + '-' + d;
+  document.getElementById('footer-date').textContent = 'Last Updated: ' + new Date().toLocaleDateString('en-US', {timeZone:'America/Chicago',year:'numeric',month:'long',day:'numeric'});
+
+  loadEntries();
+  render();
+};
+</script>
+
+<script src="darkmode.js"></script>
+<script src="search.js"></script>
+</body>
+</html>
