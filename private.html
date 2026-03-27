@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Personal — Private</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Roboto+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --paper:     #f2ede4;
+  --paper2:    #ede8de;
+  --ink:       #1a1208;
+  --ink-dim:   #5a4a30;
+  --ink-muted: #9a8a6a;
+  --red:       #8b1a1a;
+  --green:     #1a5c1a;
+  --amber:     #8b6000;
+  --blue:      #1a2a6b;
+  --rule:      rgba(139,90,0,0.15);
+  --serif:     'EB Garamond', Georgia, serif;
+  --mono:      'Roboto Mono', monospace;
+  --sans:      'Inter', sans-serif;
+  --line-h:    32px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: #2a2018;
+  min-height: 100vh;
+  padding: 24px 16px 60px;
+  font-family: var(--serif);
+}
+
+/* Page wrapper — looks like a document folder */
+.document {
+  max-width: 900px;
+  margin: 0 auto;
+  background: var(--paper);
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent calc(var(--line-h) - 1px), var(--rule) calc(var(--line-h) - 1px), var(--rule) var(--line-h));
+  box-shadow: 0 4px 40px rgba(0,0,0,0.6), inset 0 0 60px rgba(0,0,0,0.04);
+  position: relative;
+}
+
+/* Red margin line */
+.document::before {
+  content: '';
+  position: absolute;
+  left: 56px; top: 0; bottom: 0;
+  width: 1px;
+  background: rgba(180,0,0,0.3);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* CONFIDENTIAL watermark */
+.document::after {
+  content: 'PRIVATE';
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%) rotate(-30deg);
+  font-family: var(--mono);
+  font-size: 100px;
+  font-weight: bold;
+  color: rgba(139,26,26,0.04);
+  letter-spacing: 10px;
+  pointer-events: none;
+  z-index: 0;
+  white-space: nowrap;
+}
+
+.page {
+  padding: 40px 48px 40px 72px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Header */
+.doc-header {
+  text-align: center;
+  padding-bottom: 24px;
+  margin-bottom: 32px;
+  border-bottom: 2px solid var(--ink-dim);
+}
+
+.doc-title {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+
+.doc-sub {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.doc-meta {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-dim);
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+/* Section headers */
+.section {
+  margin-bottom: 40px;
+}
+
+.section-title {
+  font-family: var(--serif);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ink);
+  padding: 8px 0;
+  border-bottom: 1px solid var(--ink-dim);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-title::before {
+  content: '';
+  display: block;
+  width: 8px; height: 8px;
+  border: 1px solid var(--ink-dim);
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+
+/* GOAL BANNER */
+.goal-banner {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 16px 20px;
+  margin-bottom: 32px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--ink-dim);
+}
+.goal-cell {
+  background: var(--ink);
+  padding: 12px 16px;
+  text-align: center;
+}
+.goal-num {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 500;
+  color: #f2ede4;
+  margin-bottom: 4px;
+}
+.goal-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(242,237,228,0.5);
+}
+
+/* BILLS TABLE */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+thead th {
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  border-bottom: 1px solid var(--ink-dim);
+  padding: 6px 8px;
+  text-align: left;
+  font-weight: 500;
+}
+tbody td {
+  padding: 8px 8px;
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink-dim);
+  vertical-align: top;
+}
+tbody tr:hover td { background: rgba(139,90,0,0.04); }
+.num { text-align: right; font-family: var(--mono); }
+.red { color: var(--red); }
+.grn { color: var(--green); }
+.amb { color: var(--amber); }
+.bold { font-weight: 600; color: var(--ink); }
+
+tfoot td {
+  padding: 8px 8px;
+  border-top: 2px solid var(--ink-dim);
+  font-weight: 600;
+  color: var(--ink);
+  font-size: 13px;
+}
+
+/* CASH PROGRESS BAR */
+.progress-wrap {
+  margin: 8px 0 20px;
+}
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-muted);
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+.progress-track {
+  height: 10px;
+  background: rgba(139,90,0,0.1);
+  border: 1px solid var(--rule);
+}
+.progress-fill {
+  height: 100%;
+  background: var(--green);
+  transition: width 0.8s ease;
+}
+
+/* INVENTORY GRID */
+.inv-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.inv-card {
+  background: var(--paper2);
+  border: 1px solid var(--rule);
+  border-top: 2px solid var(--ink-dim);
+  padding: 14px;
+}
+
+.inv-card-title {
+  font-family: var(--serif);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 10px;
+  letter-spacing: 0.5px;
+}
+
+.inv-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--rule);
+  gap: 8px;
+}
+.inv-item:last-child { border-bottom: none; }
+
+.inv-name {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-dim);
+  flex: 1;
+}
+
+.inv-val {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--amber);
+  min-width: 60px;
+  text-align: right;
+}
+
+.inv-status {
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border: 1px solid;
+  white-space: nowrap;
+}
+.status-list { color: var(--amber); border-color: var(--amber); background: rgba(139,96,0,0.08); }
+.status-sold { color: var(--green); border-color: var(--green); background: rgba(26,92,26,0.08); }
+.status-hold { color: var(--ink-muted); border-color: var(--ink-muted); }
+
+/* Add item form */
+.add-form {
+  background: var(--paper2);
+  border: 1px solid var(--rule);
+  padding: 16px;
+  margin-top: 12px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr auto;
+  gap: 8px;
+  align-items: end;
+}
+
+.form-group label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 4px;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  background: var(--paper);
+  border: none;
+  border-bottom: 1px solid var(--ink-dim);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 6px 4px;
+  outline: none;
+  -webkit-appearance: none;
+}
+.form-group input:focus,
+.form-group select:focus { border-bottom-color: var(--ink); }
+.form-group input::placeholder { color: var(--ink-muted); }
+.form-group select option { background: var(--paper); }
+
+.btn-add {
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  padding: 8px 16px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.btn-add:hover { background: #333; }
+
+.btn-sm {
+  background: transparent;
+  border: 1px solid var(--rule);
+  color: var(--ink-muted);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.15s;
+}
+.btn-sm:hover { color: var(--red); border-color: var(--red); }
+
+/* HOUSING CARDS */
+.housing-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.housing-card {
+  background: var(--paper2);
+  border: 1px solid var(--rule);
+  padding: 16px;
+  position: relative;
+}
+
+.housing-card.priority { border-top: 3px solid var(--green); }
+.housing-card.caution  { border-top: 3px solid var(--amber); }
+.housing-card.difficult{ border-top: 3px solid var(--red); opacity: 0.7; }
+
+.hc-badge {
+  position: absolute;
+  top: 12px; right: 12px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border: 1px solid;
+}
+.badge-go   { color: var(--green); border-color: var(--green); }
+.badge-try  { color: var(--amber); border-color: var(--amber); }
+.badge-hard { color: var(--red);   border-color: var(--red);   }
+
+.hc-name {
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 4px;
+  padding-right: 70px;
+}
+
+.hc-cost {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--amber);
+  margin-bottom: 8px;
+}
+
+.hc-detail {
+  font-size: 12px;
+  color: var(--ink-dim);
+  line-height: 1.7;
+  margin-bottom: 10px;
+}
+
+.hc-action {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--blue);
+  letter-spacing: 0.5px;
+  padding-top: 8px;
+  border-top: 1px solid var(--rule);
+}
+
+/* STORAGE */
+.storage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.storage-item {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 16px;
+  align-items: center;
+  padding: 10px 12px;
+  background: var(--paper2);
+  border: 1px solid var(--rule);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+.si-name { color: var(--ink); font-weight: 500; }
+.si-size { color: var(--ink-muted); }
+.si-price { color: var(--amber); }
+.si-note { color: var(--ink-muted); font-size: 10px; }
+
+/* CASH TIMELINE */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.tl-row {
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  gap: 16px;
+  align-items: start;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--rule);
+  position: relative;
+}
+.tl-day {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-muted);
+  letter-spacing: 1px;
+  padding-top: 2px;
+}
+.tl-action { font-size: 13px; color: var(--ink-dim); line-height: 1.5; }
+.tl-action strong { color: var(--ink); }
+.tl-amount { font-family: var(--mono); font-size: 13px; font-weight: 600; white-space: nowrap; }
+
+/* NAV */
+.page-nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: rgba(26,18,8,0.96);
+  border-bottom: 1px solid rgba(242,237,228,0.1);
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 36px;
+  overflow-x: auto;
+  backdrop-filter: blur(8px);
+}
+.page-nav::-webkit-scrollbar { display: none; }
+.nav-item {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(242,237,228,0.4);
+  padding: 0 14px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  white-space: nowrap;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.nav-item:hover { color: rgba(242,237,228,0.9); }
+.nav-item.private { color: var(--red); opacity: 0.6; }
+
+.page { padding-top: 56px; }
+
+/* CASH GOAL SUMMARY */
+.cash-summary {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.cs-item { text-align: center; }
+.cs-num {
+  font-family: var(--mono);
+  font-size: 24px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.cs-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: 0.5;
+}
+
+@media (max-width: 640px) {
+  .page { padding: 56px 16px 40px; }
+  .inv-grid, .housing-grid { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr 1fr; }
+  .goal-banner { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="page-nav">
+  <span class="nav-item private">&#128274; Private</span>
+  <a class="nav-item" href="#overview">Overview</a>
+  <a class="nav-item" href="#bills">Bills</a>
+  <a class="nav-item" href="#inventory">Sell-Off</a>
+  <a class="nav-item" href="#housing">Housing</a>
+  <a class="nav-item" href="#storage">Storage</a>
+  <a class="nav-item" href="#housing-tracker">Housing</a>
+  <a class="nav-item" href="#timeline">14-Day Plan</a>
+  <a class="nav-item" href="plc-capital.html" style="margin-left:auto">&#8592; Ops</a>
+</nav>
+
+<div class="document">
+<div class="page">
+
+<!-- HEADER -->
+<div class="doc-header">
+  <div class="doc-sub">Personal — Confidential</div>
+  <div class="doc-title">Situation Assessment & Recovery Plan</div>
+  <div class="doc-meta">
+    <span id="doc-date">March 27, 2026</span>
+    <span>Edmond, Oklahoma</span>
+    <span>14 Days to April 10</span>
+    <span style="color:#8b1a1a">&#128274; Private Document</span>
+  </div>
+</div>
+
+<!-- OVERVIEW STATS -->
+<div id="overview" class="section">
+  <div class="section-title">Situation Overview</div>
+
+  <div class="goal-banner">
+    <div class="goal-cell">
+      <div class="goal-num">$2,200</div>
+      <div class="goal-label">Monthly Take-Home</div>
+    </div>
+    <div class="goal-cell">
+      <div class="goal-num" style="color:#e07070">$1,640</div>
+      <div class="goal-label">Fixed Bills / Month</div>
+    </div>
+    <div class="goal-cell">
+      <div class="goal-num" style="color:#90c090">$560</div>
+      <div class="goal-label">Left After Bills</div>
+    </div>
+    <div class="goal-cell">
+      <div class="goal-num" style="color:#f0c060">14</div>
+      <div class="goal-label">Days to Move</div>
+    </div>
+  </div>
+
+  <!-- Cash goal progress -->
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span>Cash Raised Toward Move Goal</span>
+      <span><span id="cash-raised-display">$0</span> of <span id="cash-goal-display">$800</span></span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="cash-progress-bar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:12px;align-items:center;margin-top:8px">
+    <div style="font-family:var(--mono);font-size:11px;color:var(--ink-muted)">Update cash raised:</div>
+    <input type="number" id="cash-raised-input" placeholder="0" style="width:100px;background:var(--paper);border:none;border-bottom:1px solid var(--ink-dim);font-family:var(--mono);font-size:12px;padding:4px;outline:none;color:var(--ink)" oninput="updateCashProgress()">
+    <input type="number" id="cash-goal-input" placeholder="800" style="width:100px;background:var(--paper);border:none;border-bottom:1px solid var(--ink-dim);font-family:var(--mono);font-size:12px;padding:4px;outline:none;color:var(--ink)" oninput="updateCashProgress()">
+    <span style="font-family:var(--mono);font-size:10px;color:var(--ink-muted)">goal</span>
+  </div>
+</div>
+
+<!-- BILLS -->
+<div id="bills" class="section">
+  <div class="section-title">Monthly Bills & Fixed Obligations</div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Obligation</th>
+        <th>Category</th>
+        <th class="num">Amount</th>
+        <th>Priority</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="bold">Car Payment</td>
+        <td>Transportation</td>
+        <td class="num red">$510.00</td>
+        <td><span style="color:#8b1a1a;font-family:var(--mono);font-size:9px;letter-spacing:1px">CRITICAL</span></td>
+        <td>Do not miss. Repossession risk.</td>
+      </tr>
+      <tr>
+        <td class="bold">Stepfather (Phone + Insurance)</td>
+        <td>Family Obligation</td>
+        <td class="num red">$365.00</td>
+        <td><span style="color:#8b1a1a;font-family:var(--mono);font-size:9px;letter-spacing:1px">CRITICAL</span></td>
+        <td>Talk to him. He may defer temporarily.</td>
+      </tr>
+      <tr>
+        <td class="bold">Student Loan</td>
+        <td>Debt Service</td>
+        <td class="num amb">$365.00</td>
+        <td><span style="color:#8b6000;font-family:var(--mono);font-size:9px;letter-spacing:1px">DEFERRABLE</span></td>
+        <td>Federal loans: apply for hardship deferment at studentaid.gov. Can pause 1-3 months.</td>
+      </tr>
+      <tr>
+        <td class="bold">Capital One</td>
+        <td>Credit Card</td>
+        <td class="num amb" id="cap1-min">$35.00 est.</td>
+        <td><span style="color:#8b6000;font-family:var(--mono);font-size:9px;letter-spacing:1px">MINIMUM</span></td>
+        <td>Pay minimum only during crisis. Update when you know exact amount.</td>
+      </tr>
+      <tr>
+        <td class="bold">USAA</td>
+        <td>Credit Card</td>
+        <td class="num amb" id="usaa-min">$35.00 est.</td>
+        <td><span style="color:#8b6000;font-family:var(--mono);font-size:9px;letter-spacing:1px">MINIMUM</span></td>
+        <td>USAA has hardship programs. Call them: 1-800-531-8722.</td>
+      </tr>
+      <tr>
+        <td class="bold">American Express</td>
+        <td>Credit Card</td>
+        <td class="num amb" id="amex-min">$35.00 est.</td>
+        <td><span style="color:#8b6000;font-family:var(--mono);font-size:9px;letter-spacing:1px">MINIMUM</span></td>
+        <td>Amex has financial relief line: 1-800-528-4800.</td>
+      </tr>
+      <tr>
+        <td class="bold">Food</td>
+        <td>Living Expense</td>
+        <td class="num red">$400.00 est.</td>
+        <td><span style="color:#8b1a1a;font-family:var(--mono);font-size:9px;letter-spacing:1px">REQUIRED</span></td>
+        <td>Currently overspending eating out. Target: $200/mo with meal prep discipline.</td>
+      </tr>
+      <tr>
+        <td class="bold">Gas</td>
+        <td>Transportation</td>
+        <td class="num amb">$80.00 est.</td>
+        <td><span style="color:#8b6000;font-family:var(--mono);font-size:9px;letter-spacing:1px">REQUIRED</span></td>
+        <td>~$50 fill-up x 1.5/mo. Edmond commute is short.</td>
+      </tr>
+      <tr>
+        <td class="bold">New Rent (target)</td>
+        <td>Housing</td>
+        <td class="num amb">$600.00 est.</td>
+        <td><span style="color:#1a5c1a;font-family:var(--mono);font-size:9px;letter-spacing:1px">NEW NEED</span></td>
+        <td>Room rental or extended stay. See Housing section.</td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="2" class="bold">TOTAL MONTHLY OBLIGATIONS</td>
+        <td class="num red bold">~$2,025</td>
+        <td colspan="2" style="font-family:var(--mono);font-size:11px;color:var(--ink-muted)">Leaves ~$175/mo. Very tight. Cash infusion from sell-off is critical.</td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <div style="margin-top:12px;padding:12px;background:rgba(139,26,26,0.06);border:1px solid rgba(139,26,26,0.2)">
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--red);margin-bottom:6px">&#9888; TAX EXEMPT NOTE</div>
+    <div style="font-size:12px;color:var(--ink-dim);line-height:1.7">
+      Going tax exempt stops federal withholding — adds approximately $250-350 to each paycheck. This is a bridge, not free money. You'll owe it back at tax time April 2027. Use it to survive the next 60 days, then set aside 15% of each check to cover the bill later.
+    </div>
+  </div>
+</div>
+
+<!-- INVENTORY / SELL-OFF -->
+<div id="inventory" class="section">
+  <div class="section-title">Personal Inventory — Sell-Off Tracker</div>
+
+  <div style="font-size:12px;color:var(--ink-dim);margin-bottom:16px;line-height:1.7">
+    List everything you own that could generate cash. Jordans, clothes, electronics, anything. Facebook Marketplace and OfferUp move items fastest in OKC. Price to sell in 48 hours, not to maximize.
+  </div>
+
+  <!-- Running totals -->
+  <div style="display:flex;gap:24px;margin-bottom:16px;flex-wrap:wrap">
+    <div style="font-family:var(--mono);font-size:12px;color:var(--ink-dim)">Est. Value: <strong id="inv-total-est" style="color:var(--amber)">$0</strong></div>
+    <div style="font-family:var(--mono);font-size:12px;color:var(--ink-dim)">Listed: <strong id="inv-total-listed" style="color:var(--amber)">$0</strong></div>
+    <div style="font-family:var(--mono);font-size:12px;color:var(--ink-dim)">Sold: <strong id="inv-total-sold" style="color:var(--green)">$0</strong></div>
+    <div style="font-family:var(--mono);font-size:12px;color:var(--ink-dim)">Items: <strong id="inv-count" style="color:var(--ink)">0</strong></div>
+  </div>
+
+  <!-- Inventory table -->
+  <table id="inv-table">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Category</th>
+        <th class="num">Est. Value</th>
+        <th class="num">Ask Price</th>
+        <th>Platform</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="inv-body">
+      <!-- Seeded with likely items -->
+    </tbody>
+  </table>
+
+  <!-- Add item form -->
+  <div class="add-form" style="margin-top:16px">
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-muted);margin-bottom:12px">Add Item to Inventory</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Item Name</label>
+        <input type="text" id="inv-name" placeholder="Air Jordan 1 Retro">
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="inv-cat">
+          <option>Shoes</option>
+          <option>Clothing</option>
+          <option>Electronics</option>
+          <option>Accessories</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Est. Value ($)</label>
+        <input type="number" id="inv-est" placeholder="120">
+      </div>
+      <div class="form-group">
+        <label>Ask Price ($)</label>
+        <input type="number" id="inv-ask" placeholder="95">
+      </div>
+      <button class="btn-add" onclick="addInvItem()">+ Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- HOUSING OPTIONS -->
+<div id="housing" class="section">
+  <div class="section-title">Housing Options — Edmond / OKC Area</div>
+  <div style="font-size:12px;color:var(--ink-dim);margin-bottom:16px;line-height:1.7">
+    Bad credit is a hard wall for standard leases. These options work around it. Priority: get a landing spot by April 8 — two days buffer before April 10.
+  </div>
+
+  <div class="housing-grid">
+
+    <div class="housing-card priority">
+      <div class="hc-badge badge-go">GO FIRST</div>
+      <div class="hc-name">Private Room Rental</div>
+      <div class="hc-cost">$450 – $650 / month</div>
+      <div class="hc-detail">
+        Private landlords renting spare rooms rarely run credit checks. Month-to-month. Most ask for first month + small deposit ($200-300). Edmond and NW OKC have several available right now.
+      </div>
+      <div class="hc-action">
+        &#8594; Search "rooms for rent Edmond OK" on Facebook Marketplace right now. Message 10 people. Someone will say yes within 24 hours.
+      </div>
+    </div>
+
+    <div class="housing-card priority">
+      <div class="hc-badge badge-go">NO CREDIT CHECK</div>
+      <div class="hc-name">Extended Stay Hotel</div>
+      <div class="hc-cost">$220 – $300 / week (~$900/mo)</div>
+      <div class="hc-detail">
+        No lease. No credit check. Move in same day. Weekly payment. Full kitchen in room. Best as a 30-60 day bridge while you secure permanent housing. More expensive monthly but zero barriers.
+      </div>
+      <div class="hc-action">
+        &#8594; WoodSpring Suites OKC NW: (405) 787-7700 | InTown Suites: 2716 NW 39th St OKC | Extended Stay America: NW Expressway OKC
+      </div>
+    </div>
+
+    <div class="housing-card caution">
+      <div class="hc-badge badge-try">POSSIBLE</div>
+      <div class="hc-name">Roommate Split (2BR)</div>
+      <div class="hc-cost">$500 – $700 / month (your share)</div>
+      <div class="hc-detail">
+        Find someone already in a 2BR who needs a roommate. They're the primary leaseholder — your credit isn't checked. You pay them directly. Facebook groups: "OKC Roommates Needed" and "Edmond OK Housing."
+      </div>
+      <div class="hc-action">
+        &#8594; Post in Facebook groups: "Looking for roommate situation in Edmond/NW OKC, professional, clean, $X budget." Be direct and honest.
+      </div>
+    </div>
+
+    <div class="housing-card caution">
+      <div class="hc-badge badge-try">WORTH ASKING</div>
+      <div class="hc-name">Co-signer Lease</div>
+      <div class="hc-cost">Standard market rate $800-1,100/mo</div>
+      <div class="hc-detail">
+        Some apartments allow a co-signer with good credit. This requires someone you trust enough to put their credit on your lease. Lower monthly cost than extended stay long-term.
+      </div>
+      <div class="hc-action">
+        &#8594; Is there a family member or close friend with good credit who trusts you to pay? Worth one honest conversation.
+      </div>
+    </div>
+
+    <div class="housing-card difficult" style="grid-column:1/-1">
+      <div class="hc-badge badge-hard">DIFFICULT</div>
+      <div class="hc-name">Standard Apartment Lease (solo)</div>
+      <div class="hc-cost">$900 – $1,200 / month + deposit</div>
+      <div class="hc-detail">
+        Credit check required. Bad credit typically results in denial or a deposit equal to 2 months rent ($1,800-2,400 upfront). Not realistic as a first step — but achievable in 6-12 months after stabilizing finances and rebuilding credit.
+      </div>
+      <div class="hc-action">&#8594; Table this. Come back to it in 6 months.</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- STORAGE OPTIONS -->
+<div id="storage" class="section">
+  <div class="section-title">Storage Units — OKC / Edmond Area</div>
+  <div style="font-size:12px;color:var(--ink-dim);margin-bottom:16px;line-height:1.7">
+    If you end up in a room or extended stay that can't hold everything, a storage unit is $40-80/month. Never store there permanently — it's a holding pattern, not a solution. Note: Living in a storage unit is illegal. Extended stay hotel is always the better option.
+  </div>
+
+  <div class="storage-list">
+    <div class="storage-item">
+      <div class="si-name">Public Storage — Edmond</div>
+      <div class="si-size">5x5 unit</div>
+      <div class="si-price">$40-55/mo</div>
+      <div class="si-note">Clothes, boxes, small items. First month often $1.</div>
+    </div>
+    <div class="storage-item">
+      <div class="si-name">Public Storage — Edmond</div>
+      <div class="si-size">10x10 unit</div>
+      <div class="si-price">$80-110/mo</div>
+      <div class="si-note">Furniture if needed. Most you'd ever need.</div>
+    </div>
+    <div class="storage-item">
+      <div class="si-name">CubeSmart — NW OKC</div>
+      <div class="si-size">5x5 unit</div>
+      <div class="si-price">$35-50/mo</div>
+      <div class="si-note">Climate controlled. Good for shoes/clothes.</div>
+    </div>
+    <div class="storage-item">
+      <div class="si-name">Extra Space Storage — Edmond</div>
+      <div class="si-size">5x5 unit</div>
+      <div class="si-price">$45-60/mo</div>
+      <div class="si-note">On 2nd St near your work. Very convenient.</div>
+    </div>
+  </div>
+  <div style="margin-top:12px;padding:10px 14px;background:rgba(139,96,0,0.08);border:1px solid rgba(139,96,0,0.2);font-size:12px;color:var(--ink-dim);line-height:1.7">
+    <strong style="color:var(--ink)">Tip:</strong> You said you don't have furniture. That means a 5x5 unit ($40-55/mo) holds everything you own — clothes, shoes, boxes. The sell-off plan means you'll have even less to store. Keep it small.
+  </div>
+</div>
+
+<!-- 14-DAY PLAN -->
+<div id="timeline" class="section">
+  <div class="section-title">14-Day Recovery Plan</div>
+  <div style="font-size:12px;color:var(--ink-dim);margin-bottom:16px;line-height:1.7">
+    One action per day. Each one moves you forward. You don't need to do everything — you need to do the right things in the right order.
+  </div>
+
+  <div class="timeline">
+    <div class="tl-row">
+      <div class="tl-day">Mar 27<br><span style="color:var(--red);font-size:9px">TODAY</span></div>
+      <div class="tl-action"><strong>Search Facebook Marketplace for rooms for rent.</strong> Message 10 people. Post in "OKC Roommates" group. Start photographing items to sell tonight.</div>
+      <div class="tl-amount grn">Action</div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-day">Mar 28</div>
+      <div class="tl-action"><strong>List 10 items on Facebook Marketplace + OfferUp.</strong> Jordans first — highest value, fastest to sell. Price 20% below what you'd want to maximize speed. Confirm tax exempt processed on Paycom.</div>
+      <div class="tl-amount amb">+$200</div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-day">Mar 29-30</div>
+      <div class="tl-action"><strong>Follow up on all housing messages.</strong> Visit any promising rooms in person this weekend. Call WoodSpring Suites as backup plan. Sell first items — meet buyers in public, cash only.</div>
+      <div class="tl-amount amb">+$150</div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-day">Mar 31</div>
+      <div class="tl-action"><strong>Salary raise effective today ($69,850).</strong> Confirm with payroll. If tax exempt processed, first exempt paycheck should reflect this pay period.</div>
+      <div class="tl-amount grn">Raise</div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-day">Apr 1-3</div>
+      <div class="tl-action"><strong>Secure housing commitment.</strong> Sign or shake hands on a room or extended stay by April 3 at the latest. Pay first month. Continue selling items. Call student loan servicer about emergency deferment.</div>
+      <div class="tl-amount grn">Locked</div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-day">Apr 4-6</div>
+      <div class="tl-action"><strong>Begin moving personal items.</strong> Pack what you're keeping. Items that haven't sold — drop price 30% or donate. Rent storage unit if needed. Keep moving, keep selling.</div>
+      <div class="tl-amount amb">+$100</div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-day">Apr 7-9</div>
+      <div class="tl-action"><strong>Complete move.</strong> Out of current address. Everything in new place or storage. New chapter starts here. You made it.</div>
+      <div class="tl-amount grn">Done</div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-day">Apr 10</div>
+      <div class="tl-action"><strong>Independence Day.</strong> Out. Clean. Forward only. Start rebuilding from a place of your own.</div>
+      <div class="tl-amount grn" style="font-size:16px">&#10003;</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- HOUSING COMMAND CENTER -->
+<div id="housing-tracker" class="section">
+  <div class="section-title">Housing Command Center — April 1 Target</div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px">
+    <div style="background:var(--ink);color:var(--paper);padding:16px 20px">
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:2px;color:rgba(242,237,228,0.5);margin-bottom:6px">MOVE-OUT TARGET</div>
+      <div style="font-family:var(--mono);font-size:28px;font-weight:500">April 1, 2026</div>
+      <div style="font-family:var(--mono);font-size:10px;color:rgba(242,237,228,0.4);margin-top:4px">5 days from now &mdash; clean exit, no rent owed</div>
+    </div>
+    <div style="background:var(--paper2);border:1px solid var(--rule);padding:16px 20px">
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--ink-muted);margin-bottom:6px">HOUSING STATUS</div>
+      <select id="housing-status-select" onchange="saveHousingStatus()" style="width:100%;background:var(--paper);border:none;border-bottom:1px solid var(--ink-dim);font-family:var(--mono);font-size:13px;padding:6px 0;color:var(--ink);outline:none;cursor:pointer">
+        <option value="searching">&#128269; Searching</option>
+        <option value="contacted">&#128222; Contacts Made</option>
+        <option value="viewing">&#128065; Viewing Options</option>
+        <option value="secured">&#10003; SECURED</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- EXTENDED STAYS -->
+  <div style="font-family:var(--mono);font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--ink-muted);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--rule)">Extended Stay Options &mdash; Last Resort / Guaranteed Availability</div>
+
+  <table style="margin-bottom:20px">
+    <thead>
+      <tr>
+        <th>Property</th>
+        <th>Address</th>
+        <th class="num">Weekly</th>
+        <th class="num">Monthly Est.</th>
+        <th>Rating</th>
+        <th>Phone</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="bold">WoodSpring Suites</td>
+        <td style="font-size:11px;color:var(--ink-muted)">2801 NW 135th St, OKC<br><span style="font-size:10px">5 min from Edmond</span></td>
+        <td class="num amb">~$255</td>
+        <td class="num amb">~$1,020</td>
+        <td><span style="font-family:var(--mono);font-size:11px;color:var(--amber)">&#9733; 3.4</span></td>
+        <td style="font-family:var(--mono);font-size:11px"><a href="tel:4058960444" style="color:var(--blue);text-decoration:none">(405) 896-0444</a></td>
+        <td><span id="ws-status" class="inv-status status-hold">Not Called</span></td>
+      </tr>
+      <tr>
+        <td class="bold">InTown Suites</td>
+        <td style="font-size:11px;color:var(--ink-muted)">2716 NW 39th St, OKC<br><span style="font-size:10px">15 min from Edmond</span></td>
+        <td class="num amb">~$225</td>
+        <td class="num amb">~$900</td>
+        <td><span style="font-family:var(--mono);font-size:11px;color:var(--amber)">&#9733; 3.1</span></td>
+        <td style="font-family:var(--mono);font-size:11px"><a href="tel:4059461900" style="color:var(--blue);text-decoration:none">(405) 946-1900</a></td>
+        <td><span id="it-status" class="inv-status status-hold">Not Called</span></td>
+      </tr>
+      <tr>
+        <td class="bold">Extended Stay America</td>
+        <td style="font-size:11px;color:var(--ink-muted)">4811 NW Expressway, OKC<br><span style="font-size:10px">12 min from Edmond</span></td>
+        <td class="num amb">~$300</td>
+        <td class="num amb">~$1,200</td>
+        <td><span style="font-family:var(--mono);font-size:11px;color:var(--amber)">&#9733; 3.6</span></td>
+        <td style="font-family:var(--mono);font-size:11px"><a href="tel:4057284000" style="color:var(--blue);text-decoration:none">(405) 728-4000</a></td>
+        <td><span id="esa-status" class="inv-status status-hold">Not Called</span></td>
+      </tr>
+      <tr>
+        <td class="bold">Candlewood Suites</td>
+        <td style="font-size:11px;color:var(--ink-muted)">One Renaissance Blvd, Edmond<br><span style="font-size:10px">Edmond address &#10003;</span></td>
+        <td class="num amb">~$375</td>
+        <td class="num amb">~$1,500</td>
+        <td><span style="font-family:var(--mono);font-size:11px;color:var(--green)">&#9733; 4.1</span></td>
+        <td style="font-family:var(--mono);font-size:11px"><a href="tel:4058449100" style="color:var(--blue);text-decoration:none">(405) 844-9100</a></td>
+        <td><span id="cw-status" class="inv-status status-hold">Not Called</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="background:rgba(26,42,107,0.08);border:1px solid rgba(26,42,107,0.2);padding:12px 16px;margin-bottom:24px;font-family:var(--mono);font-size:11px;color:var(--ink-dim);line-height:1.8">
+    <strong style="color:var(--ink)">Script for every call:</strong><br>
+    "Hi, I'm looking to check in April 1st. What's your best weekly rate for a standard room? Do you require a credit check or deposit? Great &mdash; can you hold a room under [name]?"<br>
+    <span style="color:var(--ink-muted);font-size:10px">Answer: No credit check required at any of these properties. Deposit = 1 week max.</span>
+  </div>
+
+  <!-- ROOM LEADS TRACKER -->
+  <div style="font-family:var(--mono);font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--ink-muted);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--rule)">Room Rental Leads &mdash; Facebook Marketplace / Groups</div>
+
+  <div style="font-size:12px;color:var(--ink-dim);margin-bottom:12px;line-height:1.7">
+    Track every person you message. Follow up within 24 hours on anyone who doesn't respond. Prefer: female landlord, month-to-month, private room, $400-700/mo, Edmond or NW OKC.
+  </div>
+
+  <table id="leads-table">
+    <thead>
+      <tr>
+        <th>Name / Listing</th>
+        <th>Location</th>
+        <th class="num">Price</th>
+        <th>Type</th>
+        <th>Status</th>
+        <th>Notes</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="leads-body">
+      <!-- filled by JS -->
+    </tbody>
+  </table>
+
+  <div class="add-form" style="margin-top:16px">
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-muted);margin-bottom:12px">Add Housing Lead</div>
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;align-items:end;flex-wrap:wrap">
+      <div class="form-group"><label>Name / Description</label><input type="text" id="lead-name" placeholder="Sarah - 2BR Edmond near Broadway"></div>
+      <div class="form-group"><label>Price/mo</label><input type="number" id="lead-price" placeholder="550"></div>
+      <div class="form-group"><label>Type</label>
+        <select id="lead-type">
+          <option>Private Room</option>
+          <option>Shared Room</option>
+          <option>Extended Stay</option>
+          <option>Studio</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Status</label>
+        <select id="lead-status">
+          <option value="messaged">Messaged</option>
+          <option value="responded">Responded</option>
+          <option value="viewing">Viewing</option>
+          <option value="secured">Secured &#10003;</option>
+          <option value="passed">Passed</option>
+        </select>
+      </div>
+      <button class="btn-add" onclick="addLead()">+ Add</button>
+    </div>
+    <div class="form-group" style="margin-top:8px"><label>Notes</label><input type="text" id="lead-notes" placeholder="Female landlord, pets ok, available April 1, near work"></div>
+  </div>
+
+  <div style="margin-top:16px;padding:12px 16px;background:rgba(26,92,26,0.06);border:1px solid rgba(26,92,26,0.2);font-size:12px;color:var(--ink-dim);line-height:1.7">
+    <strong style="color:var(--ink)">Message to copy-paste to every room listing:</strong><br>
+    <em>"Hi &mdash; I'm a 29-year-old banking professional at a local Edmond bank. I'm relocating April 1 and looking for a quiet, clean room. Steady income, no drama, can pay first month upfront. Is this still available?"</em>
+  </div>
+</div>
+
+<!-- CLOSING NOTE -->
+<div style="margin-top:40px;padding:20px 24px;border-top:2px solid var(--ink-dim);text-align:center">
+  <div style="font-family:var(--serif);font-style:italic;font-size:16px;color:var(--ink-dim);line-height:1.8">
+    "The secret of getting ahead is getting started. The secret of getting started is breaking your complex overwhelming tasks into small manageable tasks, and then starting on the first one."
+  </div>
+  <div style="font-family:var(--mono);font-size:10px;color:var(--ink-muted);margin-top:8px;letter-spacing:2px">— MARK TWAIN</div>
+  <div style="font-family:var(--mono);font-size:11px;color:var(--ink-muted);margin-top:16px;letter-spacing:1px">
+    Filed by Ledger &nbsp;&mdash;&nbsp; March 27, 2026 &nbsp;&mdash;&nbsp; Private Document
+  </div>
+</div>
+
+</div>
+</div>
+
+<script>
+var STORAGE_KEY = 'pl-survival-inventory';
+var CASH_KEY    = 'pl-survival-cash';
+
+// Seed items based on what Payton described
+var SEED_ITEMS = [
+  { id:1, name:'Air Jordan (pair 1)', cat:'Shoes',     est:150, ask:110, platform:'Facebook Marketplace', status:'unlisted' },
+  { id:2, name:'Air Jordan (pair 2)', cat:'Shoes',     est:120, ask:90,  platform:'Facebook Marketplace', status:'unlisted' },
+  { id:3, name:'Air Jordan (pair 3)', cat:'Shoes',     est:100, ask:75,  platform:'OfferUp',              status:'unlisted' },
+  { id:4, name:'Name Brand Shirts (lot)', cat:'Clothing', est:60, ask:40, platform:'Facebook Marketplace', status:'unlisted' },
+  { id:5, name:'Pants / Jeans (lot)', cat:'Clothing',  est:40,  ask:25,  platform:'Facebook Marketplace', status:'unlisted' },
+];
+
+var nextId = 100;
+var items = [];
+
+function loadItems() {
+  var saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    items = JSON.parse(saved);
+    nextId = items.length > 0 ? Math.max.apply(null, items.map(function(i){ return i.id; })) + 1 : 100;
+  } else {
+    items = SEED_ITEMS.slice();
+    nextId = 100;
+    saveItems();
+  }
+}
+
+function saveItems() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+}
+
+function renderInventory() {
+  var tbody = document.getElementById('inv-body');
+  tbody.innerHTML = '';
+  var totalEst = 0, totalListed = 0, totalSold = 0;
+
+  for (var i = 0; i < items.length; i++) {
+    var item = items[i];
+    totalEst += item.est;
+    if (item.status === 'listed') totalListed += item.ask;
+    if (item.status === 'sold')   totalSold   += item.ask;
+
+    var statusCls = item.status === 'sold' ? 'status-sold' : item.status === 'listed' ? 'status-list' : 'status-hold';
+    var statusLabel = item.status === 'sold' ? 'SOLD' : item.status === 'listed' ? 'LISTED' : 'UNLISTED';
+
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td class="bold">' + item.name + '</td>' +
+      '<td>' + item.cat + '</td>' +
+      '<td class="num amb">$' + item.est + '</td>' +
+      '<td class="num">$' + item.ask + '</td>' +
+      '<td style="font-family:var(--mono);font-size:11px;color:var(--ink-muted)">' + item.platform + '</td>' +
+      '<td><span class="inv-status ' + statusCls + '">' + statusLabel + '</span></td>' +
+      '<td style="display:flex;gap:4px">' +
+        (item.status !== 'listed' && item.status !== 'sold' ? '<button class="btn-sm" onclick="setStatus(' + item.id + ',\'listed\')">List</button>' : '') +
+        (item.status !== 'sold' ? '<button class="btn-sm" onclick="setStatus(' + item.id + ',\'sold\')" style="color:var(--green);border-color:var(--green)">Sold</button>' : '') +
+        '<button class="btn-sm" onclick="removeItem(' + item.id + ')">&#215;</button>' +
+      '</td>';
+    tbody.appendChild(tr);
+  }
+
+  document.getElementById('inv-total-est').textContent    = '$' + totalEst;
+  document.getElementById('inv-total-listed').textContent = '$' + totalListed;
+  document.getElementById('inv-total-sold').textContent   = '$' + totalSold;
+  document.getElementById('inv-count').textContent        = items.length;
+
+  // Update cash progress with sold amount
+  var cashInput = document.getElementById('cash-raised-input');
+  if (!cashInput.value) cashInput.value = totalSold;
+  updateCashProgress();
+}
+
+function addInvItem() {
+  var name = document.getElementById('inv-name').value.trim();
+  var cat  = document.getElementById('inv-cat').value;
+  var est  = parseFloat(document.getElementById('inv-est').value) || 0;
+  var ask  = parseFloat(document.getElementById('inv-ask').value) || 0;
+  if (!name) { alert('Enter item name.'); return; }
+  items.push({ id: nextId++, name: name, cat: cat, est: est, ask: ask, platform: 'Facebook Marketplace', status: 'unlisted' });
+  saveItems();
+  renderInventory();
+  document.getElementById('inv-name').value = '';
+  document.getElementById('inv-est').value  = '';
+  document.getElementById('inv-ask').value  = '';
+}
+
+function setStatus(id, status) {
+  for (var i = 0; i < items.length; i++) {
+    if (items[i].id === id) { items[i].status = status; break; }
+  }
+  saveItems();
+  renderInventory();
+}
+
+function removeItem(id) {
+  items = items.filter(function(item){ return item.id !== id; });
+  saveItems();
+  renderInventory();
+}
+
+function updateCashProgress() {
+  var raised = parseFloat(document.getElementById('cash-raised-input').value) || 0;
+  var goal   = parseFloat(document.getElementById('cash-goal-input').value)   || 800;
+  var pct    = Math.min(100, (raised / goal) * 100);
+  document.getElementById('cash-progress-bar').style.width    = pct + '%';
+  document.getElementById('cash-raised-display').textContent  = '$' + raised.toFixed(0);
+  document.getElementById('cash-goal-display').textContent    = '$' + goal.toFixed(0);
+  var fill = document.getElementById('cash-progress-bar');
+  fill.style.background = pct >= 100 ? '#1a5c1a' : pct >= 60 ? '#5c7a1a' : '#8b6000';
+  localStorage.setItem(CASH_KEY, JSON.stringify({ raised: raised, goal: goal }));
+}
+
+function loadCash() {
+  var saved = localStorage.getItem(CASH_KEY);
+  if (saved) {
+    var d = JSON.parse(saved);
+    document.getElementById('cash-raised-input').value = d.raised;
+    document.getElementById('cash-goal-input').value   = d.goal;
+    updateCashProgress();
+  }
+}
+
+// Update date
+document.getElementById('doc-date').textContent = new Date().toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+  a.addEventListener('click', function(e) {
+    var t = document.querySelector(this.getAttribute('href'));
+    if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  });
+});
+
+
+// LEADS TRACKER
+var LEADS_KEY = 'pl-housing-leads';
+var leadNextId = 200;
+var leads = [];
+
+function loadLeads() {
+  var saved = localStorage.getItem(LEADS_KEY);
+  if (saved) {
+    leads = JSON.parse(saved);
+    if (leads.length) leadNextId = Math.max.apply(null, leads.map(function(l){ return l.id; })) + 1;
+  }
+}
+
+function saveLeads() { localStorage.setItem(LEADS_KEY, JSON.stringify(leads)); }
+
+function renderLeads() {
+  var tbody = document.getElementById('leads-body');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  if (!leads.length) {
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td colspan="7" style="text-align:center;color:var(--ink-muted);font-family:var(--mono);font-size:11px;padding:16px">No leads yet. Start messaging listings.</td>';
+    tbody.appendChild(tr);
+    return;
+  }
+  for (var i = 0; i < leads.length; i++) {
+    var l = leads[i];
+    var stCls = l.status === 'secured' ? 'status-sold' : l.status === 'responded' || l.status === 'viewing' ? 'status-list' : 'status-hold';
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td class="bold">' + l.name + '</td>' +
+      '<td style="font-size:11px;color:var(--ink-muted)">' + (l.location||'OKC Area') + '</td>' +
+      '<td class="num amb">$' + l.price + '/mo</td>' +
+      '<td style="font-family:var(--mono);font-size:10px;color:var(--ink-muted)">' + l.type + '</td>' +
+      '<td><span class="inv-status ' + stCls + '">' + l.status.toUpperCase() + '</span></td>' +
+      '<td style="font-size:11px;color:var(--ink-muted)">' + (l.notes||'') + '</td>' +
+      '<td style="display:flex;gap:4px">' +
+        (l.status !== 'secured' ? '<button class="btn-sm" onclick="setLeadStatus(' + l.id + ',\'secured\')" style="color:var(--green);border-color:var(--green)">&#10003; Got It</button>' : '<span style="color:var(--green);font-family:var(--mono);font-size:11px">SECURED</span>') +
+        '<button class="btn-sm" onclick="removeLead(' + l.id + ')">&#215;</button>' +
+      '</td>';
+    tbody.appendChild(tr);
+  }
+}
+
+function addLead() {
+  var name   = document.getElementById('lead-name').value.trim();
+  var price  = parseFloat(document.getElementById('lead-price').value) || 0;
+  var type   = document.getElementById('lead-type').value;
+  var status = document.getElementById('lead-status').value;
+  var notes  = document.getElementById('lead-notes').value.trim();
+  if (!name) { alert('Enter a name or description.'); return; }
+  leads.push({ id: leadNextId++, name: name, price: price, type: type, status: status, notes: notes, location: 'OKC Area' });
+  saveLeads();
+  renderLeads();
+  document.getElementById('lead-name').value  = '';
+  document.getElementById('lead-price').value = '';
+  document.getElementById('lead-notes').value = '';
+}
+
+function setLeadStatus(id, status) {
+  for (var i = 0; i < leads.length; i++) {
+    if (leads[i].id === id) { leads[i].status = status; break; }
+  }
+  saveLeads();
+  renderLeads();
+  if (status === 'secured') {
+    var sel = document.getElementById('housing-status-select');
+    if (sel) { sel.value = 'secured'; saveHousingStatus(); }
+  }
+}
+
+function removeLead(id) {
+  leads = leads.filter(function(l){ return l.id !== id; });
+  saveLeads();
+  renderLeads();
+}
+
+function saveHousingStatus() {
+  var sel = document.getElementById('housing-status-select');
+  if (sel) localStorage.setItem('pl-housing-status', sel.value);
+}
+
+function loadHousingStatus() {
+  var saved = localStorage.getItem('pl-housing-status');
+  var sel = document.getElementById('housing-status-select');
+  if (saved && sel) sel.value = saved;
+}
+
+window.onload = function() {
+  loadItems();
+  loadLeads();
+  renderLeads();
+  loadHousingStatus();
+  loadCash();
+  renderInventory();
+};
+</script>
+</body>
+</html>
