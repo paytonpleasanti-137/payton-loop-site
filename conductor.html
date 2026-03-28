@@ -239,6 +239,7 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:14p
 
 <script>
 var ODDS_KEY_STORAGE = 'pl-odds-api-key';
+var ODDS_KEY_DEFAULT = '0554f8ffc022765fa3d42ba65ad37985';
 var FUNDAMENTALS_URL = '/data/fundamentals_cache.json';
 var GRAHAM_THRESHOLD = 0.10;
 var EARNINGS_THRESHOLD = 0.06;
@@ -551,12 +552,79 @@ function processSports(events, container) {
   renderSignals();
 }
 
+
+function loadSportsFromCache() {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', '/data/sports_signals.json', true);
+  xhr.onload = function() {
+    if (xhr.status === 200) {
+      try {
+        var data = JSON.parse(xhr.responseText);
+        renderSportsFromData(data);
+      } catch(e) {}
+    }
+  };
+  xhr.send();
+}
+
+function renderSportsFromData(data) {
+  var container = document.getElementById('sports-body');
+  var arbs = data.arb_windows || [];
+  var values = data.value_lines || [];
+  
+  if (arbs.length === 0 && values.length === 0) {
+    container.innerHTML = '<div class="sport-empty">No signals right now. Lines are tight. Refreshing every 30 min.</div>';
+    return;
+  }
+
+  var html = '';
+  
+  if (arbs.length > 0) {
+    arbs.forEach(function(a) {
+      var legs = (a.legs || []).map(function(l){ return l.team.split(' ').slice(-1)[0] + ' ' + (l.odds > 0 ? '+' : '') + l.odds + ' @' + l.book; }).join(' | ');
+      html += '<div class="sport-item">' +
+        '<div class="sport-game">&#9830; ARB: ' + a.game + '</div>' +
+        '<div class="sport-meta">' + (a.sport||'') + ' &bull; ' + a.margin_pct + '% margin &bull; $' + a.profit_25 + ' guaranteed on $25</div>' +
+        '<div class="sport-signal">' + legs + '</div>' +
+        '</div>';
+      // Add to top signals
+      topSignals.unshift({
+        stream: 'sports',
+        signal: 'ARB WINDOW',
+        detail: a.game + ' — ' + a.margin_pct + '% margin, $' + a.profit_25 + ' profit on $25 stakes',
+        strength: a.margin_pct > 2 ? 'STRONG' : 'MODERATE',
+        score: 4
+      });
+    });
+  }
+
+  if (values.length > 0) {
+    html += '<div style="padding:10px 20px;border-bottom:1px solid rgba(255,255,255,0.03);font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--txt4);text-transform:uppercase">Best Value Lines</div>';
+    values.slice(0,8).forEach(function(v) {
+      html += '<div class="sport-item">' +
+        '<div class="sport-game">' + v.team + '</div>' +
+        '<div class="sport-meta">' + v.game + ' &bull; ' + (v.sport||'') + '</div>' +
+        '<div class="sport-signal">' + (v.best_odds > 0 ? '+' : '') + v.best_odds + ' @ ' + v.best_book + ' &mdash; avg market: ' + (v.avg_odds > 0 ? '+' : '') + Math.round(v.avg_odds) + ' &mdash; edge: +' + v.edge_pts + ' pts</div>' +
+        '</div>';
+    });
+  }
+
+  container.innerHTML = html;
+  renderSignals();
+}
+
 // Init
 window.onload = function() {
-  var savedKey = localStorage.getItem(ODDS_KEY_STORAGE);
+  var savedKey = localStorage.getItem(ODDS_KEY_STORAGE) || ODDS_KEY_DEFAULT;
   if (savedKey) {
-    document.getElementById('odds-chip').innerHTML = '<span class="dot dot-g"></span>Odds API — Active';
-    setTimeout(function(){ fetchSportsData(savedKey); }, 1000);
+    localStorage.setItem(ODDS_KEY_STORAGE, savedKey);
+    document.getElementById('odds-chip').innerHTML = '<span class="dot dot-g"></span>Odds API &#9679; Active';
+    document.getElementById('sports-badge').textContent = 'Live';
+    document.getElementById('sports-badge').style.background = 'rgba(74,158,106,0.12)';
+    document.getElementById('sports-badge').style.color = 'var(--green)';
+    // Load from server-side JSON first (fast), then optionally live
+    loadSportsFromCache();
+    setTimeout(function(){ fetchSportsData(savedKey); }, 500);
   }
   loadFundamentals();
 };

@@ -1,0 +1,246 @@
+{
+  "generated": "2026-03-27T22:35:47.256437",
+  "events_scanned": 46,
+  "arb_windows": [
+    {
+      "game": "Golden State Warriors vs Washington Wizards",
+      "sport": "BASKETBALL NBA",
+      "commence": "2026-03-28T02:11:00Z",
+      "margin_pct": 5.739,
+      "profit_25": 1.43,
+      "legs": [
+        {
+          "team": "Golden State Warriors",
+          "odds": -360,
+          "book": "bovada"
+        },
+        {
+          "team": "Washington Wizards",
+          "odds": 525,
+          "book": "betmgm"
+        }
+      ]
+    },
+    {
+      "game": "Portland Trail Blazers vs Dallas Mavericks",
+      "sport": "BASKETBALL NBA",
+      "commence": "2026-03-28T02:12:00Z",
+      "margin_pct": 2.93,
+      "profit_25": 0.73,
+      "legs": [
+        {
+          "team": "Dallas Mavericks",
+          "odds": 290,
+          "book": "betrivers"
+        },
+        {
+          "team": "Portland Trail Blazers",
+          "odds": -250,
+          "book": "mybookieag"
+        }
+      ]
+    }
+  ],
+  "value_lines": [
+    {
+      "game": "Seattle Mariners vs Cleveland Guardians",
+      "sport": "BASEBALL MLB",
+      "commence": "2026-03-28T01:46:00Z",
+      "team": "Seattle Mariners",
+      "best_odds": -10000,
+      "best_book": "betmgm",
+      "avg_odds": -15000.0,
+      "edge_pts": 5000.0
+    },
+    {
+      "game": "Los Angeles Lakers vs Brooklyn Nets",
+      "sport": "BASKETBALL NBA",
+      "commence": "2026-03-28T02:41:00Z",
+      "team": "Los Angeles Lakers",
+      "best_odds": -1300,
+      "best_book": "draftkings",
+      "avg_odds": -2116.7,
+      "edge_pts": 816.7
+    },
+    {
+      "game": "Golden State Warriors vs Washington Wizards",
+      "sport": "BASKETBALL NBA",
+      "commence": "2026-03-28T02:11:00Z",
+      "team": "Golden State Warriors",
+      "best_odds": -360,
+      "best_book": "bovada",
+      "avg_odds": -698.2,
+      "edge_pts": 338.2
+    },
+    {
+      "game": "Los Angeles Lakers vs Brooklyn Nets",
+      "sport": "BASKETBALL NBA",
+      "commence": "2026-03-28T02:41:00Z",
+      "team": "Brooklyn Nets",
+      "best_odds": 1100,
+      "best_book": "mybookieag",
+      "avg_odds": 784.2,
+      "edge_pts": 315.8
+    },
+    {
+      "game": "Milwaukee Bucks vs San Antonio Spurs",
+      "sport": "BASKETBALL NBA",
+      "commence": "2026-03-28T19:10:00Z",
+      "team": "San Antonio Spurs",
+      "best_odds": -2000,
+      "best_book": "fanduel",
+      "avg_odds": -2255.9,
+      "edge_pts": 255.9
+    },
+    {
+      "game": "San Diego Padres vs Detroit Tigers",
+      "sport": "BASEBALL MLB",
+      "commence": "2026-03-28T01:41:00Z",
+      "team": "San Diego Padres",
+      "best_odds": -650,
+      "best_book": "betmgm",
+      "avg_odds": -775.3,
+      "edge_pts": 125.3
+    },
+    {
+      "game": "Seattle Mariners vs Cleveland Guardians",
+      "sport": "BASEBALL MLB",
+      "commence": "2026-03-28T01:46:00Z",
+      "team": "Cleveland Guardians",
+      "best_odds": 2200,
+      "best_book": "fanduel",
+      "avg_odds": 2100.0,
+      "edge_pts": 100.0
+    },
+    {
+      "game": "Golden State Warriors vs Washington Wizards",
+      "sport": "BASKETBALL NBA",
+      "commence": "2026-03-28T02:11:00Z",
+      "team": "Washington Wizards",
+      "best_odds": 525,
+      "best_book": "betmgm",
+      "avg_odds": 428.3,
+      "edge_pts": 96.7
+    },
+    {
+      "game": "San Diego Padres vs Detroit Tigers",
+      "sport": "BASEBALL MLB",
+      "commence": "2026-03-29T00:40:00Z",
+      "team": "San Diego Padres",
+      "best_odds": 103,
+      "best_book": "betonlineag",
+      "avg_odds": 10.3,
+      "edge_pts": 92.7
+    },
+    {
+      "game": "Milwaukee Bucks vs San Antonio Spurs",
+      "sport": "BASKETBALL NBA",
+      "commence": "2026-03-28T19:10:00Z",
+      "team": "Milwaukee Bucks",
+      "best_odds": 1153,
+      "best_book": "lowvig",
+      "avg_odds": 1061.2,
+      "edge_pts": 91.8
+    },
+    {
+      "game": "San Diego Padres vs Detroit Tigers",
+      "sport": "BASEBALL MLB",
+      "commence": "2026-03-28T01:41:00Z",
+      "team": "Detroit Tigers",
+      "best_odds": 550,
+      "best_book": "bovada",
+      "avg_odds": 460.0,
+      "edge_pts": 90.0
+    },
+    {
+      "game": "Atlanta Hawks vs Sacramento Kings",
+      "sport": "BASKETBALL NBA",
+      "commence": "2026-03-28T23:40:00Z",
+      "team": "Atlanta Hawks",
+      "best_odds": -979,
+      "best_book": "lowvig",
+      "avg_odds": -1067.2,
+      "edge_pts": 88.2
+    },
+    {
+      "game": "Portland Trail Blazers vs Dallas Mavericks",
+      "sport": "BASKETBALL NBA",
+      "commence": "2026-03-28T02:12:00Z",
+      "team": "Portland Trail Blazers",
+      "best_odds": -250,
+      "best_book": "mybookieag",
+      "avg_odds": -337.5,
+      "edge_pts": 87.5
+    },
+    {
+      "game": "Phoenix Suns vs Utah Jazz",
+      "sport": "BASKETBALL NBA",
+      "commence": "2026-03-29T02:10:00Z",
+      "team": "Phoenix Suns",
+      "best_odds": -1250,
+      "best_book": "betrivers",
+      "avg_odds": -1337.5,
+      "edge_pts": 87.5
+    },
+    {
+      "game": "Atlanta Hawks vs Sacramento Kings",
+      "sport": "BASKETBALL NBA",
+      "commence": "2026-03-28T23:40:00Z",
+      "team": "Sacramento Kings",
+      "best_odds": 730,
+      "best_book": "fanduel",
+      "avg_odds": 671.7,
+      "edge_pts": 58.3
+    },
+    {
+      "game": "Philadelphia Phillies vs Texas Rangers",
+      "sport": "BASEBALL MLB",
+      "commence": "2026-03-28T20:05:00Z",
+      "team": "Texas Rangers",
+      "best_odds": 109,
+      "best_book": "betus",
+      "avg_odds": 57.3,
+      "edge_pts": 51.7
+    },
+    {
+      "game": "Portland Trail Blazers vs Dallas Mavericks",
+      "sport": "BASKETBALL NBA",
+      "commence": "2026-03-28T02:12:00Z",
+      "team": "Dallas Mavericks",
+      "best_odds": 290,
+      "best_book": "betrivers",
+      "avg_odds": 245.0,
+      "edge_pts": 45.0
+    },
+    {
+      "game": "Phoenix Suns vs Utah Jazz",
+      "sport": "BASKETBALL NBA",
+      "commence": "2026-03-29T02:10:00Z",
+      "team": "Utah Jazz",
+      "best_odds": 825,
+      "best_book": "betmgm",
+      "avg_odds": 783.8,
+      "edge_pts": 41.2
+    },
+    {
+      "game": "Boston Bruins vs Minnesota Wild",
+      "sport": "ICEHOCKEY NHL",
+      "commence": "2026-03-28T21:00:00Z",
+      "team": "Boston Bruins",
+      "best_odds": 112,
+      "best_book": "fanduel",
+      "avg_odds": 83.3,
+      "edge_pts": 28.7
+    },
+    {
+      "game": "Los Angeles Dodgers vs Arizona Diamondbacks",
+      "sport": "BASEBALL MLB",
+      "commence": "2026-03-28T02:11:00Z",
+      "team": "Los Angeles Dodgers",
+      "best_odds": -250,
+      "best_book": "mybookieag",
+      "avg_odds": -277.8,
+      "edge_pts": 27.8
+    }
+  ]
+}
