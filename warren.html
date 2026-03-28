@@ -3,829 +3,675 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Warren's Office</title>
-<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Roboto+Mono:wght@300;400&display=swap" rel="stylesheet">
+<title>Warren's Office — Pass 2</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Roboto+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0}
 html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'EB Garamond',Georgia,serif}
+#canvas-wrap{position:fixed;inset:0}
+canvas{display:block;width:100%!important;height:100%!important}
 
-/* ── SCENE WRAPPER ── */
-#scene{
-  width:100vw;height:100vh;
-  position:relative;overflow:hidden;
-  background:#000;
-}
-
-/* ── CORRIDOR ── */
-#corridor{
-  position:absolute;inset:0;
-  display:flex;align-items:center;justify-content:center;
-  transition:opacity 0.8s;
-}
-.corridor-bg{
-  width:100%;height:100%;
-  position:absolute;
-  background:
-    linear-gradient(180deg, #1a1208 0%, #2a1e0e 40%, #3a2910 60%, #2a1e0e 100%);
-}
-/* Perspective floor */
-.floor{
-  position:absolute;bottom:0;left:0;right:0;height:45%;
-  background:linear-gradient(180deg,#3d2e18 0%,#2a1e0e 100%);
-  clip-path:polygon(0 100%,100% 100%,85% 0%,15% 0%);
-}
-/* Perspective ceiling */
-.ceiling{
-  position:absolute;top:0;left:0;right:0;height:35%;
-  background:linear-gradient(180deg,#1a1208 0%,#2d2210 100%);
-  clip-path:polygon(15% 100%,85% 100%,100% 0%,0% 0%);
-}
-/* Left wall */
-.wall-l{
-  position:absolute;top:0;left:0;bottom:0;width:15%;
-  background:linear-gradient(90deg,#1a1208,#3d2e18);
-  clip-path:polygon(0 0,100% 35%,100% 65%,0 100%);
-}
-/* Right wall */
-.wall-r{
-  position:absolute;top:0;right:0;bottom:0;width:15%;
-  background:linear-gradient(270deg,#1a1208,#3d2e18);
-  clip-path:polygon(100% 0,0 35%,0 65%,100% 100%);
-}
-/* Wall panels left */
-.panels-l{
-  position:absolute;left:2%;top:35%;bottom:35%;width:12%;
-  display:flex;flex-direction:column;gap:4px;
-}
-.panel-strip{height:32%;background:rgba(80,55,20,0.4);border:1px solid rgba(120,90,40,0.3)}
-/* Wall panels right */
-.panels-r{
-  position:absolute;right:2%;top:35%;bottom:35%;width:12%;
-  display:flex;flex-direction:column;gap:4px;
-}
-
-/* Vanishing point corridor lines */
-.vp-lines{
-  position:absolute;inset:0;pointer-events:none;
-}
-
-/* THE DOOR — at the end of the hall */
-#door-wrap{
-  position:absolute;
-  left:50%;top:50%;
-  transform:translate(-50%,-50%);
-  display:flex;flex-direction:column;align-items:center;
-  cursor:pointer;
-  transition:transform 0.3s;
-}
-#door-wrap:hover{transform:translate(-50%,-50%) scale(1.04)}
-.door-frame{
-  width:clamp(60px,8vw,100px);
-  height:clamp(90px,12vw,150px);
-  background:linear-gradient(180deg,#5c3d1a,#3d2810);
-  border:3px solid #8b6520;
-  border-radius:4px 4px 0 0;
-  position:relative;
-  box-shadow:0 0 40px rgba(139,101,32,0.3), inset 0 0 20px rgba(0,0,0,0.5);
-}
-.door-panel-top{
-  position:absolute;top:10%;left:10%;right:10%;height:35%;
-  border:2px solid #a07830;
-  background:rgba(0,0,0,0.2);
-}
-.door-panel-bot{
-  position:absolute;top:52%;left:10%;right:10%;height:38%;
-  border:2px solid #a07830;
-  background:rgba(0,0,0,0.2);
-}
-.door-knob{
-  position:absolute;right:12%;top:50%;
-  width:10px;height:10px;
-  background:radial-gradient(circle at 35% 35%,#ffd700,#b8860b);
-  border-radius:50%;
-  box-shadow:0 0 6px rgba(255,215,0,0.4);
-}
-.door-light{
-  position:absolute;bottom:100%;left:50%;transform:translateX(-50%);
-  width:4px;height:20px;
-  background:linear-gradient(180deg,transparent,rgba(255,200,100,0.6));
-}
-.door-sign{
-  margin-top:8px;
-  font-family:'Roboto Mono',monospace;
-  font-size:clamp(7px,1vw,10px);
-  letter-spacing:2px;
-  color:rgba(255,200,100,0.5);
-  text-transform:uppercase;
-}
-/* Ambient light spill from door */
-.door-glow{
-  position:absolute;
-  left:50%;top:50%;
-  transform:translate(-50%,-50%);
-  width:clamp(80px,12vw,160px);
-  height:clamp(120px,18vw,240px);
-  background:radial-gradient(ellipse,rgba(255,200,100,0.08) 0%,transparent 70%);
-  pointer-events:none;
-}
-
-/* Secretary desk — subtle */
-.secretary-area{
-  position:absolute;
-  left:20%;top:60%;
-  opacity:0.5;
-}
-.sec-desk{
-  width:clamp(40px,5vw,70px);height:clamp(15px,2vw,25px);
-  background:linear-gradient(180deg,#5c3d1a,#3d2810);
-  border-radius:2px;
-}
-.sec-lamp{
-  width:4px;height:clamp(12px,2vw,22px);
-  background:#8b6520;
-  position:absolute;top:-100%;left:60%;
-}
-.sec-lamp::after{
-  content:'';position:absolute;bottom:100%;left:-8px;
-  width:20px;height:12px;
-  background:rgba(255,200,80,0.15);
-  border-radius:50% 50% 0 0;
-}
-
-/* ── PLAYER ── */
-#player{
-  position:absolute;
-  bottom:10%;
-  left:50%;
-  transform:translateX(-50%);
-  width:clamp(12px,2vw,22px);
-  height:clamp(24px,4vw,44px);
-  transition:left 0.15s, bottom 0.15s, transform 0.15s;
-  z-index:10;
-}
-.player-body{
-  width:100%;height:70%;
-  background:#2c1a08;
-  border-radius:3px 3px 0 0;
-  position:relative;
-}
-.player-head{
-  width:70%;height:30%;
-  background:#c8956c;
-  border-radius:50%;
-  margin:0 auto;
-  position:relative;top:-5px;
-}
-.player-shadow{
-  width:150%;height:6px;
-  background:rgba(0,0,0,0.4);
-  border-radius:50%;
-  margin:-3px auto 0;
-}
-
-/* ── DOOR OPEN ANIMATION ── */
-.door-opening .door-frame{
-  animation:openDoor 1.2s forwards;
-  transform-origin:left center;
-}
-@keyframes openDoor{
-  0%{transform:rotateY(0deg);filter:brightness(1)}
-  100%{transform:rotateY(-75deg);filter:brightness(0.3)}
-}
-
-/* ── FADE TRANSITION ── */
-#fade{
-  position:fixed;inset:0;background:#000;
-  opacity:0;pointer-events:none;
-  transition:opacity 0.8s;z-index:1000;
-}
-#fade.show{opacity:1;pointer-events:all}
-
-/* ── OFFICE SCENE ── */
-#office{
-  position:absolute;inset:0;
-  display:none;
-  opacity:0;
-  transition:opacity 1s;
-  background:#c8b898;
-  overflow:hidden;
-}
-#office.active{display:block}
-#office.visible{opacity:1}
-
-/* Office room */
-.office-room{
-  position:absolute;inset:0;
-  background:
-    linear-gradient(180deg,#d4c4a0 0%,#c8b898 50%,#b8a888 100%);
-}
-/* Wood paneling back wall */
-.back-wall{
-  position:absolute;top:0;left:0;right:0;height:55%;
-  background:repeating-linear-gradient(
-    90deg,
-    #8b6520 0px, #7a5818 2px,
-    #9a7230 2px, #8b6520 40px
-  );
-  opacity:0.85;
-}
-.back-wall::after{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(180deg,rgba(0,0,0,0.3) 0%,transparent 100%);
-}
-/* Wainscoting */
-.wainscot{
-  position:absolute;top:55%;left:0;right:0;height:5%;
-  background:#5c3d1a;
-  border-top:3px solid #a07830;border-bottom:3px solid #a07830;
-}
-/* Floor */
-.office-floor{
-  position:absolute;top:60%;left:0;right:0;bottom:0;
-  background:repeating-linear-gradient(
-    90deg,
-    #8b6520 0px,#8b6520 40px,
-    #7a5818 40px,#7a5818 42px
-  );
-  opacity:0.7;
-}
-
-/* WARREN'S DESK */
-.warren-desk{
-  position:absolute;
-  left:50%;bottom:28%;
-  transform:translateX(-50%);
-  width:clamp(200px,35vw,400px);
-  height:clamp(80px,12vw,140px);
-}
-.desk-surface{
-  width:100%;height:40%;
-  background:linear-gradient(180deg,#5c3d1a,#3d2810);
-  border-radius:4px 4px 0 0;
-  border-top:3px solid #a07830;
-  position:relative;
-}
-.desk-legs{
-  width:100%;height:60%;
-  background:#3d2810;
-  display:flex;justify-content:space-between;padding:0 5%;
-}
-.desk-leg{width:8%;background:#2a1e0e;border-radius:0 0 3px 3px}
-
-/* Items on desk */
-.desk-items{
-  position:absolute;top:-clamp(30px,5vw,60px);left:0;right:0;
-  display:flex;align-items:flex-end;justify-content:center;gap:clamp(8px,1.5vw,20px);
-  padding:0 8%;
-}
-.newspaper-stack{
-  width:clamp(30px,5vw,55px);height:clamp(20px,3vw,35px);
-  background:#f5f0e0;
-  border:1px solid #ccc;
-  position:relative;transform:rotate(-2deg);
-  display:flex;flex-direction:column;justify-content:center;align-items:center;
-}
-.newspaper-stack::before{
-  content:'WSJ';font-family:'Roboto Mono',monospace;
-  font-size:clamp(5px,0.7vw,8px);font-weight:700;color:#c00;letter-spacing:1px;
-}
-.newspaper-stack::after{
-  content:'';position:absolute;top:3px;left:3px;right:3px;
-  height:1px;background:#999;
-}
-.too-hard-pile{
-  width:clamp(25px,4vw,45px);height:clamp(25px,4vw,50px);
-  display:flex;flex-direction:column;gap:2px;align-items:center;
-}
-.paper{
-  width:100%;height:clamp(5px,1vw,10px);
-  background:#f5f0e0;border:1px solid #ddd;
-  position:relative;
-}
-.paper:nth-child(1){transform:rotate(1deg)}
-.paper:nth-child(2){transform:rotate(-1deg)}
-.paper:nth-child(3){transform:rotate(2deg)}
-.too-hard-label{
-  font-size:clamp(4px,0.6vw,7px);color:#666;font-family:'Roboto Mono',monospace;
-  letter-spacing:0.5px;white-space:nowrap;margin-top:2px;
-}
-.phone{
-  width:clamp(15px,2.5vw,28px);height:clamp(20px,3vw,35px);
-  background:#1a1a1a;border-radius:3px;
-  position:relative;
-}
-.phone::after{
-  content:'';position:absolute;top:15%;left:10%;right:10%;height:50%;
-  background:rgba(255,255,255,0.05);border-radius:2px;
-}
-.cherry-coke{
-  width:clamp(8px,1.2vw,14px);height:clamp(18px,3vw,32px);
-  background:linear-gradient(180deg,#8b0000,#c00,#8b0000);
-  border-radius:2px 2px 3px 3px;
-  position:relative;
-}
-.cherry-coke::before{
-  content:'';position:absolute;top:0;left:10%;right:10%;height:15%;
-  background:rgba(255,255,255,0.3);border-radius:2px;
-}
-
-/* WARREN — figure behind desk */
-.warren-figure{
-  position:absolute;
-  left:50%;bottom:calc(28% + clamp(80px,12vw,140px));
-  transform:translateX(-50%);
-  display:flex;flex-direction:column;align-items:center;
-  animation:breathe 4s ease-in-out infinite;
-}
-@keyframes breathe{
-  0%,100%{transform:translateX(-50%) translateY(0)}
-  50%{transform:translateX(-50%) translateY(-3px)}
-}
-.warren-chair-back{
-  width:clamp(50px,8vw,90px);height:clamp(60px,9vw,100px);
-  background:linear-gradient(180deg,#2a1e0e,#1a1208);
-  border-radius:6px 6px 0 0;
-  border:2px solid #5c3d1a;
-}
-.warren-torso{
-  position:absolute;bottom:0;left:50%;transform:translateX(-50%);
-  width:clamp(35px,5.5vw,65px);height:clamp(40px,6vw,70px);
-  background:#3d5a8a;  /* blue suit */
-  border-radius:4px 4px 0 0;
-}
-.warren-head{
-  position:absolute;bottom:calc(clamp(40px,6vw,70px) + clamp(5px,0.5vw,8px));
-  left:50%;transform:translateX(-50%);
-  width:clamp(22px,3.5vw,40px);height:clamp(26px,4vw,46px);
-  background:#c8956c;
-  border-radius:50% 50% 45% 45%;
-}
-.warren-hair{
-  position:absolute;top:0;left:0;right:0;height:35%;
-  background:#d4d4d4;
-  border-radius:50% 50% 0 0;
-}
-.warren-glasses{
-  position:absolute;top:40%;left:10%;right:10%;height:20%;
-  border-top:2px solid #333;
-  display:flex;gap:10%;
-}
-.warren-glasses::before,.warren-glasses::after{
-  content:'';flex:1;height:clamp(6px,1.2vw,14px);
-  border:1.5px solid #333;background:rgba(150,200,255,0.2);
-  border-radius:2px;margin-top:1px;
-}
-/* Writing motion */
-.warren-arm{
-  position:absolute;
-  bottom:clamp(5px,1vw,12px);right:5%;
-  width:clamp(20px,3vw,35px);height:clamp(8px,1.2vw,14px);
-  background:#c8956c;
-  border-radius:4px;
-  transform-origin:left center;
-  animation:writing 2s ease-in-out infinite;
-}
-@keyframes writing{
-  0%,100%{transform:rotate(-10deg) translateX(0)}
-  25%{transform:rotate(-5deg) translateX(3px)}
-  75%{transform:rotate(-15deg) translateX(-2px)}
-}
-
-/* PORTRAITS on wall */
-.portrait{
-  position:absolute;top:10%;
-  background:#f5f0e0;
-  border:3px solid #8b6520;
-  display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
-  padding-bottom:4px;
-}
-.portrait-left{left:8%;width:clamp(35px,5vw,60px);height:clamp(45px,7vw,80px)}
-.portrait-right{right:8%;width:clamp(35px,5vw,60px);height:clamp(45px,7vw,80px)}
-.portrait-face{
-  width:55%;height:50%;
-  background:#c8956c;
-  border-radius:50% 50% 45% 45%;
-  margin-bottom:4px;
-  position:relative;
-}
-.portrait-face::after{content:'';position:absolute;top:0;left:0;right:0;height:30%;background:#8b6520;border-radius:50% 50% 0 0}
-.portrait-name{font-size:clamp(4px,0.6vw,7px);font-family:'Roboto Mono',monospace;color:#5c3d1a;letter-spacing:0.5px;text-align:center;font-weight:700}
-
-/* Venetian blinds window */
-.window{
-  position:absolute;top:8%;left:50%;transform:translateX(-50%);
-  width:clamp(60px,10vw,120px);height:clamp(70px,11vw,130px);
-  background:#e8f4ff;
-  border:3px solid #8b6520;
-  overflow:hidden;
-}
-.blind-slat{
-  width:100%;height:clamp(4px,0.7vw,8px);
-  background:rgba(200,180,140,0.7);
-  border-bottom:1px solid rgba(150,130,90,0.5);
-}
-.window-light{
-  position:absolute;inset:0;
-  background:linear-gradient(90deg,transparent 20%,rgba(255,255,200,0.15) 50%,transparent 80%);
-}
-
-/* INFO PANEL — Trivium overlay */
-#trivium-panel{
-  position:absolute;right:2%;top:50%;transform:translateY(-50%);
-  width:clamp(140px,20vw,220px);
-  background:rgba(255,250,240,0.93);
-  border:1px solid #8b6520;
-  border-left:3px solid #8b0000;
-  padding:clamp(8px,1.2vw,16px);
-  font-size:clamp(9px,1.1vw,13px);
-  display:none;
-  box-shadow:2px 2px 12px rgba(0,0,0,0.2);
-}
-#trivium-panel.show{display:block;animation:fadeInRight 0.5s forwards}
-@keyframes fadeInRight{from{opacity:0;transform:translateY(-50%) translateX(20px)}to{opacity:1;transform:translateY(-50%) translateX(0)}}
-.tp-section{margin-bottom:clamp(6px,1vw,12px)}
-.tp-label{
-  font-family:'Roboto Mono',monospace;font-size:clamp(7px,0.8vw,9px);
-  font-weight:700;letter-spacing:2px;text-transform:uppercase;
-  color:#8b0000;margin-bottom:4px;
-}
-.tp-text{line-height:1.5;color:#2a1a0a;font-family:'EB Garamond',serif}
-.tp-close{
-  position:absolute;top:6px;right:8px;
-  font-size:12px;color:#8b6520;cursor:pointer;line-height:1;
-  font-family:'Roboto Mono',monospace;
-}
-.tp-close:hover{color:#8b0000}
-
-/* CLICK HINT */
-.click-hint{
-  position:absolute;
-  font-family:'Roboto Mono',monospace;font-size:clamp(6px,0.8vw,9px);
-  color:rgba(200,180,140,0.6);letter-spacing:1px;text-transform:uppercase;
-  pointer-events:none;
-}
-
-/* CAPTION BAR */
+/* HUD */
+#hud{position:fixed;inset:0;pointer-events:none;z-index:10}
 #caption{
-  position:absolute;bottom:3%;left:50%;transform:translateX(-50%);
-  font-family:'Roboto Mono',monospace;font-size:clamp(8px,1vw,11px);
-  letter-spacing:1.5px;text-transform:uppercase;
-  color:rgba(200,180,140,0.5);
-  white-space:nowrap;
-  transition:opacity 0.5s;
+  position:absolute;bottom:4%;left:50%;transform:translateX(-50%);
+  font-family:'Roboto Mono',monospace;font-size:clamp(9px,1vw,12px);
+  letter-spacing:2px;text-transform:uppercase;
+  color:rgba(220,190,130,0.6);white-space:nowrap;
+  text-shadow:0 1px 4px rgba(0,0,0,0.8);
+  transition:opacity 0.4s;
 }
-
-/* ── AMBIENT PARTICLES ── */
-.dust{
-  position:absolute;
-  width:2px;height:2px;
-  background:rgba(255,220,150,0.4);
-  border-radius:50%;
-  animation:float linear infinite;
+#location{
+  position:absolute;top:3%;left:3%;
+  font-family:'Roboto Mono',monospace;font-size:clamp(8px,0.9vw,11px);
+  letter-spacing:2px;text-transform:uppercase;color:rgba(200,170,100,0.4);
 }
-@keyframes float{
-  0%{transform:translateY(0) translateX(0);opacity:0}
-  10%{opacity:1}
-  90%{opacity:0.3}
-  100%{transform:translateY(-80px) translateX(20px);opacity:0}
-}
-
-/* ESC hint */
 #esc-hint{
-  position:absolute;top:2%;left:50%;transform:translateX(-50%);
-  font-family:'Roboto Mono',monospace;font-size:clamp(7px,0.8vw,10px);
-  color:rgba(180,160,120,0.4);letter-spacing:2px;text-transform:uppercase;
-  display:none;
+  position:absolute;top:3%;right:3%;
+  font-family:'Roboto Mono',monospace;font-size:clamp(8px,0.9vw,11px);
+  letter-spacing:2px;text-transform:uppercase;color:rgba(200,170,100,0.3);
+  display:none;pointer-events:all;cursor:pointer;
 }
+#esc-hint:hover{color:rgba(200,170,100,0.7)}
+
+/* TRIVIUM PANEL */
+#trivium{
+  position:absolute;right:2%;top:50%;transform:translateY(-50%);
+  width:clamp(180px,22vw,280px);
+  background:rgba(250,245,235,0.96);
+  border:1px solid #8b6520;border-left:4px solid #8b0000;
+  padding:clamp(12px,1.5vw,20px);
+  display:none;pointer-events:all;
+  box-shadow:0 4px 24px rgba(0,0,0,0.35);
+}
+#trivium.show{display:block;animation:slideIn 0.3s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(-50%) translateX(30px)}to{opacity:1;transform:translateY(-50%) translateX(0)}}
+.tv-close{position:absolute;top:8px;right:12px;font-size:16px;color:#8b6520;cursor:pointer;line-height:1;font-family:'Roboto Mono',monospace}
+.tv-close:hover{color:#8b0000}
+.tv-section{margin-bottom:14px}
+.tv-label{font-family:'Roboto Mono',monospace;font-size:8px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#8b0000;margin-bottom:5px}
+.tv-text{font-size:clamp(11px,1.1vw,13px);line-height:1.6;color:#1a1008}
+.tv-divider{height:1px;background:#e0d4b0;margin:10px 0}
+
+/* CROSSHAIR */
+#crosshair{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:20px;height:20px;pointer-events:none;display:none;
+}
+#crosshair::before,#crosshair::after{content:'';position:absolute;background:rgba(220,190,130,0.5)}
+#crosshair::before{width:1px;height:100%;left:50%;top:0;transform:translateX(-50%)}
+#crosshair::after{width:100%;height:1px;top:50%;left:0;transform:translateY(-50%)}
+
+/* INTERACT HINT */
+#interact-hint{
+  position:absolute;left:50%;bottom:12%;transform:translateX(-50%);
+  background:rgba(0,0,0,0.7);border:1px solid rgba(220,190,130,0.3);
+  padding:6px 16px;
+  font-family:'Roboto Mono',monospace;font-size:clamp(8px,0.9vw,11px);
+  letter-spacing:1.5px;text-transform:uppercase;
+  color:rgba(220,190,130,0.8);
+  display:none;pointer-events:none;
+  transition:opacity 0.3s;
+}
+
+/* LOADING */
+#loading{
+  position:fixed;inset:0;background:#0a0804;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:100;transition:opacity 1s;
+}
+#loading.fade{opacity:0;pointer-events:none}
+.load-name{font-family:'EB Garamond',serif;font-size:clamp(28px,4vw,48px);font-weight:600;color:#c8a850;letter-spacing:2px;margin-bottom:8px}
+.load-sub{font-family:'Roboto Mono',monospace;font-size:clamp(8px,1vw,11px);letter-spacing:3px;text-transform:uppercase;color:rgba(200,170,100,0.4);margin-bottom:32px}
+.load-bar-wrap{width:200px;height:2px;background:rgba(200,170,100,0.15)}
+.load-bar{height:100%;background:#c8a850;width:0%;transition:width 0.3s}
 </style>
 </head>
 <body>
 
-<div id="scene">
-
-  <!-- FADE OVERLAY -->
-  <div id="fade"></div>
-
-  <!-- ── CORRIDOR ── -->
-  <div id="corridor">
-    <div class="corridor-bg"></div>
-    <div class="floor"></div>
-    <div class="ceiling"></div>
-    <div class="wall-l"></div>
-    <div class="wall-r"></div>
-    <div class="panels-l">
-      <div class="panel-strip"></div>
-      <div class="panel-strip"></div>
-      <div class="panel-strip"></div>
-    </div>
-    <div class="panels-r">
-      <div class="panel-strip"></div>
-      <div class="panel-strip"></div>
-      <div class="panel-strip"></div>
-    </div>
-
-    <!-- Secretary -->
-    <div class="secretary-area">
-      <div class="sec-lamp"></div>
-      <div class="sec-desk"></div>
-    </div>
-
-    <!-- Door glow -->
-    <div class="door-glow"></div>
-
-    <!-- THE DOOR -->
-    <div id="door-wrap" onclick="enterDoor()">
-      <div class="door-frame">
-        <div class="door-panel-top"></div>
-        <div class="door-panel-bot"></div>
-        <div class="door-knob"></div>
-        <div class="door-light"></div>
-      </div>
-      <div class="door-sign">Buffett &bull; Office 2</div>
-    </div>
-
-    <!-- Player -->
-    <div id="player">
-      <div class="player-head"></div>
-      <div class="player-body"></div>
-      <div class="player-shadow"></div>
-    </div>
-
-    <!-- Caption -->
-    <div id="caption">Use arrow keys to move &bull; Approach the door &bull; Press Enter to knock</div>
-  </div>
-
-  <!-- ── OFFICE ── -->
-  <div id="office">
-    <div class="office-room"></div>
-    <div class="back-wall"></div>
-    <div class="wainscot"></div>
-    <div class="office-floor"></div>
-
-    <!-- Window with blinds -->
-    <div class="window" id="window-el">
-      <div id="blind-container"></div>
-      <div class="window-light"></div>
-    </div>
-
-    <!-- Portraits -->
-    <div class="portrait portrait-left">
-      <div class="portrait-face"></div>
-      <div class="portrait-name">B. Graham</div>
-    </div>
-    <div class="portrait portrait-right">
-      <div class="portrait-face" style="background:#b8806c"></div>
-      <div class="portrait-name">C. Munger</div>
-    </div>
-
-    <!-- Warren's desk -->
-    <div class="warren-desk">
-      <div class="desk-surface">
-        <div class="desk-items">
-          <div class="newspaper-stack"></div>
-          <div class="too-hard-pile">
-            <div class="paper"></div>
-            <div class="paper"></div>
-            <div class="paper"></div>
-            <div class="too-hard-label">TOO HARD</div>
-          </div>
-          <div class="phone"></div>
-          <div class="cherry-coke"></div>
-        </div>
-      </div>
-      <div class="desk-legs">
-        <div class="desk-leg"></div>
-        <div class="desk-leg"></div>
-        <div class="desk-leg"></div>
-        <div class="desk-leg"></div>
-      </div>
-    </div>
-
-    <!-- Warren figure -->
-    <div class="warren-figure" id="warren" onclick="showTrivium('warren')">
-      <div class="warren-chair-back">
-        <div class="warren-torso">
-          <div class="warren-head">
-            <div class="warren-hair"></div>
-            <div class="warren-glasses"></div>
-          </div>
-          <div class="warren-arm"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Clickable items hints -->
-    <div class="click-hint" style="left:50%;bottom:calc(28% + clamp(80px,12vw,140px) + clamp(60px,9vw,100px));transform:translateX(-50%) translateY(-8px)">
-      &#9650; Click Warren
-    </div>
-
-    <!-- Trivium panel -->
-    <div id="trivium-panel">
-      <div class="tp-close" onclick="closeTrivium()">&#215;</div>
-      <div id="tp-content"></div>
-    </div>
-
-    <!-- Dust particles -->
-    <div id="dust-container"></div>
-
-    <!-- ESC hint -->
-    <div id="esc-hint">Press ESC to leave</div>
-
-    <!-- Caption -->
-    <div id="office-caption" style="position:absolute;bottom:3%;left:50%;transform:translateX(-50%);font-family:'Roboto Mono',monospace;font-size:clamp(7px,0.9vw,10px);letter-spacing:1.5px;text-transform:uppercase;color:rgba(139,101,32,0.5);white-space:nowrap">
-      Kiewit Plaza &bull; Omaha, Nebraska &bull; Office 2
-    </div>
-  </div>
-
+<div id="loading">
+  <div class="load-name">Warren's Office</div>
+  <div class="load-sub">Kiewit Plaza &bull; Omaha, Nebraska</div>
+  <div class="load-bar-wrap"><div class="load-bar" id="load-bar"></div></div>
 </div>
 
+<div id="canvas-wrap"></div>
+
+<div id="hud">
+  <div id="location">Kiewit Plaza &bull; Office 2 &bull; Omaha, NE</div>
+  <div id="esc-hint" onclick="goBack()">&#8592; Exit</div>
+  <div id="caption">Walk with WASD or Arrow Keys &bull; Look with mouse &bull; Click objects to learn</div>
+  <div id="crosshair"></div>
+  <div id="interact-hint" id="interact-hint">Press F or Click to examine</div>
+  <div id="trivium">
+    <div class="tv-close" onclick="closeTrivium()">&#215;</div>
+    <div id="tv-content"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-var playerX = 50;
-var playerY = 10;
-var atDoor = false;
-var inOffice = false;
-var keys = {};
-var TRIVIUM_DATA = {
+// ── TRIVIUM DATA ──
+var TRIVIUM = {
   warren: {
-    grammar: "Warren Buffett. 93 years old. Net worth $130 billion. Still works in this same office he has occupied since 1962. No computer on the desk.",
-    logic: "He reads 500 pages a day. The newspaper stack, the annual reports, the cherry Coke  --  these aren't affectations. They are the inputs of a system that has compounded at 20% annually for 60 years. The 'TOO HARD' pile means he only swings at pitches he understands completely. That restraint is the strategy.",
-    rhetoric: "The move: define your circle of competence ruthlessly. Everything outside it goes in the TOO HARD pile. Everything inside it  --  you study until you know it better than anyone alive. Then you wait. And when the pitch comes, you swing hard."
-  },
-  graham_portrait: {
-    grammar: "Benjamin Graham. 'The Intelligent Investor.' Columbia Business School professor. Warren Buffett's teacher and employer.",
-    logic: "Graham invented the concept of intrinsic value  --  the idea that a stock is not a ticker symbol but a fractional ownership of a real business. Mr. Market is not your boss. He is your servant. When he offers you something at a discount to what it's worth, you buy. When he's manic, you sell.",
-    rhetoric: "The move: always calculate what something is worth before you look at what it costs. If you do it in that order, Mr. Market can never manipulate you."
-  },
-  munger_portrait: {
-    grammar: "Charlie Munger. Vice Chairman, Berkshire Hathaway. 99 years old when he died in 2023. Architecture degree. Self-taught investor. Built his mental model lattice across physics, biology, psychology, history, mathematics.",
-    logic: "Munger's insight: the big money is not in buying good businesses at fair prices. It's in buying great businesses at good prices and then doing nothing. Sit on your ass investing. The tax advantages of inactivity compound alongside the business itself.",
-    rhetoric: "The move: learn something from every discipline. Not surface knowledge -- the actual mechanism. When you have 100 mental models, the world starts explaining itself to you."
-  },
-  window: {
-    grammar: "Venetian blinds. South-facing window. Omaha, Nebraska. He could afford floor-to-ceiling glass in any skyscraper in any city on earth.",
-    logic: "He stayed in Omaha deliberately. Distance from Wall Street means distance from the noise. The blinds are always half-closed. Not because he doesn't want to see the world  --  because the world he needs to see is in the annual reports on his desk, not through the window.",
-    rhetoric: "The move: control your information diet with the same discipline you control your investment portfolio. Most of what comes through the window is noise. Most of what's in the annual report is signal."
+    label: "Warren Buffett",
+    grammar: "93 years old. $130 billion net worth. Reads 500 pages every day. Has worked in this same office since 1962. No computer on the desk.",
+    logic: "The newspaper stack, the annual reports, the Cherry Coke -- these are the inputs of a system that has compounded at 20% annually for 60 years. The TOO HARD pile is not laziness. It is the most important decision in investing: knowing exactly what you do not know.",
+    rhetoric: "Define your circle of competence ruthlessly. Everything outside it goes in the TOO HARD pile. Everything inside it -- study until you know it better than anyone alive. Then wait. When the pitch comes, swing hard."
   },
   desk: {
-    grammar: "A desk. Newspapers. A stack of papers labeled TOO HARD. A landline phone. One Cherry Coke.",
-    logic: "No Bloomberg terminal. No Reuters feed. No second monitor. Every piece of technology that Wall Street considers essential, he has concluded is unnecessary or counterproductive. The phone is for rare outbound calls he initiates. He is never reactive.",
-    rhetoric: "The move: the person who controls the speed of the conversation controls the negotiation. Never let urgency be imposed on you from the outside. Think on your schedule."
+    label: "The Desk",
+    grammar: "Wooden desk. Newspaper stack. A pile labeled TOO HARD. A landline phone. One Cherry Coke. No Bloomberg terminal. No second monitor. No email.",
+    logic: "Every piece of technology Wall Street considers essential, he has concluded is unnecessary. The phone is for rare outbound calls he initiates. He is never reactive. The person who controls the speed of the conversation controls the negotiation.",
+    rhetoric: "Never let urgency be imposed from the outside. Think on your own schedule. The best investment decisions come from stillness, not speed."
+  },
+  graham: {
+    label: "Benjamin Graham",
+    grammar: "The Intelligent Investor. Columbia Business School professor. Warren Buffett's teacher, mentor, and first employer. Father of value investing.",
+    logic: "Graham gave the world Mr. Market -- the manic-depressive business partner who offers to buy or sell his share of the business every day at a different price. When he is fearful, his prices are low. When he is euphoric, his prices are high. His mood is irrelevant to the underlying value.",
+    rhetoric: "Always calculate what something is worth before you look at what it costs. In that order. Mr. Market cannot manipulate you if you already know the answer."
+  },
+  munger: {
+    label: "Charlie Munger",
+    grammar: "Vice Chairman, Berkshire Hathaway. Died 2023 at 99. Architecture degree. Self-taught investor. Built a mental model lattice across physics, biology, psychology, history, and mathematics.",
+    logic: "Munger's core insight: the big money is not in activity. It is in sitting on your ass and doing nothing while great businesses compound. Most investors underperform not because they do too little -- but because they do too much.",
+    rhetoric: "Learn something real from every discipline -- not surface knowledge, the actual mechanism. When you have 100 mental models, the world starts explaining itself. Invert. Always invert."
+  },
+  window: {
+    label: "The Window",
+    grammar: "Venetian blinds. South-facing. Omaha, Nebraska. He could afford floor-to-ceiling glass in any penthouse in any financial capital on earth.",
+    logic: "He chose Omaha deliberately. Distance from Wall Street is distance from the noise. The blinds are half-closed -- not because he doesn't want to see the world, but because the world worth seeing is in the annual reports on his desk.",
+    rhetoric: "Control your information diet with the same discipline you control your portfolio. Most of what comes through the window is noise. The signal is in the filings."
+  },
+  coke: {
+    label: "Cherry Coke",
+    grammar: "One Cherry Coke. Buffett drinks five of these a day. He has done so since 1986 when Berkshire bought 6.2% of Coca-Cola for $1.3 billion.",
+    logic: "That stake is now worth over $25 billion. He didn't just invest in Coke -- he studied the psychology of brand loyalty, the mathematics of global distribution, and the economics of a product with inelastic demand. Then he bought it and held it for 40 years.",
+    rhetoric: "The best investments are in businesses so simple a child could understand them, with moats so wide competitors cannot cross them, run by people you would trust with your family."
   }
 };
 
-function showTrivium(key) {
-  var data = TRIVIUM_DATA[key];
-  if (!data) return;
-  var html =
-    '<div class="tp-section"><div class="tp-label">Grammar &mdash; What</div><div class="tp-text">' + data.grammar + '</div></div>' +
-    '<div class="tp-section"><div class="tp-label">Logic &mdash; Why</div><div class="tp-text">' + data.logic + '</div></div>' +
-    '<div class="tp-section"><div class="tp-label">Rhetoric &mdash; The Move</div><div class="tp-text">' + data.rhetoric + '</div></div>';
-  document.getElementById('tp-content').innerHTML = html;
-  document.getElementById('trivium-panel').classList.add('show');
+var showTrivium = function(key) {
+  var d = TRIVIUM[key];
+  if (!d) return;
+  var html = '<div style="font-family:\'EB Garamond\',serif;font-size:clamp(14px,1.4vw,18px);font-weight:600;color:#1a1008;margin-bottom:12px">' + d.label + '</div>';
+  html += '<div class="tv-divider"></div>';
+  html += '<div class="tv-section"><div class="tv-label">Grammar -- What</div><div class="tv-text">' + d.grammar + '</div></div>';
+  html += '<div class="tv-section"><div class="tv-label">Logic -- Why</div><div class="tv-text">' + d.logic + '</div></div>';
+  html += '<div class="tv-section"><div class="tv-label">Rhetoric -- The Move</div><div class="tv-text">' + d.rhetoric + '</div></div>';
+  document.getElementById('tv-content').innerHTML = html;
+  document.getElementById('trivium').classList.add('show');
+};
+
+var closeTrivium = function() {
+  document.getElementById('trivium').classList.remove('show');
+};
+
+var goBack = function() {
+  window.location.href = 'plc-capital.html';
+};
+
+// ── THREE.JS SCENE ──
+var scene, camera, renderer, clock;
+var moveF=false, moveB=false, moveL=false, moveR=false;
+var pitch=0, yaw=0;
+var isLocked=false;
+var raycaster, interactables=[], hovered=null;
+var WALK_SPEED=2.5, SPRINT=4.5;
+
+function init() {
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x2a1e0e);
+  scene.fog = new THREE.Fog(0x1a1208, 8, 22);
+
+  camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 50);
+  camera.position.set(0, 1.65, 6);
+
+  renderer = new THREE.WebGLRenderer({antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  document.getElementById('canvas-wrap').appendChild(renderer.domElement);
+
+  clock = new THREE.Clock();
+  raycaster = new THREE.Raycaster();
+
+  buildScene();
+  setupLights();
+  setupControls();
+
+  window.addEventListener('resize', onResize);
+  animate();
 }
 
-function closeTrivium() {
-  document.getElementById('trivium-panel').classList.remove('show');
+function tex(color, rough, metal) {
+  var m = new THREE.MeshStandardMaterial({color:color, roughness:rough||0.8, metalness:metal||0});
+  return m;
 }
 
-function buildBlinds() {
-  var container = document.getElementById('blind-container');
-  var html = '';
-  for (var i = 0; i < 14; i++) {
-    html += '<div class="blind-slat"></div>';
+function buildScene() {
+  // ── ROOM GEOMETRY ──
+  var roomW=12, roomH=3.5, roomD=10;
+
+  // Floor -- hardwood
+  var floorGeo = new THREE.PlaneGeometry(roomW, roomD, 20, 20);
+  var floorMat = tex(0x6b4c1a, 0.9, 0.1);
+  var floor = new THREE.Mesh(floorGeo, floorMat);
+  floor.rotation.x = -Math.PI/2;
+  floor.receiveShadow = true;
+  scene.add(floor);
+
+  // Ceiling
+  var ceiling = new THREE.Mesh(new THREE.PlaneGeometry(roomW, roomD), tex(0xd4c4a0, 0.95));
+  ceiling.rotation.x = Math.PI/2;
+  ceiling.position.y = roomH;
+  scene.add(ceiling);
+
+  // Back wall -- wood paneling
+  var backWall = new THREE.Mesh(new THREE.PlaneGeometry(roomW, roomH), tex(0x7a5818, 0.85, 0.05));
+  backWall.position.set(0, roomH/2, -roomD/2);
+  backWall.receiveShadow = true;
+  scene.add(backWall);
+
+  // Wood panel strips (vertical)
+  for (var i=-5; i<=5; i++) {
+    var strip = new THREE.Mesh(
+      new THREE.BoxGeometry(0.04, roomH, 0.02),
+      tex(0x5c3d1a, 0.9)
+    );
+    strip.position.set(i*1.0, roomH/2, -roomD/2+0.02);
+    scene.add(strip);
   }
-  container.innerHTML = html;
-}
 
-function buildDust() {
-  var container = document.getElementById('dust-container');
-  var html = '';
-  for (var i = 0; i < 12; i++) {
-    var left = 10 + Math.random() * 80;
-    var delay = Math.random() * 6;
-    var duration = 4 + Math.random() * 6;
-    var size = 1 + Math.random() * 2;
-    html += '<div class="dust" style="left:' + left + '%;bottom:' + (20 + Math.random() * 40) + '%;' +
-      'width:' + size + 'px;height:' + size + 'px;' +
-      'animation-delay:' + delay + 's;animation-duration:' + duration + 's"></div>';
+  // Wainscoting rail
+  var wainscot = new THREE.Mesh(new THREE.BoxGeometry(roomW, 0.08, 0.06), tex(0x8b6520, 0.6, 0.2));
+  wainscot.position.set(0, 0.95, -roomD/2+0.04);
+  scene.add(wainscot);
+
+  // Side walls
+  var leftWall = new THREE.Mesh(new THREE.PlaneGeometry(roomD, roomH), tex(0x8b7040, 0.9));
+  leftWall.rotation.y = Math.PI/2;
+  leftWall.position.set(-roomW/2, roomH/2, 0);
+  scene.add(leftWall);
+
+  var rightWall = new THREE.Mesh(new THREE.PlaneGeometry(roomD, roomH), tex(0x8b7040, 0.9));
+  rightWall.rotation.y = -Math.PI/2;
+  rightWall.position.set(roomW/2, roomH/2, 0);
+  scene.add(rightWall);
+
+  // ── WINDOW ──
+  var winFrame = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1.8, 0.12), tex(0x8b6520, 0.7, 0.1));
+  winFrame.position.set(-2, 2.2, -roomD/2+0.06);
+  scene.add(winFrame);
+
+  var winGlass = new THREE.Mesh(
+    new THREE.PlaneGeometry(1.8, 1.4),
+    new THREE.MeshStandardMaterial({color:0xd4eeff, roughness:0, metalness:0.1, transparent:true, opacity:0.35})
+  );
+  winGlass.position.set(-2, 2.2, -roomD/2+0.07);
+  scene.add(winGlass);
+
+  // Blinds -- horizontal slats
+  for (var b=0; b<8; b++) {
+    var slat = new THREE.Mesh(
+      new THREE.BoxGeometry(1.8, 0.06, 0.015),
+      tex(0xc8b898, 0.8)
+    );
+    slat.position.set(-2, 1.6 + b*0.18, -roomD/2+0.1);
+    scene.add(slat);
   }
-  container.innerHTML = html;
-}
 
-function updatePlayer() {
-  var el = document.getElementById('player');
-  el.style.left = playerX + '%';
-  el.style.bottom = (10 + playerY * 0.3) + '%';
-  var scale = 0.5 + playerY * 0.015;
-  el.style.transform = 'translateX(-50%) scale(' + scale + ')';
+  // Window interactable trigger
+  var winTrigger = new THREE.Mesh(
+    new THREE.BoxGeometry(2.2, 1.8, 0.3),
+    new THREE.MeshStandardMaterial({transparent:true, opacity:0})
+  );
+  winTrigger.position.set(-2, 2.2, -roomD/2+0.15);
+  winTrigger.userData.key = 'window';
+  winTrigger.userData.label = 'Window & Venetian Blinds';
+  interactables.push(winTrigger);
+  scene.add(winTrigger);
 
-  var doorDist = Math.abs(playerX - 50) + Math.abs(playerY - 80);
-  atDoor = (doorDist < 18);
+  // Ambient light from window
+  var winLight = new THREE.SpotLight(0xfff8e0, 0.8, 8, Math.PI/4, 0.5, 1);
+  winLight.position.set(-2, 2.2, -roomD/2+1);
+  winLight.target.position.set(-1, 1.6, -roomD/2+3);
+  scene.add(winLight);
+  scene.add(winLight.target);
 
-  var caption = document.getElementById('caption');
-  if (atDoor) {
-    caption.textContent = 'Press ENTER to knock';
-    caption.style.opacity = '1';
-  } else if (playerY > 40) {
-    caption.textContent = 'Getting closer...';
-    caption.style.opacity = '0.7';
-  } else {
-    caption.textContent = 'Use arrow keys \u2022 Approach the door \u2022 Press Enter to knock';
-    caption.style.opacity = '0.5';
+  // ── DESK ──
+  var deskTop = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.1, 1.4), tex(0x5c3d1a, 0.7, 0.1));
+  deskTop.position.set(0.5, 0.82, -1.5);
+  deskTop.castShadow = true;
+  deskTop.receiveShadow = true;
+  scene.add(deskTop);
+
+  // Desk top surface (lighter felt)
+  var deskSurface = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.015, 1.2), tex(0x4a3010, 0.95));
+  deskSurface.position.set(0.5, 0.878, -1.5);
+  scene.add(deskSurface);
+
+  // Desk legs
+  [[-1.3,-1.0],[-1.3,-2.0],[2.3,-1.0],[2.3,-2.0]].forEach(function(pos) {
+    var leg = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.82, 0.12), tex(0x3d2810, 0.9));
+    leg.position.set(pos[0], 0.41, pos[1]);
+    leg.castShadow = true;
+    scene.add(leg);
+  });
+
+  // Desk interactable
+  var deskTrigger = new THREE.Mesh(
+    new THREE.BoxGeometry(3.2, 0.5, 1.6),
+    new THREE.MeshStandardMaterial({transparent:true, opacity:0})
+  );
+  deskTrigger.position.set(0.5, 0.82, -1.5);
+  deskTrigger.userData.key = 'desk';
+  deskTrigger.userData.label = 'The Desk';
+  interactables.push(deskTrigger);
+  scene.add(deskTrigger);
+
+  // ── NEWSPAPER STACK ──
+  for (var n=0; n<4; n++) {
+    var paper = new THREE.Mesh(
+      new THREE.BoxGeometry(0.35, 0.015, 0.28),
+      tex(n===0 ? 0xf5f0e0 : 0xe8e4d0, 0.98)
+    );
+    paper.position.set(-0.3 + n*0.01, 0.89+n*0.018, -1.4);
+    paper.rotation.y = (n%2===0?0.05:-0.03);
+    scene.add(paper);
   }
+
+  // TOO HARD pile
+  for (var p=0; p<5; p++) {
+    var pg = new THREE.Mesh(
+      new THREE.BoxGeometry(0.28, 0.01, 0.22),
+      tex(0xf0ece0, 0.98)
+    );
+    pg.position.set(1.2 + p*0.005, 0.89+p*0.012, -1.5);
+    pg.rotation.y = (p%2===0?0.08:-0.06);
+    scene.add(pg);
+  }
+
+  // Phone -- black rectangle
+  var phone = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.06, 0.28), tex(0x111111, 0.7));
+  phone.position.set(1.7, 0.91, -1.3);
+  scene.add(phone);
+
+  // Cherry Coke can
+  var canGeo = new THREE.CylinderGeometry(0.045, 0.045, 0.18, 16);
+  var can = new THREE.Mesh(canGeo, tex(0xaa0000, 0.5, 0.3));
+  can.position.set(0.9, 0.975, -1.2);
+  can.castShadow = true;
+  can.userData.key = 'coke';
+  can.userData.label = 'Cherry Coke';
+  interactables.push(can);
+  scene.add(can);
+
+  // ── WARREN'S CHAIR ──
+  var chairBack = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.85, 0.1), tex(0x1a1208, 0.9));
+  chairBack.position.set(0.5, 1.32, -2.45);
+  chairBack.castShadow = true;
+  scene.add(chairBack);
+
+  var chairSeat = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.08, 0.6), tex(0x1a1208, 0.9));
+  chairSeat.position.set(0.5, 0.9, -2.2);
+  scene.add(chairSeat);
+
+  // ── WARREN FIGURE ──
+  // Torso (suit jacket -- navy blue)
+  var torso = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.5, 0.28), tex(0x2a3d6b, 0.85));
+  torso.position.set(0.5, 1.25, -2.0);
+  torso.castShadow = true;
+  scene.add(torso);
+
+  // Neck
+  var neck = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.065, 0.12, 8), tex(0xc8956c, 0.85));
+  neck.position.set(0.5, 1.56, -2.0);
+  scene.add(neck);
+
+  // Head
+  var headGeo = new THREE.SphereGeometry(0.18, 16, 12);
+  var head = new THREE.Mesh(headGeo, tex(0xc8956c, 0.85));
+  head.position.set(0.5, 1.78, -2.0);
+  head.scale.set(1, 1.15, 0.95);
+  head.castShadow = true;
+  scene.add(head);
+
+  // Hair (grey)
+  var hairGeo = new THREE.SphereGeometry(0.185, 16, 8, 0, Math.PI*2, 0, Math.PI*0.45);
+  var hair = new THREE.Mesh(hairGeo, tex(0xc8c8c8, 0.9));
+  hair.position.set(0.5, 1.82, -1.99);
+  scene.add(hair);
+
+  // Glasses
+  var glassFrame = new THREE.Mesh(new THREE.TorusGeometry(0.055, 0.008, 6, 16), tex(0x222222, 0.7));
+  glassFrame.position.set(0.38, 1.78, -1.825);
+  glassFrame.rotation.y = 0.15;
+  scene.add(glassFrame);
+  var glassFrame2 = glassFrame.clone();
+  glassFrame2.position.set(0.62, 1.78, -1.825);
+  glassFrame2.rotation.y = -0.15;
+  scene.add(glassFrame2);
+
+  // Warren interactable
+  var warrenTrigger = new THREE.Mesh(
+    new THREE.BoxGeometry(0.6, 1.0, 0.5),
+    new THREE.MeshStandardMaterial({transparent:true, opacity:0})
+  );
+  warrenTrigger.position.set(0.5, 1.5, -2.0);
+  warrenTrigger.userData.key = 'warren';
+  warrenTrigger.userData.label = 'Warren Buffett';
+  interactables.push(warrenTrigger);
+  scene.add(warrenTrigger);
+
+  // Arm reading/writing
+  var arm = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.085, 0.1), tex(0xc8956c, 0.85));
+  arm.position.set(0.18, 0.98, -1.7);
+  arm.rotation.z = -0.2;
+  scene.add(arm);
+
+  // ── PORTRAITS ──
+  // Graham portrait (left wall)
+  var portFrame1 = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.85, 0.06), tex(0x8b6520, 0.7, 0.15));
+  portFrame1.position.set(-5.85, 2.0, -1.5);
+  portFrame1.rotation.y = Math.PI/2;
+  scene.add(portFrame1);
+
+  var portCanvas1 = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.72, 0.02), tex(0xd4c4a0, 0.95));
+  portCanvas1.position.set(-5.82, 2.0, -1.5);
+  portCanvas1.rotation.y = Math.PI/2;
+  scene.add(portCanvas1);
+
+  // Portrait face (Graham)
+  var portFace1 = new THREE.Mesh(new THREE.SphereGeometry(0.1, 10, 8), tex(0xb8906a, 0.9));
+  portFace1.position.set(-5.8, 2.1, -1.5);
+  portFace1.rotation.y = Math.PI/2;
+  scene.add(portFace1);
+
+  var portTrigger1 = new THREE.Mesh(
+    new THREE.BoxGeometry(0.1, 0.9, 0.7),
+    new THREE.MeshStandardMaterial({transparent:true, opacity:0})
+  );
+  portTrigger1.position.set(-5.8, 2.0, -1.5);
+  portTrigger1.userData.key = 'graham';
+  portTrigger1.userData.label = 'Benjamin Graham';
+  interactables.push(portTrigger1);
+  scene.add(portTrigger1);
+
+  // Munger portrait (right wall)
+  var portFrame2 = portFrame1.clone();
+  portFrame2.position.set(5.85, 2.0, -1.5);
+  portFrame2.rotation.y = -Math.PI/2;
+  scene.add(portFrame2);
+
+  var portCanvas2 = portCanvas1.clone();
+  portCanvas2.position.set(5.82, 2.0, -1.5);
+  portCanvas2.rotation.y = -Math.PI/2;
+  scene.add(portCanvas2);
+
+  var portFace2 = new THREE.Mesh(new THREE.SphereGeometry(0.1, 10, 8), tex(0xa07860, 0.9));
+  portFace2.position.set(5.8, 2.1, -1.5);
+  portFace2.rotation.y = -Math.PI/2;
+  scene.add(portFace2);
+
+  var portTrigger2 = new THREE.Mesh(
+    new THREE.BoxGeometry(0.1, 0.9, 0.7),
+    new THREE.MeshStandardMaterial({transparent:true, opacity:0})
+  );
+  portTrigger2.position.set(5.8, 2.0, -1.5);
+  portTrigger2.userData.key = 'munger';
+  portTrigger2.userData.label = 'Charlie Munger';
+  interactables.push(portTrigger2);
+  scene.add(portTrigger2);
+
+  // ── BOOKSHELF ──
+  var shelf = new THREE.Mesh(new THREE.BoxGeometry(2.2, 2.2, 0.4), tex(0x5c3d1a, 0.85));
+  shelf.position.set(4.5, 1.1, -roomD/2+0.25);
+  shelf.castShadow = true;
+  scene.add(shelf);
+  // Books
+  var bookColors = [0x8b0000,0x1a3a6b,0x2a5a2a,0x5c3d1a,0x8b6520,0x333333,0x6b1a1a,0x1a4a6b];
+  for (var bk=0; bk<16; bk++) {
+    var book = new THREE.Mesh(
+      new THREE.BoxGeometry(0.08 + Math.random()*0.04, 0.26 + Math.random()*0.12, 0.22),
+      tex(bookColors[bk%bookColors.length], 0.9)
+    );
+    book.position.set(3.6 + (bk%8)*0.24, 0.45 + Math.floor(bk/8)*0.5, -roomD/2+0.22);
+    book.rotation.y = (Math.random()-0.5)*0.05;
+    scene.add(book);
+  }
+
+  // ── FLOOR LAMP ──
+  var lampPole = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.03, 1.6, 8), tex(0x8b6520, 0.6, 0.4));
+  lampPole.position.set(-4.5, 0.8, -2.5);
+  scene.add(lampPole);
+  var lampShade = new THREE.Mesh(new THREE.ConeGeometry(0.25, 0.3, 16, 1, true), tex(0xd4a060, 0.8));
+  lampShade.position.set(-4.5, 1.75, -2.5);
+  lampShade.rotation.x = Math.PI;
+  scene.add(lampShade);
+
+  // ── AREA RUG ──
+  var rug = new THREE.Mesh(new THREE.BoxGeometry(5, 0.015, 3.5), tex(0x8b2020, 0.95));
+  rug.position.set(0.5, 0.008, -1.5);
+  scene.add(rug);
+
+  // Rug border
+  var rugBorder = new THREE.Mesh(new THREE.BoxGeometry(5.2, 0.012, 3.7), tex(0xc8a030, 0.95));
+  rugBorder.position.set(0.5, 0.006, -1.5);
+  scene.add(rugBorder);
 }
 
-function enterDoor() {
-  if (inOffice) return;
-  triggerEntry();
+function setupLights() {
+  // Ambient
+  var ambient = new THREE.AmbientLight(0xfff4e0, 0.4);
+  scene.add(ambient);
+
+  // Main overhead -- warm incandescent
+  var overhead = new THREE.PointLight(0xfff0d0, 1.2, 12, 2);
+  overhead.position.set(0.5, 3.2, -1.5);
+  overhead.castShadow = true;
+  overhead.shadow.mapSize.width = 1024;
+  overhead.shadow.mapSize.height = 1024;
+  scene.add(overhead);
+
+  // Desk lamp glow
+  var deskGlow = new THREE.PointLight(0xffe8a0, 0.8, 3, 2);
+  deskGlow.position.set(-4.5, 1.8, -2.5);
+  scene.add(deskGlow);
+
+  // Subtle back fill
+  var fill = new THREE.DirectionalLight(0xfff0e0, 0.2);
+  fill.position.set(-3, 4, 2);
+  scene.add(fill);
 }
 
-function triggerEntry() {
-  inOffice = true;
-  document.getElementById('door-wrap').classList.add('door-opening');
-  setTimeout(function() {
-    var fade = document.getElementById('fade');
-    fade.classList.add('show');
+function setupControls() {
+  // Pointer lock
+  var canvas = renderer.domElement;
+  canvas.addEventListener('click', function() {
+    if (!document.getElementById('trivium').classList.contains('show')) {
+      canvas.requestPointerLock();
+    }
+  });
+
+  document.addEventListener('pointerlockchange', function() {
+    isLocked = (document.pointerLockElement === canvas);
+    document.getElementById('crosshair').style.display = isLocked ? 'block' : 'none';
+    document.getElementById('esc-hint').style.display = isLocked ? 'block' : 'none';
+    document.getElementById('caption').style.opacity = isLocked ? '0' : '1';
+  });
+
+  document.addEventListener('mousemove', function(e) {
+    if (!isLocked) return;
+    var sens = 0.002;
+    yaw -= e.movementX * sens;
+    pitch -= e.movementY * sens;
+    pitch = Math.max(-Math.PI/3, Math.min(Math.PI/4, pitch));
+  });
+
+  // Click to interact
+  canvas.addEventListener('click', function() {
+    if (!isLocked) return;
+    if (hovered) {
+      showTrivium(hovered.userData.key);
+      document.exitPointerLock();
+    }
+  });
+
+  // Keyboard
+  document.addEventListener('keydown', function(e) {
+    if (e.key==='w'||e.key==='ArrowUp')    moveF=true;
+    if (e.key==='s'||e.key==='ArrowDown')  moveB=true;
+    if (e.key==='a'||e.key==='ArrowLeft')  moveL=true;
+    if (e.key==='d'||e.key==='ArrowRight') moveR=true;
+    if (e.key==='f'||e.key==='F') { if(hovered){ showTrivium(hovered.userData.key); if(isLocked) document.exitPointerLock(); }}
+    if (e.key==='Escape') { closeTrivium(); if(!isLocked) goBack(); }
+  });
+  document.addEventListener('keyup', function(e) {
+    if (e.key==='w'||e.key==='ArrowUp')    moveF=false;
+    if (e.key==='s'||e.key==='ArrowDown')  moveB=false;
+    if (e.key==='a'||e.key==='ArrowLeft')  moveL=false;
+    if (e.key==='d'||e.key==='ArrowRight') moveR=false;
+  });
+
+  // Touch / mobile swipe
+  var touchX=0, touchY=0;
+  document.addEventListener('touchstart', function(e){ touchX=e.touches[0].clientX; touchY=e.touches[0].clientY; });
+  document.addEventListener('touchmove', function(e){
+    var dx=e.touches[0].clientX-touchX, dy=e.touches[0].clientY-touchY;
+    yaw -= dx*0.003; pitch -= dy*0.003;
+    pitch=Math.max(-Math.PI/3,Math.min(Math.PI/4,pitch));
+    touchX=e.touches[0].clientX; touchY=e.touches[0].clientY;
+  });
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  var dt = Math.min(clock.getDelta(), 0.05);
+
+  // Camera rotation
+  camera.rotation.order = 'YXZ';
+  camera.rotation.y = yaw;
+  camera.rotation.x = pitch;
+
+  // Movement
+  var speed = (moveF&&moveB) ? 0 : WALK_SPEED;
+  var dir = new THREE.Vector3();
+  if (moveF) dir.z -= 1;
+  if (moveB) dir.z += 1;
+  if (moveL) dir.x -= 1;
+  if (moveR) dir.x += 1;
+  dir.normalize().multiplyScalar(speed * dt);
+  dir.applyEuler(new THREE.Euler(0, yaw, 0));
+
+  var nx = camera.position.x + dir.x;
+  var nz = camera.position.z + dir.z;
+  // Room bounds
+  if (nx > -5.5 && nx < 5.5) camera.position.x = nx;
+  if (nz > -4.5 && nz < 6.5) camera.position.z = nz;
+
+  // Raycasting for interaction
+  if (isLocked) {
+    raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
+    var hits = raycaster.intersectObjects(interactables);
+    var hint = document.getElementById('interact-hint');
+    if (hits.length > 0 && hits[0].distance < 4.5) {
+      hovered = hits[0].object;
+      hint.textContent = 'Click to examine: ' + hovered.userData.label;
+      hint.style.display = 'block';
+    } else {
+      hovered = null;
+      hint.style.display = 'none';
+    }
+  }
+
+  renderer.render(scene, camera);
+}
+
+function onResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+// ── LOADING SEQUENCE ──
+var loadProgress = 0;
+var loadInterval = setInterval(function() {
+  loadProgress += Math.random() * 18;
+  if (loadProgress >= 100) {
+    loadProgress = 100;
+    clearInterval(loadInterval);
+    document.getElementById('load-bar').style.width = '100%';
     setTimeout(function() {
-      document.getElementById('corridor').style.display = 'none';
-      var office = document.getElementById('office');
-      office.classList.add('active');
-      document.getElementById('esc-hint').style.display = 'block';
-      buildBlinds();
-      buildDust();
-      // Add click targets
-      document.querySelector('.warren-figure').onclick = function(){ showTrivium('warren'); };
-      document.querySelector('.portrait-left').onclick = function(){ showTrivium('graham_portrait'); };
-      document.querySelector('.portrait-right').onclick = function(){ showTrivium('munger_portrait'); };
-      document.querySelector('.window').onclick = function(){ showTrivium('window'); };
-      document.querySelector('.warren-desk').onclick = function(){ showTrivium('desk'); };
-      setTimeout(function() {
-        fade.classList.remove('show');
-        setTimeout(function() {
-          office.classList.add('visible');
-        }, 100);
-      }, 400);
-    }, 800);
-  }, 800);
-}
-
-function exitOffice() {
-  if (!inOffice) return;
-  var fade = document.getElementById('fade');
-  fade.classList.add('show');
-  setTimeout(function() {
-    document.getElementById('office').classList.remove('active','visible');
-    document.getElementById('corridor').style.display = 'flex';
-    document.getElementById('esc-hint').style.display = 'none';
-    document.getElementById('door-wrap').classList.remove('door-opening');
-    inOffice = false;
-    playerX = 50; playerY = 10;
-    updatePlayer();
-    setTimeout(function() { fade.classList.remove('show'); }, 400);
-  }, 600);
-}
-
-document.addEventListener('keydown', function(e) {
-  if (inOffice) {
-    if (e.key === 'Escape') { closeTrivium(); exitOffice(); }
-    return;
+      init();
+      document.getElementById('loading').classList.add('fade');
+      document.getElementById('location').style.display = 'block';
+    }, 400);
   }
-  var speed = 2.5;
-  if (e.key === 'ArrowLeft')  { playerX = Math.max(15, playerX - speed); }
-  if (e.key === 'ArrowRight') { playerX = Math.min(85, playerX + speed); }
-  if (e.key === 'ArrowUp')    { playerY = Math.min(90, playerY + speed); }
-  if (e.key === 'ArrowDown')  { playerY = Math.max(0,  playerY - speed); }
-  if ((e.key === 'Enter' || e.key === ' ') && atDoor) { triggerEntry(); }
-  updatePlayer();
-  e.preventDefault();
-});
-
-// Mobile touch
-var touchStartX, touchStartY;
-document.addEventListener('touchstart', function(e) {
-  touchStartX = e.touches[0].clientX;
-  touchStartY = e.touches[0].clientY;
-});
-document.addEventListener('touchend', function(e) {
-  if (inOffice) return;
-  var dx = e.changedTouches[0].clientX - touchStartX;
-  var dy = e.changedTouches[0].clientY - touchStartY;
-  var speed = 5;
-  if (Math.abs(dx) > Math.abs(dy)) {
-    playerX = Math.max(15, Math.min(85, playerX + (dx > 0 ? speed : -speed)));
-  } else {
-    playerY = Math.max(0, Math.min(90, playerY + (dy < 0 ? speed : -speed)));
-  }
-  updatePlayer();
-});
-
-// Tap door on mobile
-document.getElementById('door-wrap').addEventListener('touchend', function(e) {
-  e.preventDefault();
-  if (!inOffice) triggerEntry();
-});
-
-updatePlayer();
+  document.getElementById('load-bar').style.width = loadProgress + '%';
+}, 120);
 </script>
 </body>
 </html>
