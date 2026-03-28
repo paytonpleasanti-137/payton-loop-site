@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Conductor — Signal Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&family=Roboto+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:     #0f0e0c;
+  --bg2:    #181614;
+  --bg3:    #201e1b;
+  --bg4:    #282522;
+  --border: rgba(201,168,76,0.1);
+  --bdr2:   rgba(255,255,255,0.05);
+  --txt:    #f0ebe0;
+  --txt2:   #c8bfa8;
+  --txt3:   #8a7e68;
+  --txt4:   #5a5040;
+  --gold:   #c9a84c;
+  --gold2:  rgba(201,168,76,0.12);
+  --green:  #4a9e6a;
+  --red:    #c45c5c;
+  --amber:  #c4903a;
+  --blue:   #5b8dee;
+  --serif:  'EB Garamond',Georgia,serif;
+  --sans:   'Inter',system-ui,sans-serif;
+  --mono:   'Roboto Mono',monospace;
+  --r:      6px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:14px;line-height:1.6;min-height:100vh;padding-bottom:60px}
+
+/* NAV */
+.topnav{position:sticky;top:0;z-index:100;height:48px;display:flex;align-items:center;background:rgba(15,14,12,0.96);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);padding:0 24px;gap:16px}
+.nav-brand{font-family:var(--serif);font-size:20px;font-weight:500;color:var(--txt);margin-right:auto}
+.nav-brand em{color:var(--gold);font-style:normal}
+.nav-badge{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;padding:3px 10px;border-radius:100px;text-transform:uppercase}
+.badge-live{background:rgba(74,158,106,0.15);color:var(--green)}
+.badge-warn{background:rgba(196,144,58,0.15);color:var(--amber)}
+.nav-refresh{font-family:var(--mono);font-size:10px;color:var(--txt3);cursor:pointer;padding:6px 14px;border:1px solid var(--bdr2);border-radius:var(--r);background:none;transition:all 0.15s}
+.nav-refresh:hover{border-color:var(--border);color:var(--txt2)}
+.nav-back{font-size:12px;color:var(--txt3);text-decoration:none;transition:color 0.15s}
+.nav-back:hover{color:var(--gold)}
+
+/* CONDUCTOR HEADER */
+.conductor-hdr{max-width:1100px;margin:0 auto;padding:28px 24px 0}
+.ch-title{font-family:var(--serif);font-size:36px;font-weight:500;color:var(--txt);margin-bottom:6px}
+.ch-sub{font-size:13px;color:var(--txt3);margin-bottom:24px}
+.ch-meta{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:28px}
+.meta-chip{font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:4px 12px;border:1px solid var(--bdr2);border-radius:100px;color:var(--txt3);display:flex;align-items:center;gap:5px}
+.dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
+.dot-g{color:var(--green)} .dot-a{color:var(--amber)} .dot-r{color:var(--red)}
+
+/* SIGNAL STRIP — top conductor output */
+.signal-strip{max-width:1100px;margin:0 auto;padding:0 24px 24px}
+.ss-label{font-size:11px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--txt4);margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.ss-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--bdr2),transparent)}
+
+.signal-card{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);
+  padding:16px 20px;margin-bottom:8px;
+  display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;
+}
+.sc-stream{
+  font-family:var(--mono);font-size:8px;letter-spacing:2px;text-transform:uppercase;
+  padding:3px 10px;border-radius:100px;white-space:nowrap;
+}
+.sc-stream.equity{background:rgba(91,141,238,0.12);color:var(--blue)}
+.sc-stream.sports{background:rgba(201,168,76,0.12);color:var(--gold)}
+.sc-body{min-width:0}
+.sc-title{font-size:14px;font-weight:500;color:var(--txt);margin-bottom:3px}
+.sc-detail{font-size:12px;color:var(--txt3)}
+.sc-strength{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:3px 10px;border-radius:100px;white-space:nowrap}
+.strength-strong{background:rgba(74,158,106,0.12);color:var(--green)}
+.strength-moderate{background:rgba(196,144,58,0.12);color:var(--amber)}
+
+.no-signals{background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--r);padding:24px;text-align:center;color:var(--txt3);font-size:13px}
+
+/* MAIN GRID */
+.main-grid{max-width:1100px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* EQUITY TABLE */
+.panel{background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--r);overflow:hidden}
+.panel-hdr{padding:16px 20px;border-bottom:1px solid var(--bdr2);display:flex;align-items:center;gap:10px}
+.panel-title{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--txt3)}
+.panel-badge{font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:100px;margin-left:auto}
+
+.eq-table{width:100%;border-collapse:collapse}
+.eq-table th{font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--txt4);padding:10px 16px;text-align:left;background:var(--bg3);border-bottom:1px solid var(--bdr2)}
+.eq-table th.r{text-align:right}
+.eq-table td{padding:10px 16px;border-bottom:1px solid rgba(255,255,255,0.02);font-size:12px;vertical-align:middle}
+.eq-table tr:last-child td{border-bottom:none}
+.eq-table tr:hover td{background:var(--bg3)}
+.ticker-name{font-weight:500;color:var(--txt);font-size:13px}
+.ticker-sub{font-size:10px;color:var(--txt4);margin-top:1px}
+.num{text-align:right;font-family:var(--mono);font-size:11px;color:var(--txt2)}
+.num-live{color:var(--txt);font-weight:500}
+.num-green{color:var(--green)}
+.num-red{color:var(--red)}
+.num-gold{color:var(--gold)}
+.num-muted{color:var(--txt4)}
+.flag{font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:100px;white-space:nowrap;font-family:var(--mono)}
+.flag-buy{background:rgba(74,158,106,0.12);color:var(--green)}
+.flag-watch{background:rgba(196,144,58,0.1);color:var(--amber)}
+.flag-fair{color:var(--txt4)}
+
+/* SPORTS PANEL */
+.sport-item{padding:14px 20px;border-bottom:1px solid rgba(255,255,255,0.02)}
+.sport-item:last-child{border-bottom:none}
+.sport-game{font-size:13px;font-weight:500;color:var(--txt);margin-bottom:4px}
+.sport-meta{font-size:11px;color:var(--txt3);font-family:var(--mono)}
+.sport-signal{font-size:11px;color:var(--green);margin-top:4px}
+.sport-empty{padding:24px 20px;text-align:center;color:var(--txt3);font-size:12px}
+
+/* LOADING */
+.loading{display:inline-block;animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:0.3}50%{opacity:1}}
+
+/* BOTTOM NAV */
+.btm{position:fixed;bottom:0;left:0;right:0;z-index:100;height:48px;display:flex;background:rgba(15,14,12,0.97);border-top:1px solid var(--border);backdrop-filter:blur(20px);overflow-x:auto}
+.btm::-webkit-scrollbar{display:none}
+.btm-link{flex:1;min-width:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:8px;font-weight:500;color:var(--txt4);letter-spacing:1px;text-decoration:none;text-transform:uppercase;border-right:1px solid var(--bdr2);transition:color 0.15s;padding:0 8px}
+.btm-link:last-child{border-right:none}
+.btm-link:hover{color:var(--txt2)}
+.btm-link.active{color:var(--gold)}
+.btm-icon{font-size:14px;line-height:1}
+
+@media(max-width:768px){.main-grid{grid-template-columns:1fr}.eq-table th:nth-child(3),.eq-table td:nth-child(3),.eq-table th:nth-child(4),.eq-table td:nth-child(4){display:none}}
+@media(max-width:480px){.signal-card{grid-template-columns:1fr;gap:8px}}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <span class="nav-brand">Con<em>duc</em>tor</span>
+  <span class="nav-badge badge-live" id="status-badge">&#9679; Loading</span>
+  <button class="nav-refresh" onclick="refresh()">&#8635; Refresh</button>
+  <a class="nav-back" href="plc-capital.html">&#8592; Ops</a>
+</nav>
+
+<div class="conductor-hdr">
+  <div class="ch-title">Signal Engine</div>
+  <div class="ch-sub">Equity intrinsic value &bull; Sports arbitrage &bull; Only what matters</div>
+  <div class="ch-meta">
+    <div class="meta-chip"><span class="dot dot-g"></span>EDGAR Fundamentals — Live</div>
+    <div class="meta-chip"><span class="dot dot-g"></span>Prices — Browser Fetched</div>
+    <div class="meta-chip" id="odds-chip"><span class="dot dot-a"></span>Odds API — Key Needed</div>
+    <div class="meta-chip"><span class="dot dot-g"></span>Zero Ongoing Cost</div>
+    <div class="meta-chip" id="last-update">Updated: —</div>
+  </div>
+</div>
+
+<!-- TOP SIGNALS — CONDUCTOR OUTPUT -->
+<div class="signal-strip">
+  <div class="ss-label">Conductor Output — Signals Above Threshold</div>
+  <div id="signals-container">
+    <div class="no-signals"><span class="loading">&#9670;</span> Fetching live data...</div>
+  </div>
+</div>
+
+<!-- MAIN GRID -->
+<div class="main-grid">
+
+  <!-- EQUITY PANEL -->
+  <div class="panel">
+    <div class="panel-hdr">
+      <span class="panel-title">Equity Screener</span>
+      <span class="panel-badge badge-live" style="background:rgba(91,141,238,0.12);color:var(--blue)">Graham + Earnings Yield</span>
+    </div>
+    <table class="eq-table" id="eq-table">
+      <thead>
+        <tr>
+          <th>Ticker</th>
+          <th class="r">Price</th>
+          <th class="r">Graham #</th>
+          <th class="r">EPS</th>
+          <th class="r">Signal</th>
+        </tr>
+      </thead>
+      <tbody id="eq-body">
+        <tr><td colspan="5" style="text-align:center;padding:20px;color:var(--txt3)"><span class="loading">Loading...</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SPORTS PANEL -->
+  <div class="panel">
+    <div class="panel-hdr">
+      <span class="panel-title">Sports Arbitrage</span>
+      <span class="panel-badge" id="sports-badge" style="background:rgba(196,144,58,0.1);color:var(--amber);font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:100px">Key Needed</span>
+    </div>
+    <div id="sports-body">
+      <div class="sport-empty">
+        <div style="margin-bottom:8px;font-size:20px">&#9672;</div>
+        <div style="color:var(--txt2);margin-bottom:8px">Odds API key required</div>
+        <div>Get free key at <strong style="color:var(--gold)">the-odds-api.com</strong> and enter below</div>
+        <div style="margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+          <input id="odds-key-input" type="text" placeholder="Paste API key here..."
+            style="background:var(--bg3);border:1px solid var(--bdr2);color:var(--txt);font-family:var(--mono);font-size:11px;padding:8px 12px;border-radius:var(--r);outline:none;width:220px">
+          <button onclick="saveOddsKey()" style="background:var(--gold);color:var(--bg);border:none;padding:8px 16px;border-radius:var(--r);font-size:12px;font-weight:600;cursor:pointer">Activate</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<br>
+
+<!-- METHODOLOGY NOTE -->
+<div style="max-width:1100px;margin:0 auto;padding:0 24px 24px">
+  <div style="background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--r);padding:20px 24px">
+    <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--txt4);margin-bottom:12px">Methodology</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;font-size:12px;color:var(--txt3);line-height:1.7">
+      <div>
+        <strong style="color:var(--txt2)">Graham Number</strong> = &radic;(22.5 &times; EPS &times; Book Value/Share)<br>
+        Flags when stock trades &ge;10% below this threshold.<br>
+        Fundamentals from SEC EDGAR (free, no key, updated quarterly).
+      </div>
+      <div>
+        <strong style="color:var(--txt2)">Sports Arbitrage</strong> = Best Odds Team A + Best Odds Team B &lt; 100%<br>
+        Guaranteed profit regardless of outcome when margin &gt; 0.5%.<br>
+        Lines from DraftKings, FanDuel, BetMGM, Caesars simultaneously.
+      </div>
+    </div>
+  </div>
+</div>
+
+<nav class="btm">
+  <a class="btm-link active" href="conductor.html"><span class="btm-icon">&#9671;</span><span>Signal</span></a>
+  <a class="btm-link" href="plc-capital.html"><span class="btm-icon">&#9670;</span><span>Ops</span></a>
+  <a class="btm-link" href="belmont.html"><span class="btm-icon">&#9632;</span><span>Belmont</span></a>
+  <a class="btm-link" href="bets.html"><span class="btm-icon">&#9654;</span><span>Bets</span></a>
+  <a class="btm-link" href="mind.html"><span class="btm-icon">&#9670;</span><span>Mind</span></a>
+  <a class="btm-link" href="private.html"><span class="btm-icon">&#128274;</span><span>Private</span></a>
+</nav>
+
+<script>
+var ODDS_KEY_STORAGE = 'pl-odds-api-key';
+var FUNDAMENTALS_URL = '/data/fundamentals_cache.json';
+var GRAHAM_THRESHOLD = 0.10;
+var EARNINGS_THRESHOLD = 0.06;
+
+// Curated ticker list with known fundamentals (from EDGAR cache)
+// Graham numbers pre-computed from SEC EDGAR data
+var FUNDAMENTALS = [];
+var LIVE_PRICES  = {};
+var topSignals   = [];
+
+// Load EDGAR fundamentals cache
+function loadFundamentals() {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', FUNDAMENTALS_URL, true);
+  xhr.onload = function() {
+    if (xhr.status === 200) {
+      var data = JSON.parse(xhr.responseText);
+      FUNDAMENTALS = data.data || [];
+      fetchLivePrices();
+    } else {
+      useFallbackFundamentals();
+    }
+  };
+  xhr.onerror = function() { useFallbackFundamentals(); };
+  xhr.send();
+}
+
+function useFallbackFundamentals() {
+  // Hardcoded from our last EDGAR run (2026-03-28)
+  FUNDAMENTALS = [
+    {ticker:"AAPL", name:"Apple",              eps:7.63,  bvps:5.02,   graham_number:29.36,  revenue_B:265.6},
+    {ticker:"MSFT", name:"Microsoft",          eps:13.71, bvps:46.26,  graham_number:119.47, revenue_B:62.5},
+    {ticker:"NVDA", name:"NVIDIA",             eps:4.94,  bvps:6.47,   graham_number:26.83,  revenue_B:215.9},
+    {ticker:"TSLA", name:"Tesla",              eps:1.01,  bvps:21.89,  graham_number:22.31,  revenue_B:94.8},
+    {ticker:"JPM",  name:"JPMorgan",           eps:21.15, bvps:134.38, graham_number:252.9,  revenue_B:182.4},
+    {ticker:"KO",   name:"Coca-Cola",          eps:3.05,  bvps:7.48,   graham_number:22.65,  revenue_B:47.9},
+    {ticker:"V",    name:"Visa",               eps:42.74, bvps:56.34,  graham_number:232.76, revenue_B:21.8},
+    {ticker:"WMT",  name:"Walmart",            eps:2.75,  bvps:12.5,   graham_number:27.79,  revenue_B:713.2},
+  ];
+  fetchLivePrices();
+}
+
+function fetchLivePrices() {
+  var tickers = FUNDAMENTALS.map(function(f){ return f.ticker; });
+  var remaining = tickers.length;
+  if (remaining === 0) { renderAll(); return; }
+
+  tickers.forEach(function(ticker) {
+    // Use Yahoo Finance from the browser (US network, no block)
+    var url = 'https://query1.finance.yahoo.com/v8/finance/chart/' + ticker + '?interval=1d&range=1d';
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.setRequestHeader('Accept', 'application/json');
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        try {
+          var data = JSON.parse(xhr.responseText);
+          var meta = data.chart.result[0].meta;
+          LIVE_PRICES[ticker] = meta.regularMarketPrice || meta.chartPreviousClose;
+        } catch(e) {}
+      }
+      remaining--;
+      if (remaining <= 0) renderAll();
+    };
+    xhr.onerror = function() { remaining--; if (remaining <= 0) renderAll(); };
+    xhr.timeout = 8000;
+    xhr.ontimeout = function() { remaining--; if (remaining <= 0) renderAll(); };
+    xhr.send();
+  });
+}
+
+function computeSignals() {
+  topSignals = [];
+  FUNDAMENTALS.forEach(function(f) {
+    var price = LIVE_PRICES[f.ticker];
+    if (!price || !f.graham_number) return;
+    var gn = f.graham_number;
+    var discount = (gn - price) / gn;
+    var ey = f.eps > 0 ? f.eps / price : 0;
+
+    if (discount >= GRAHAM_THRESHOLD) {
+      topSignals.push({
+        stream: 'equity',
+        ticker: f.ticker,
+        name: f.name,
+        price: price,
+        signal: 'GRAHAM UNDERVALUED',
+        detail: f.ticker + ' at $' + price.toFixed(2) + ' — ' + (discount*100).toFixed(1) + '% below Graham Number ($' + gn.toFixed(2) + ')',
+        strength: discount > 0.25 ? 'STRONG' : 'MODERATE',
+        score: discount > 0.25 ? 3 : 2
+      });
+    }
+
+    if (ey >= EARNINGS_THRESHOLD) {
+      topSignals.push({
+        stream: 'equity',
+        ticker: f.ticker,
+        name: f.name,
+        price: price,
+        signal: 'HIGH EARNINGS YIELD',
+        detail: 'Earnings yield ' + (ey*100).toFixed(1) + '% (P/E ' + (price/f.eps).toFixed(1) + 'x) at $' + price.toFixed(2),
+        strength: ey > 0.09 ? 'STRONG' : 'MODERATE',
+        score: ey > 0.09 ? 2 : 1
+      });
+    }
+  });
+
+  topSignals.sort(function(a,b){ return b.score - a.score; });
+}
+
+function renderSignals() {
+  var container = document.getElementById('signals-container');
+  if (topSignals.length === 0) {
+    container.innerHTML = '<div class="no-signals">No signals above threshold right now. Markets may be fairly priced. Check back after next market open.</div>';
+    return;
+  }
+  var html = '';
+  topSignals.slice(0, 8).forEach(function(s) {
+    var cls = s.stream === 'equity' ? 'equity' : 'sports';
+    var scls = s.strength === 'STRONG' ? 'strength-strong' : 'strength-moderate';
+    html += '<div class="signal-card">' +
+      '<span class="sc-stream ' + cls + '">' + s.stream.toUpperCase() + '</span>' +
+      '<div class="sc-body"><div class="sc-title">' + s.signal + '</div><div class="sc-detail">' + s.detail + '</div></div>' +
+      '<span class="sc-strength ' + scls + '">' + s.strength + '</span>' +
+      '</div>';
+  });
+  container.innerHTML = html;
+}
+
+function renderEquityTable() {
+  var tbody = document.getElementById('eq-body');
+  var rows = '';
+  FUNDAMENTALS.forEach(function(f) {
+    var price = LIVE_PRICES[f.ticker];
+    var priceStr = price ? '$' + price.toFixed(2) : '<span class="loading">—</span>';
+    var gnStr = f.graham_number ? '$' + f.graham_number.toFixed(2) : '—';
+    var epsStr = f.eps ? '$' + f.eps.toFixed(2) : '—';
+    
+    var flag = '';
+    var priceClass = 'num num-live';
+    if (price && f.graham_number) {
+      var disc = (f.graham_number - price) / f.graham_number;
+      if (disc >= 0.25) {
+        flag = '<span class="flag flag-buy">Strong Buy</span>';
+        priceClass = 'num num-green';
+      } else if (disc >= 0.10) {
+        flag = '<span class="flag flag-buy">Undervalued</span>';
+        priceClass = 'num num-green';
+      } else if (disc < -0.10) {
+        flag = '<span class="flag flag-watch">Overvalued</span>';
+        priceClass = 'num num-red';
+      } else {
+        flag = '<span class="flag flag-fair">Fair</span>';
+      }
+    }
+
+    rows += '<tr>' +
+      '<td><div class="ticker-name">' + f.ticker + '</div><div class="ticker-sub">' + f.name + '</div></td>' +
+      '<td class="' + priceClass + '">' + priceStr + '</td>' +
+      '<td class="num num-gold">' + gnStr + '</td>' +
+      '<td class="num">' + epsStr + '</td>' +
+      '<td>' + flag + '</td>' +
+      '</tr>';
+  });
+  tbody.innerHTML = rows;
+}
+
+function renderAll() {
+  computeSignals();
+  renderSignals();
+  renderEquityTable();
+  document.getElementById('last-update').innerHTML = 'Updated: ' + new Date().toLocaleTimeString();
+  var badge = document.getElementById('status-badge');
+  badge.className = 'nav-badge badge-live';
+  badge.innerHTML = '&#9679; Live — ' + topSignals.length + ' signal' + (topSignals.length !== 1 ? 's' : '');
+}
+
+function refresh() {
+  document.getElementById('status-badge').innerHTML = '&#9679; Refreshing...';
+  fetchLivePrices();
+}
+
+function saveOddsKey() {
+  var key = document.getElementById('odds-key-input').value.trim();
+  if (!key) return;
+  localStorage.setItem(ODDS_KEY_STORAGE, key);
+  document.getElementById('odds-chip').innerHTML = '<span class="dot dot-g"></span>Odds API — Active';
+  document.getElementById('sports-badge').innerHTML = 'Active';
+  document.getElementById('sports-badge').style.background = 'rgba(74,158,106,0.12)';
+  document.getElementById('sports-badge').style.color = 'var(--green)';
+  // Trigger sports fetch
+  fetchSportsData(key);
+}
+
+function fetchSportsData(key) {
+  var sports = ['basketball_nba','baseball_mlb','icehockey_nhl'];
+  var container = document.getElementById('sports-body');
+  container.innerHTML = '<div class="sport-empty"><span class="loading">&#9670;</span> Scanning ' + sports.length + ' sports for arb windows...</div>';
+  
+  var allEvents = [];
+  var remaining = sports.length;
+
+  sports.forEach(function(sport) {
+    var url = 'https://api.the-odds-api.com/v4/sports/' + sport + '/odds/?apiKey=' + key +
+      '&regions=us&markets=h2h&bookmakers=draftkings,fanduel,betmgm,caesars';
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        try {
+          var events = JSON.parse(xhr.responseText);
+          if (Array.isArray(events)) allEvents = allEvents.concat(events);
+        } catch(e) {}
+      }
+      remaining--;
+      if (remaining <= 0) processSports(allEvents, container);
+    };
+    xhr.onerror = function() { remaining--; if (remaining <= 0) processSports(allEvents, container); };
+    xhr.send();
+  });
+}
+
+function processSports(events, container) {
+  var arbs = [];
+
+  events.forEach(function(event) {
+    var bookLines = {};
+    (event.bookmakers || []).forEach(function(bm) {
+      (bm.markets || []).forEach(function(mkt) {
+        if (mkt.key === 'h2h') {
+          var prices = {};
+          (mkt.outcomes || []).forEach(function(o) { prices[o.name] = o.price; });
+          bookLines[bm.key] = prices;
+
+        }
+      });
+    });
+
+    var books = Object.keys(bookLines);
+    if (books.length < 2) return;
+    
+    var teams = [];
+    books.forEach(function(b) {
+      Object.keys(bookLines[b]).forEach(function(t) {
+        if (teams.indexOf(t) < 0) teams.push(t);
+      });
+    });
+    if (teams.length !== 2) return;
+
+    function impProb(odds) {
+      if (odds > 0) return 100 / (odds + 100);
+      return Math.abs(odds) / (Math.abs(odds) + 100);
+    }
+
+    var bestA = 0, bestB = 0, bestBookA = '', bestBookB = '';
+    books.forEach(function(b) {
+      var pa = bookLines[b][teams[0]];
+      var pb = bookLines[b][teams[1]];
+      if (pa && pa > bestA) { bestA = pa; bestBookA = b; }
+      if (pb && pb > bestB) { bestB = pb; bestBookB = b; }
+    });
+
+    if (!bestA || !bestB) return;
+    var total = impProb(bestA) + impProb(bestB);
+    if (total < 1.0) {
+      var margin = 1.0 - total;
+      if (margin >= 0.005) {
+        arbs.push({
+          game: event.home_team + ' vs ' + event.away_team,
+          sport: event.sport_key.replace('_',' '),
+          commence: event.commence_time,
+          margin: margin,
+          teamA: teams[0], oddsA: bestA, bookA: bestBookA,
+          teamB: teams[1], oddsB: bestB, bookB: bestBookB,
+          profit25: (25 * margin).toFixed(2)
+        });
+      }
+    }
+  });
+
+  if (arbs.length === 0) {
+    container.innerHTML = '<div class="sport-empty">No arb windows right now. Lines are tight across books. Will update on next refresh.</div>';
+    return;
+  }
+
+  arbs.sort(function(a,b){ return b.margin - a.margin; });
+  var html = '';
+  arbs.forEach(function(a) {
+    var d = new Date(a.commence);
+    var timeStr = d.toLocaleDateString('en-US', {weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+    html += '<div class="sport-item">' +
+      '<div class="sport-game">' + a.game + '</div>' +
+      '<div class="sport-meta">' + a.sport.toUpperCase() + ' &bull; ' + timeStr + '</div>' +
+      '<div class="sport-signal">&#9830; ' + (a.margin*100).toFixed(2) + '% margin &mdash; $' + a.profit25 + ' guaranteed on $25 stakes &mdash; ' + a.bookA + ' / ' + a.bookB + '</div>' +
+      '</div>';
+  });
+  container.innerHTML = html;
+
+  // Add to top signals
+  arbs.slice(0,3).forEach(function(a) {
+    topSignals.push({
+      stream: 'sports',
+      signal: 'ARB WINDOW',
+      detail: a.game + ' — ' + (a.margin*100).toFixed(2) + '% margin, $' + a.profit25 + ' profit on $25 stakes',
+      strength: a.margin > 0.02 ? 'STRONG' : 'MODERATE',
+      score: 3
+    });
+  });
+  topSignals.sort(function(a,b){ return b.score - a.score; });
+  renderSignals();
+}
+
+// Init
+window.onload = function() {
+  var savedKey = localStorage.getItem(ODDS_KEY_STORAGE);
+  if (savedKey) {
+    document.getElementById('odds-chip').innerHTML = '<span class="dot dot-g"></span>Odds API — Active';
+    setTimeout(function(){ fetchSportsData(savedKey); }, 1000);
+  }
+  loadFundamentals();
+};
+</script>
+</body>
+</html>

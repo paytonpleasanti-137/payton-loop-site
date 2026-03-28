@@ -1,0 +1,77 @@
+{
+  "updated": "2026-03-28",
+  "data": [
+    {
+      "ticker": "AAPL",
+      "name": "Apple",
+      "eps": 7.63,
+      "bvps": 5.02,
+      "graham_number": 29.36,
+      "revenue_B": 265.6
+    },
+    {
+      "ticker": "MSFT",
+      "name": "Microsoft",
+      "eps": 13.71,
+      "bvps": 46.26,
+      "graham_number": 119.47,
+      "revenue_B": 62.5
+    },
+    {
+      "ticker": "NVDA",
+      "name": "NVIDIA",
+      "eps": 4.94,
+      "bvps": 6.47,
+      "graham_number": 26.83,
+      "revenue_B": 215.9
+    },
+    {
+      "ticker": "TSLA",
+      "name": "Tesla",
+      "eps": 1.01,
+      "bvps": 21.89,
+      "graham_number": 22.31,
+      "revenue_B": 94.8
+    },
+    {
+      "ticker": "JPM",
+      "name": "JPMorgan",
+      "eps": 21.15,
+      "bvps": 134.38,
+      "graham_number": 252.9,
+      "revenue_B": 182.4
+    },
+    {
+      "ticker": "KO",
+      "name": "Coca-Cola",
+      "eps": 3.05,
+      "bvps": 7.48,
+      "graham_number": 22.65,
+      "revenue_B": 47.9
+    },
+    {
+      "ticker": "BRK-B",
+      "name": "Berkshire Hathaway",
+      "eps": 71130.48,
+      "bvps": 762011.13,
+      "graham_number": 1104332.37,
+      "revenue_B": 371.4
+    },
+    {
+      "ticker": "V",
+      "name": "Visa",
+      "eps": 42.74,
+      "bvps": 56.34,
+      "graham_number": 232.76,
+      "revenue_B": 21.8
+    },
+    {
+      "ticker": "WMT",
+      "name": "Walmart",
+      "eps": 2.75,
+      "bvps": 12.5,
+      "graham_number": 27.79,
+      "revenue_B": 713.2
+    }
+  ]
+}
