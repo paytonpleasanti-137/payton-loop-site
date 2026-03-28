@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PALADIN — Intelligence Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:    #ffffff;
+  --bg2:   #f7f7f5;
+  --bg3:   #f0f0ed;
+  --ink:   #080807;
+  --ink2:  #2a2a28;
+  --ink3:  #666660;
+  --ink4:  #aaaaaa;
+  --red:   #c8201a;
+  --green: #1a6b2a;
+  --gold:  #8b6914;
+  --blue:  #0f2d5e;
+  --border:#e2e2de;
+  --serif: 'EB Garamond',Georgia,serif;
+  --sans:  'Inter',system-ui,sans-serif;
+  --mono:  'Roboto Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;min-height:100vh;padding-bottom:52px}
+
+/* MASTHEAD */
+.masthead{
+  border-bottom:3px solid var(--ink);
+  padding:0;
+}
+.mast-top{
+  display:flex;align-items:stretch;
+  border-bottom:1px solid var(--border);
+}
+.mast-brand{
+  padding:14px 24px;border-right:1px solid var(--border);
+  display:flex;flex-direction:column;justify-content:center;
+}
+.mast-name{
+  font-family:var(--serif);font-size:32px;font-weight:700;
+  letter-spacing:-1px;color:var(--ink);line-height:1;
+}
+.mast-sub{
+  font-family:var(--mono);font-size:9px;letter-spacing:3px;
+  color:var(--ink3);text-transform:uppercase;margin-top:4px;
+}
+.mast-stats{
+  display:flex;flex:1;
+}
+.mast-stat{
+  flex:1;padding:12px 20px;border-right:1px solid var(--border);
+  display:flex;flex-direction:column;justify-content:center;
+}
+.mast-stat:last-child{border-right:none}
+.ms-label{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink3);margin-bottom:5px}
+.ms-val{font-family:var(--serif);font-size:24px;font-weight:600;line-height:1;color:var(--ink)}
+.ms-sub{font-size:10px;color:var(--ink3);margin-top:3px;font-family:var(--mono)}
+.ms-red{color:var(--red)}
+.ms-green{color:var(--green)}
+.mast-time{padding:12px 20px;display:flex;flex-direction:column;justify-content:center;border-left:1px solid var(--border)}
+.mast-time-val{font-family:var(--mono);font-size:20px;font-weight:500;color:var(--ink);letter-spacing:-0.5px}
+.mast-time-date{font-size:10px;color:var(--ink3);margin-top:3px;font-family:var(--mono);letter-spacing:0.5px;text-transform:uppercase}
+
+/* ENGINE TABS */
+.eng-tabs{
+  display:flex;background:var(--ink);overflow-x:auto;
+}
+.eng-tabs::-webkit-scrollbar{display:none}
+.eng-tab{
+  padding:0 20px;height:36px;
+  font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1px;
+  color:rgba(255,255,255,0.45);text-transform:uppercase;
+  border:none;background:none;cursor:pointer;
+  border-right:1px solid rgba(255,255,255,0.08);
+  white-space:nowrap;transition:color 0.15s;display:flex;align-items:center;gap:8px;
+}
+.eng-tab:hover{color:rgba(255,255,255,0.75)}
+.eng-tab.active{color:#fff;background:rgba(255,255,255,0.08)}
+.eng-tab .count{
+  background:var(--red);color:#fff;
+  font-size:9px;padding:1px 6px;min-width:18px;text-align:center;
+}
+.eng-tab .count-g{background:var(--green)}
+.eng-tab .count-b{background:var(--blue)}
+.eng-tab .count-d{background:var(--ink3)}
+
+/* VIEWS */
+.view{display:none;max-width:1400px;margin:0 auto;padding:24px}
+.view.active{display:block}
+
+/* SIGNAL TABLE — the money piece */
+.signal-table-wrap{border:1px solid var(--border);margin-bottom:24px}
+.st-hdr{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 16px;background:var(--ink);color:#fff;
+}
+.st-title{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.7)}
+.st-count{font-family:var(--mono);font-size:10px;color:var(--red) !important;margin-left:auto}
+.st-refresh{font-size:10px;color:rgba(255,255,255,0.4);cursor:pointer;padding:3px 10px;border:1px solid rgba(255,255,255,0.15);font-family:var(--mono);background:none;transition:all 0.15s}
+.st-refresh:hover{color:#fff;border-color:rgba(255,255,255,0.4)}
+
+.sig-table{width:100%;border-collapse:collapse}
+.sig-table th{
+  font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--ink3);padding:9px 16px;text-align:left;
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+.sig-table td{
+  padding:13px 16px;border-bottom:1px solid var(--border);
+  vertical-align:top;font-size:13px;
+}
+.sig-table tr:last-child td{border-bottom:none}
+.sig-table tr:hover td{background:var(--bg2)}
+
+.sig-type{
+  font-family:var(--mono);font-size:8px;font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;
+  padding:3px 8px;white-space:nowrap;display:inline-block;
+}
+.t-distress{background:#fff0f0;color:var(--red)}
+.t-activist{background:#fff8e6;color:var(--gold)}
+.t-ma{background:#eef3ff;color:var(--blue)}
+.t-layoff{background:#f5f5f5;color:var(--ink3)}
+.t-exec{background:#f5f5f5;color:var(--ink3)}
+
+.sig-company{font-weight:600;color:var(--ink);font-size:14px}
+.sig-ticker{font-family:var(--mono);font-size:11px;color:var(--ink3);margin-left:6px}
+.sig-location{font-size:11px;color:var(--ink3);margin-top:2px}
+
+.sig-signal{font-size:13px;color:var(--ink);margin-bottom:4px;font-weight:500}
+.sig-impl{
+  font-size:12px;color:var(--ink3);line-height:1.5;
+  padding:6px 10px;border-left:2px solid var(--border);margin-top:6px;
+}
+.sig-impl strong{color:var(--ink);font-weight:600}
+
+.act-bar{
+  height:3px;background:var(--bg3);margin-top:5px;width:80px;
+}
+.act-fill{height:100%;background:var(--red)}
+.act-label{font-family:var(--mono);font-size:10px;color:var(--red);font-weight:600}
+
+.sig-date{font-family:var(--mono);font-size:10px;color:var(--ink3);white-space:nowrap}
+
+/* LOADING */
+.loading-row td{text-align:center;padding:40px;color:var(--ink3);font-family:var(--mono);font-size:12px}
+.pulse{animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+
+/* OVERVIEW GRID */
+.ov-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:0;border:1px solid var(--border);margin-bottom:24px}
+.ov-card{padding:20px;border-right:1px solid var(--border);position:relative;cursor:pointer;transition:background 0.1s}
+.ov-card:last-child{border-right:none}
+.ov-card:hover{background:var(--bg2)}
+.ov-card.active-card{background:var(--ink)}
+.ov-card.active-card .ov-engine{color:rgba(255,255,255,0.5)}
+.ov-card.active-card .ov-num{color:#fff}
+.ov-card.active-card .ov-status{color:rgba(255,255,255,0.5)}
+.ov-engine{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink3);margin-bottom:8px}
+.ov-num{font-family:var(--serif);font-size:32px;font-weight:700;color:var(--ink);line-height:1;margin-bottom:4px}
+.ov-status{font-size:11px;color:var(--ink3)}
+.ov-dot{position:absolute;top:14px;right:14px;width:7px;height:7px;border-radius:50%}
+.dot-live{background:var(--green)}
+.dot-build{background:var(--gold)}
+.dot-soon{background:var(--ink4)}
+
+/* BOTTOM NAV */
+.btm{position:fixed;bottom:0;left:0;right:0;height:44px;display:flex;background:var(--ink);border-top:2px solid var(--red);z-index:100;overflow-x:auto}
+.btm::-webkit-scrollbar{display:none}
+.btm-link{flex:1;min-width:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:rgba(255,255,255,0.35);font-size:7px;font-weight:600;letter-spacing:1px;text-transform:uppercase;text-decoration:none;border-right:1px solid rgba(255,255,255,0.06);transition:color 0.15s}
+.btm-link:last-child{border-right:none}
+.btm-link:hover,.btm-link.active{color:#fff}
+.btm-icon{font-size:13px}
+
+@media(max-width:900px){
+  .mast-stats{display:none}
+  .ov-grid{grid-template-columns:1fr 1fr}
+  .ov-card:nth-child(2){border-right:none}
+  .sig-table th:nth-child(3),.sig-table td:nth-child(3){display:none}
+}
+@media(max-width:600px){
+  .view{padding:12px}
+  .mast-name{font-size:24px}
+  .ov-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<header class="masthead">
+  <div class="mast-top">
+    <div class="mast-brand">
+      <div class="mast-name">PALADIN</div>
+      <div class="mast-sub">Private Asset &amp; Leadership Advantage Data Intelligence Network</div>
+    </div>
+    <div class="mast-stats">
+      <div class="mast-stat">
+        <div class="ms-label">Signals Active</div>
+        <div class="ms-val ms-red" id="total-signals">—</div>
+        <div class="ms-sub">across 5 engines</div>
+      </div>
+      <div class="mast-stat">
+        <div class="ms-label">Highest Priority</div>
+        <div class="ms-val ms-red" id="top-score">92</div>
+        <div class="ms-sub">actionability score</div>
+      </div>
+      <div class="mast-stat">
+        <div class="ms-label">Deal Flow</div>
+        <div class="ms-val" id="deal-count">—</div>
+        <div class="ms-sub">companies flagged</div>
+      </div>
+      <div class="mast-stat">
+        <div class="ms-label">Data Sources</div>
+        <div class="ms-val ms-green">5</div>
+        <div class="ms-sub">SEC EDGAR · USPTO · BLS · State</div>
+      </div>
+    </div>
+    <div class="mast-time">
+      <div class="mast-time-val" id="clock">—</div>
+      <div class="mast-time-date" id="mast-date">—</div>
+    </div>
+  </div>
+  <div class="eng-tabs">
+    <button class="eng-tab active" onclick="showView('overview',this)">&#9670; Overview</button>
+    <button class="eng-tab" onclick="showView('e1',this)">E1 Deal Flow <span class="count" id="e1-count">—</span></button>
+    <button class="eng-tab" onclick="showView('e2',this)">E2 Relationship Graph <span class="count count-b" id="e2-count">—</span></button>
+    <button class="eng-tab" onclick="showView('e3',this)">E3 Predictive Intel <span class="count count-g" id="e3-count">—</span></button>
+    <button class="eng-tab" onclick="showView('e4',this)">E4 Competitive <span class="count count-d" id="e4-count">—</span></button>
+    <button class="eng-tab" onclick="showView('e5',this)">E5 Jurisdiction Arb <span class="count count-g" id="e5-count">—</span></button>
+  </div>
+</header>
+
+<!-- OVERVIEW -->
+<div class="view active" id="v-overview">
+  <div class="ov-grid">
+    <div class="ov-card active-card" onclick="showView('e1',document.querySelectorAll('.eng-tab')[1])">
+      <div class="ov-dot dot-live"></div>
+      <div class="ov-engine">Engine 01</div>
+      <div class="ov-num" id="ov-e1">—</div>
+      <div class="ov-status">Deal Flow Scanner</div>
+    </div>
+    <div class="ov-card" onclick="showView('e2',document.querySelectorAll('.eng-tab')[2])">
+      <div class="ov-dot dot-build"></div>
+      <div class="ov-engine">Engine 02</div>
+      <div class="ov-num" id="ov-e2">—</div>
+      <div class="ov-status">Relationship Graph</div>
+    </div>
+    <div class="ov-card" onclick="showView('e3',document.querySelectorAll('.eng-tab')[3])">
+      <div class="ov-dot dot-build"></div>
+      <div class="ov-engine">Engine 03</div>
+      <div class="ov-num" id="ov-e3">—</div>
+      <div class="ov-status">Predictive Intel</div>
+    </div>
+    <div class="ov-card" onclick="showView('e4',document.querySelectorAll('.eng-tab')[4])">
+      <div class="ov-dot dot-build"></div>
+      <div class="ov-engine">Engine 04</div>
+      <div class="ov-num" id="ov-e4">—</div>
+      <div class="ov-status">Competitive Intel</div>
+    </div>
+    <div class="ov-card" onclick="showView('e5',document.querySelectorAll('.eng-tab')[5])">
+      <div class="ov-dot dot-build"></div>
+      <div class="ov-engine">Engine 05</div>
+      <div class="ov-num" id="ov-e5">—</div>
+      <div class="ov-status">Jurisdiction Arb</div>
+    </div>
+  </div>
+
+  <div class="signal-table-wrap">
+    <div class="st-hdr">
+      <span class="st-title">Priority Signal Feed — All Engines</span>
+      <span class="st-count" id="overview-count"></span>
+      <span style="margin-left:auto;font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.3)" id="last-updated"></span>
+    </div>
+    <table class="sig-table">
+      <thead>
+        <tr>
+          <th style="width:120px">Type</th>
+          <th>Company</th>
+          <th>Signal &amp; Implication</th>
+          <th style="width:80px">Priority</th>
+          <th style="width:90px">Date</th>
+        </tr>
+      </thead>
+      <tbody id="overview-body">
+        <tr class="loading-row"><td colspan="5"><span class="pulse">Loading intelligence feed...</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- E1 DEAL FLOW -->
+<div class="view" id="v-e1">
+  <div class="signal-table-wrap">
+    <div class="st-hdr">
+      <span class="st-title">Engine 01 — Deal Flow Scanner</span>
+      <span style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.4);margin-left:16px">SEC EDGAR · Real-time · 5 signal types</span>
+      <button class="st-refresh" onclick="loadE1()">&#8635; Refresh</button>
+    </div>
+    <table class="sig-table">
+      <thead>
+        <tr>
+          <th style="width:120px">Signal Type</th>
+          <th>Company</th>
+          <th>Intelligence</th>
+          <th style="width:80px">Priority</th>
+          <th style="width:90px">Filed</th>
+        </tr>
+      </thead>
+      <tbody id="e1-body">
+        <tr class="loading-row"><td colspan="5"><span class="pulse">Scanning EDGAR...</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- E2 RELATIONSHIP -->
+<div class="view" id="v-e2">
+  <div class="signal-table-wrap">
+    <div class="st-hdr"><span class="st-title">Engine 02 — Relationship Graph</span><span style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.4);margin-left:16px">Board interlocks · Insider ownership · Capital networks</span></div>
+    <table class="sig-table">
+      <thead><tr><th>Network Node</th><th>Connection Type</th><th>Intelligence</th><th>Priority</th><th>Source</th></tr></thead>
+      <tbody id="e2-body">
+        <tr class="loading-row"><td colspan="5">Engine 02 initializing — board interlock graph building</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- E3 PREDICTIVE -->
+<div class="view" id="v-e3">
+  <div class="signal-table-wrap">
+    <div class="st-hdr"><span class="st-title">Engine 03 — Predictive Performance</span><span style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.4);margin-left:16px">Job postings · Patent velocity · Hiring signals</span></div>
+    <table class="sig-table">
+      <thead><tr><th>Company</th><th>Signal</th><th>Forecast</th><th>Confidence</th><th>Date</th></tr></thead>
+      <tbody id="e3-body">
+        <tr class="loading-row"><td colspan="5">Engine 03 initializing — scraping job boards and patent filings</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- E4 COMPETITIVE -->
+<div class="view" id="v-e4">
+  <div class="signal-table-wrap">
+    <div class="st-hdr"><span class="st-title">Engine 04 — Competitive Intelligence</span><span style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.4);margin-left:16px">Competitor hiring · Patent strategy · Executive movement</span></div>
+    <table class="sig-table">
+      <thead><tr><th>Target</th><th>Signal</th><th>Implication</th><th>Priority</th><th>Detected</th></tr></thead>
+      <tbody id="e4-body">
+        <tr class="loading-row"><td colspan="5">Engine 04 initializing — mapping competitive landscape</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- E5 JURISDICTION -->
+<div class="view" id="v-e5">
+  <div class="signal-table-wrap">
+    <div class="st-hdr"><span class="st-title">Engine 05 — Jurisdiction Arbitrage</span><span style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.4);margin-left:16px">Tax gaps · Regulatory windows · State incentive programs</span></div>
+    <table class="sig-table">
+      <thead><tr><th>Opportunity</th><th>Jurisdiction</th><th>Mechanism</th><th>Est. Value</th><th>Expires</th></tr></thead>
+      <tbody id="e5-body">
+        <tr class="loading-row"><td colspan="5">Engine 05 initializing — scanning state economic development portals</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="btm">
+  <a class="btm-link active" href="paladin.html"><span class="btm-icon">&#9671;</span><span>PALADIN</span></a>
+  <a class="btm-link" href="conductor.html"><span class="btm-icon">&#9670;</span><span>Signal</span></a>
+  <a class="btm-link" href="plc-capital.html"><span class="btm-icon">&#9632;</span><span>Ops</span></a>
+  <a class="btm-link" href="belmont.html"><span class="btm-icon">&#9632;</span><span>Belmont</span></a>
+  <a class="btm-link" href="bets.html"><span class="btm-icon">&#9654;</span><span>Bets</span></a>
+  <a class="btm-link" href="mind.html"><span class="btm-icon">&#9670;</span><span>Mind</span></a>
+  <a class="btm-link" href="private.html"><span class="btm-icon">&#128274;</span><span>Private</span></a>
+</nav>
+
+<script>
+var E1_DATA = null;
+
+var TYPE_META = {
+  DISTRESS_GOING_CONCERN: {label:"Going Concern", cls:"t-distress"},
+  ACTIVIST_STAKE:          {label:"Activist Stake", cls:"t-activist"},
+  MA_DEFINITIVE:           {label:"M&A Definitive", cls:"t-ma"},
+  WORKFORCE_REDUCTION:     {label:"Workforce Cut", cls:"t-layoff"},
+  EXEC_DEPARTURE:          {label:"Exec Departure", cls:"t-exec"}
+};
+
+function sigRow(s) {
+  var tm = TYPE_META[s.type] || {label:s.type, cls:"t-layoff"};
+  var ticker = s.ticker ? '<span class="sig-ticker">' + s.ticker + '</span>' : '';
+  var loc = s.location ? '<div class="sig-location">&#9679; ' + s.location + '</div>' : '';
+  var actPct = (s.actionability || 50) + '%';
+  return '<tr>' +
+    '<td><span class="sig-type ' + tm.cls + '">' + tm.label + '</span></td>' +
+    '<td><div class="sig-company">' + s.company + ticker + '</div>' + loc + '</td>' +
+    '<td><div class="sig-signal">' + s.signal + '</div><div class="sig-impl">' + (s.implication||'') + '</div></td>' +
+    '<td><div class="act-label">' + s.actionability + '</div><div class="act-bar"><div class="act-fill" style="width:' + actPct + '"></div></div></td>' +
+    '<td class="sig-date">' + (s.date||'').substring(0,10) + '</td>' +
+    '</tr>';
+}
+
+function loadE1() {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', '/data/paladin/deal_flow_signals.json?_=' + Date.now(), true);
+  xhr.onload = function() {
+    if (xhr.status === 200) {
+      E1_DATA = JSON.parse(xhr.responseText);
+      renderE1();
+      updateStats();
+    }
+  };
+  xhr.send();
+}
+
+function renderE1() {
+  if (!E1_DATA) return;
+  var sigs = E1_DATA.signals || [];
+  document.getElementById('e1-count').textContent = sigs.length;
+  document.getElementById('ov-e1').textContent = sigs.length;
+  document.getElementById('deal-count').textContent = sigs.length;
+  document.getElementById('total-signals').textContent = sigs.length;
+
+  var html = sigs.map(sigRow).join('');
+  document.getElementById('e1-body').innerHTML = html || '<tr class="loading-row"><td colspan="5">No signals at this time.</td></tr>';
+
+  // Overview feed — top 15
+  document.getElementById('overview-body').innerHTML = sigs.slice(0,15).map(sigRow).join('');
+  document.getElementById('overview-count').textContent = sigs.length + ' signals';
+
+  if (E1_DATA.generated) {
+    var d = new Date(E1_DATA.generated);
+    document.getElementById('last-updated').textContent = 'Updated ' + d.toLocaleTimeString();
+  }
+}
+
+function updateStats() {
+  if (!E1_DATA) return;
+  var top = (E1_DATA.signals[0] || {}).actionability || '—';
+  document.getElementById('top-score').textContent = top;
+  document.getElementById('e2-count').textContent = '—';
+  document.getElementById('e3-count').textContent = '—';
+  document.getElementById('e4-count').textContent = '—';
+  document.getElementById('e5-count').textContent = '—';
+  document.getElementById('ov-e2').textContent = 'Building';
+  document.getElementById('ov-e3').textContent = 'Building';
+  document.getElementById('ov-e4').textContent = 'Building';
+  document.getElementById('ov-e5').textContent = 'Building';
+}
+
+function showView(name, btn) {
+  document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
+  document.querySelectorAll('.eng-tab').forEach(function(t){ t.classList.remove('active'); });
+  document.getElementById('v-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+function updateClock() {
+  var now = new Date();
+  var h = now.getHours().toString().padStart(2,'0');
+  var m = now.getMinutes().toString().padStart(2,'0');
+  var s = now.getSeconds().toString().padStart(2,'0');
+  document.getElementById('clock').textContent = h + ':' + m + ':' + s;
+  var days = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  var months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  document.getElementById('mast-date').textContent = days[now.getDay()] + ' ' + months[now.getMonth()] + ' ' + now.getDate() + ' ' + now.getFullYear();
+}
+
+window.onload = function() {
+  updateClock();
+  setInterval(updateClock, 1000);
+  loadE1();
+};
+</script>
+</body>
+</html>
