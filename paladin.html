@@ -188,6 +188,48 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
   .mast-name{font-size:24px}
   .ov-grid{grid-template-columns:1fr 1fr}
 }
+
+/* TRIVIUM LEARNING LAYER */
+.trv-toggle{
+  display:inline-flex;align-items:center;gap:5px;
+  font-family:var(--mono);font-size:8px;font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--blue);cursor:pointer;
+  padding:3px 10px;border:1px solid rgba(26,58,107,0.2);
+  margin-top:6px;transition:all 0.15s;background:none;
+}
+.trv-toggle:hover{background:rgba(26,58,107,0.06);border-color:var(--blue)}
+.trv-toggle.open{color:var(--red);border-color:rgba(200,32,26,0.3)}
+
+.trv-panel{
+  display:none;
+  margin-top:0;
+  background:#fffef8;
+  border-top:1px solid var(--border);
+  border-bottom:2px solid var(--red);
+}
+.trv-panel.open{display:table-row}
+.trv-panel td{padding:16px 20px!important;border-bottom:none!important}
+.trv-grid{
+  display:grid;grid-template-columns:1fr 1fr 1fr;
+  gap:16px;
+}
+.trv-col{}
+.trv-col-label{
+  font-family:var(--mono);font-size:8px;font-weight:700;
+  letter-spacing:2px;text-transform:uppercase;
+  margin-bottom:6px;padding-bottom:4px;
+  border-bottom:2px solid currentColor;
+  display:flex;align-items:center;gap:6px;
+}
+.trv-grammar .trv-col-label{color:var(--blue)}
+.trv-logic   .trv-col-label{color:var(--gold)}
+.trv-rhetoric .trv-col-label{color:var(--red)}
+.trv-col-text{font-size:12px;color:var(--ink2);line-height:1.65}
+.trv-col-text strong{color:var(--ink);font-weight:600}
+
+@media(max-width:768px){.trv-grid{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
@@ -425,18 +467,87 @@ var TYPE_META = {
   EXEC_DEPARTURE:          {label:"Exec Departure", cls:"t-exec"}
 };
 
+
+var TRIVIUM_KB = {
+  DISTRESS_GOING_CONCERN: {
+    grammar: "A going concern disclosure means the company's own auditors doubt it can survive the next 12 months. Filed in an 8-K. Triggers automatic scrutiny from lenders, suppliers, and customers.",
+    logic: "Historically, ~40% of companies that file going concern disclosures enter Chapter 11 within 18 months. The other 60% either raise emergency capital, sell assets, or find a strategic buyer. The disclosure itself accelerates the crisis -- suppliers demand cash upfront, lenders call loans, customers defect. The window for a buyer to acquire assets at distressed prices is typically 30-90 days after this filing.",
+    rhetoric: "<strong>The move:</strong> When you see this signal, check if the company has publicly disclosed a 'strategic alternatives review' -- that phrase means they are already looking for a buyer. If they haven't, they will within 60 days. Assets in a 363 bankruptcy sale go at 30-60% discounts. Watch the docket at PACER for the stalking horse bid. That is your price anchor."
+  },
+  ACTIVIST_STAKE: {
+    grammar: "A Schedule 13D filing means an investor has crossed 5% ownership and intends to influence company decisions -- board composition, strategy, sale of the company. Required within 10 days of crossing the threshold.",
+    logic: "Activist campaigns result in board changes 60% of the time and a sale of the company 30% of the time within 24 months of the initial 13D. The stock typically jumps 5-15% on the announcement as the market prices in the probability of a premium exit. The activist's first letter to the board usually signals their thesis -- operational efficiency, capital return, or outright sale.",
+    rhetoric: "<strong>The move:</strong> Read the 13D exhibit carefully. If the activist uses the phrase 'maximize shareholder value' or 'explore strategic alternatives' -- a sale is the primary goal. Identify the 3-5 most logical acquirers in the sector. Watch for their 13G filings in the same company -- passive 13G can turn into activist 13D quickly."
+  },
+  MA_DEFINITIVE: {
+    grammar: "A definitive merger agreement filed in an 8-K means a deal has been signed -- price, structure, and conditions are set. This is past the LOI stage. A shareholder vote and regulatory approval are typically all that remain.",
+    logic: "Definitive deals close 85-90% of the time. The 10-15% that break typically involve regulatory blocking, financing failure, or material adverse change. When a deal is announced in a sector, adjacent companies become targets within 6-18 months in 40% of historical cases -- acquirers who missed this deal look for the next best alternative.",
+    rhetoric: "<strong>The move:</strong> Map the sector immediately. Who are the 3-5 companies that the acquirer would have bought if this target wasn't available? Check their ownership structures, debt levels, and whether they have activist investors already on the register. The next deal in the sector is often visible 90 days before it's announced."
+  },
+  WORKFORCE_REDUCTION: {
+    grammar: "A WARN Act filing or 8-K disclosing workforce reduction means the company is cutting costs under pressure. The WARN Act requires 60-day notice for layoffs of 50+ employees at a single site or 500+ company-wide.",
+    logic: "Workforce reductions precede one of two outcomes: operational turnaround (cost structure reset allows return to profitability) or strategic sale (leaner company is more attractive to acquirers). Companies that cut 10%+ of their workforce and then hire aggressively in a specific function 6-12 months later are pivoting -- the new hiring pattern reveals the new strategy before any announcement.",
+    rhetoric: "<strong>The move:</strong> After a layoff announcement, check the company's job postings every 30 days. What roles are they adding? If they're cutting operations and adding sales engineers in a new geography -- they found product-market fit somewhere new. If they're cutting everything and not hiring -- watch for a sale or shutdown within 12 months."
+  },
+  EXEC_DEPARTURE: {
+    grammar: "An 8-K Item 5.02 disclosing CEO or CFO departure. Could be voluntary resignation, retirement, or termination. The distinction matters -- 'pursuing other opportunities' is often forced. 'To spend more time with family' almost always is.",
+    logic: "CEO departures are followed by strategic reviews in 35% of cases and acquisition by another company in 22% of cases within 24 months. The interim period -- when an acting CEO or search is underway -- is the window of maximum vulnerability and maximum opportunity. The board is distracted. The organization is uncertain. Competitors accelerate, acquirers circle.",
+    rhetoric: "<strong>The move:</strong> Read the separation agreement in the proxy. A CEO who leaves with accelerated vesting of all equity and a 2-year non-compete was pushed out and paid to be quiet. A CEO who leaves with only their vested shares resigned clean. The former signals board conflict about strategy. That conflict often resolves in a sale."
+  }
+};
+
+function buildTriviumPanel(sig, rowId) {
+  var kb = TRIVIUM_KB[sig.type];
+  if (!kb) return '';
+  return '<tr class="trv-panel" id="trv-' + rowId + '">' +
+    '<td colspan="5">' +
+    '<div class="trv-grid">' +
+    '<div class="trv-col trv-grammar">' +
+    '<div class="trv-col-label">&#9650; Grammar &mdash; What it is</div>' +
+    '<div class="trv-col-text">' + kb.grammar + '</div>' +
+    '</div>' +
+    '<div class="trv-col trv-logic">' +
+    '<div class="trv-col-label">&#9670; Logic &mdash; Why it matters</div>' +
+    '<div class="trv-col-text">' + kb.logic + '</div>' +
+    '</div>' +
+    '<div class="trv-col trv-rhetoric">' +
+    '<div class="trv-col-label">&#9632; Rhetoric &mdash; The Move</div>' +
+    '<div class="trv-col-text">' + kb.rhetoric + '</div>' +
+    '</div>' +
+    '</div>' +
+    '</td></tr>';
+}
+
+function toggleTrivium(rowId) {
+  var panel = document.getElementById('trv-' + rowId);
+  var btn   = document.getElementById('trvbtn-' + rowId);
+  if (!panel) return;
+  var isOpen = panel.classList.contains('open');
+  panel.classList.toggle('open', !isOpen);
+  btn.classList.toggle('open', !isOpen);
+  btn.textContent = isOpen ? '&#9670; Learn' : '&#215; Close';
+}
+
+var _sigIdx = 0;
 function sigRow(s) {
   var tm = TYPE_META[s.type] || {label:s.type, cls:"t-layoff"};
   var ticker = s.ticker ? '<span class="sig-ticker">' + s.ticker + '</span>' : '';
   var loc = s.location ? '<div class="sig-location">&#9679; ' + s.location + '</div>' : '';
   var actPct = (s.actionability || 50) + '%';
-  return '<tr>' +
+  var rowId = 'r' + (_sigIdx++);
+  var hasTrv = TRIVIUM_KB[s.type] ? true : false;
+  var trvBtn = hasTrv
+    ? '<button class="trv-toggle" id="trvbtn-' + rowId + '" onclick="toggleTrivium(\'' + rowId + '\')" >&#9670; Learn</button>'
+    : '';
+  var mainRow = '<tr>' +
     '<td><span class="sig-type ' + tm.cls + '">' + tm.label + '</span></td>' +
     '<td><div class="sig-company">' + s.company + ticker + '</div>' + loc + '</td>' +
-    '<td><div class="sig-signal">' + s.signal + '</div><div class="sig-impl">' + (s.implication||'') + '</div></td>' +
+    '<td><div class="sig-signal">' + s.signal + '</div><div class="sig-impl">' + (s.implication||'') + '</div>' + trvBtn + '</td>' +
     '<td><div class="act-label">' + s.actionability + '</div><div class="act-bar"><div class="act-fill" style="width:' + actPct + '"></div></div></td>' +
     '<td class="sig-date">' + (s.date||'').substring(0,10) + '</td>' +
     '</tr>';
+  var trvRow = hasTrv ? buildTriviumPanel(s, rowId) : '';
+  return mainRow + trvRow;
 }
 
 function loadE1() {
@@ -460,10 +571,12 @@ function renderE1() {
   document.getElementById('deal-count').textContent = sigs.length;
   document.getElementById('total-signals').textContent = sigs.length;
 
+  _sigIdx = 0;
   var html = sigs.map(sigRow).join('');
   document.getElementById('e1-body').innerHTML = html || '<tr class="loading-row"><td colspan="5">No signals at this time.</td></tr>';
 
   // Overview feed — top 15
+  _sigIdx = 0;
   document.getElementById('overview-body').innerHTML = sigs.slice(0,15).map(sigRow).join('');
   document.getElementById('overview-count').textContent = sigs.length + ' signals';
 

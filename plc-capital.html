@@ -349,16 +349,35 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
   </div>
   <div class="topnav-tabs">
     <button class="nav-tab active" onclick="show('home',this)">Home</button>
-    <button class="nav-tab" onclick="show('financials',this)">Financials</button>
-    <button class="nav-tab" onclick="show('queue',this)">Queue</button>
-    <button class="nav-tab" onclick="show('belmont',this)">Belmont</button>
+    <div style="width:1px;background:var(--border);margin:6px 0;flex-shrink:0"></div>
+    <span style="font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);padding:0 10px;display:flex;align-items:center;white-space:nowrap">Capital</span>
+    <button class="nav-tab" onclick="show('financials',this)" title="Money — rationally">Financials</button>
+    <button class="nav-tab" onclick="show('queue',this)" title="Content engine">Queue</button>
+    <a class="nav-tab" href="paladin.html" title="Intelligence platform">PALADIN</a>
+    <a class="nav-tab" href="conductor.html" title="Live signals">Signals</a>
+    <a class="nav-tab" href="belmont.html" title="Client services">Belmont</a>
+    <div style="width:1px;background:var(--border);margin:6px 0;flex-shrink:0"></div>
+    <span style="font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);padding:0 10px;display:flex;align-items:center;white-space:nowrap">Consilience</span>
+    <a class="nav-tab" href="mind.html" title="Mental models">Mind</a>
+    <a class="nav-tab" href="tv.html" title="Curated knowledge">TV</a>
+    <div style="width:1px;background:var(--border);margin:6px 0;flex-shrink:0"></div>
+    <span style="font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);padding:0 10px;display:flex;align-items:center;white-space:nowrap">Command</span>
+    <button class="nav-tab" onclick="show('financials',this)" title="Know your situation">Ledger</button>
+    <a class="nav-tab" href="private.html" title="Private ops">Private &#128274;</a>
   </div>
 </nav>
 
 <!-- HOME -->
 <div class="view active" id="v-home">
 
-  <div class="status-bar">
+  <div style="border-bottom:1px solid var(--border);padding:7px 24px;display:flex;align-items:center;gap:28px;background:var(--bg2)">
+    <span style="font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4)">Trivium Framework &rarr;</span>
+    <span style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--blue)"><span style="font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;font-weight:700;color:var(--blue)">Grammar</span> What it is</span>
+    <span style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--gold)"><span style="font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;font-weight:700;color:var(--gold)">Logic</span> Why it matters</span>
+    <span style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--red)"><span style="font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;font-weight:700;color:var(--red)">Rhetoric</span> The move</span>
+    <span style="margin-left:auto;font-family:var(--mono);font-size:8px;color:var(--ink4);letter-spacing:1px">Capital &bull; Consilience &bull; Command</span>
+  </div>
+<div class="status-bar">
     <div class="status-item si-green"><span class="dot" style="background:var(--green)"></span>Cloudflare Live</div>
     <div class="status-item si-green"><span class="dot" style="background:var(--green)"></span>Server Online</div>
     <div class="status-item si-amber"><span class="dot" style="background:var(--gold)"></span>Domain Needed</div>
