@@ -339,6 +339,11 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
 <nav class="topnav">
   <div class="topnav-top">
     <span class="nav-brand">Payton <em>Loop</em></span>
+    <div style="position:relative;margin:0 auto">
+      <input id="easter-search" type="text" placeholder="Search..."
+        style="background:#f0f0ed;border:1px solid var(--border);color:var(--ink);font-family:var(--mono);font-size:11px;padding:6px 14px;outline:none;width:200px;border-radius:0"
+        autocomplete="off" onkeydown="checkEaster(event)">
+    </div>
     <span class="nav-date" id="nav-date"></span>
     <a class="nav-cta" href="belmont.html">Belmont Group &rarr;</a>
   </div>
@@ -643,6 +648,17 @@ function setDate() {
   var d = new Date();
   var opts = {weekday:'long',year:'numeric',month:'long',day:'numeric'};
   document.getElementById('nav-date').textContent = d.toLocaleDateString('en-US', opts).toUpperCase();
+}
+
+
+function checkEaster(e) {
+  if (e.key === 'Enter') {
+    var val = document.getElementById('easter-search').value.trim();
+    if (val === "Warren's Office") {
+      window.location.href = 'warren.html';
+    }
+    document.getElementById('easter-search').value = '';
+  }
 }
 
 window.onload = function() {

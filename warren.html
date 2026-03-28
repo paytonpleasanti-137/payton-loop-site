@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Warren's Office</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Roboto+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'EB Garamond',Georgia,serif}
+
+/* ── SCENE WRAPPER ── */
+#scene{
+  width:100vw;height:100vh;
+  position:relative;overflow:hidden;
+  background:#000;
+}
+
+/* ── CORRIDOR ── */
+#corridor{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity 0.8s;
+}
+.corridor-bg{
+  width:100%;height:100%;
+  position:absolute;
+  background:
+    linear-gradient(180deg, #1a1208 0%, #2a1e0e 40%, #3a2910 60%, #2a1e0e 100%);
+}
+/* Perspective floor */
+.floor{
+  position:absolute;bottom:0;left:0;right:0;height:45%;
+  background:linear-gradient(180deg,#3d2e18 0%,#2a1e0e 100%);
+  clip-path:polygon(0 100%,100% 100%,85% 0%,15% 0%);
+}
+/* Perspective ceiling */
+.ceiling{
+  position:absolute;top:0;left:0;right:0;height:35%;
+  background:linear-gradient(180deg,#1a1208 0%,#2d2210 100%);
+  clip-path:polygon(15% 100%,85% 100%,100% 0%,0% 0%);
+}
+/* Left wall */
+.wall-l{
+  position:absolute;top:0;left:0;bottom:0;width:15%;
+  background:linear-gradient(90deg,#1a1208,#3d2e18);
+  clip-path:polygon(0 0,100% 35%,100% 65%,0 100%);
+}
+/* Right wall */
+.wall-r{
+  position:absolute;top:0;right:0;bottom:0;width:15%;
+  background:linear-gradient(270deg,#1a1208,#3d2e18);
+  clip-path:polygon(100% 0,0 35%,0 65%,100% 100%);
+}
+/* Wall panels left */
+.panels-l{
+  position:absolute;left:2%;top:35%;bottom:35%;width:12%;
+  display:flex;flex-direction:column;gap:4px;
+}
+.panel-strip{height:32%;background:rgba(80,55,20,0.4);border:1px solid rgba(120,90,40,0.3)}
+/* Wall panels right */
+.panels-r{
+  position:absolute;right:2%;top:35%;bottom:35%;width:12%;
+  display:flex;flex-direction:column;gap:4px;
+}
+
+/* Vanishing point corridor lines */
+.vp-lines{
+  position:absolute;inset:0;pointer-events:none;
+}
+
+/* THE DOOR — at the end of the hall */
+#door-wrap{
+  position:absolute;
+  left:50%;top:50%;
+  transform:translate(-50%,-50%);
+  display:flex;flex-direction:column;align-items:center;
+  cursor:pointer;
+  transition:transform 0.3s;
+}
+#door-wrap:hover{transform:translate(-50%,-50%) scale(1.04)}
+.door-frame{
+  width:clamp(60px,8vw,100px);
+  height:clamp(90px,12vw,150px);
+  background:linear-gradient(180deg,#5c3d1a,#3d2810);
+  border:3px solid #8b6520;
+  border-radius:4px 4px 0 0;
+  position:relative;
+  box-shadow:0 0 40px rgba(139,101,32,0.3), inset 0 0 20px rgba(0,0,0,0.5);
+}
+.door-panel-top{
+  position:absolute;top:10%;left:10%;right:10%;height:35%;
+  border:2px solid #a07830;
+  background:rgba(0,0,0,0.2);
+}
+.door-panel-bot{
+  position:absolute;top:52%;left:10%;right:10%;height:38%;
+  border:2px solid #a07830;
+  background:rgba(0,0,0,0.2);
+}
+.door-knob{
+  position:absolute;right:12%;top:50%;
+  width:10px;height:10px;
+  background:radial-gradient(circle at 35% 35%,#ffd700,#b8860b);
+  border-radius:50%;
+  box-shadow:0 0 6px rgba(255,215,0,0.4);
+}
+.door-light{
+  position:absolute;bottom:100%;left:50%;transform:translateX(-50%);
+  width:4px;height:20px;
+  background:linear-gradient(180deg,transparent,rgba(255,200,100,0.6));
+}
+.door-sign{
+  margin-top:8px;
+  font-family:'Roboto Mono',monospace;
+  font-size:clamp(7px,1vw,10px);
+  letter-spacing:2px;
+  color:rgba(255,200,100,0.5);
+  text-transform:uppercase;
+}
+/* Ambient light spill from door */
+.door-glow{
+  position:absolute;
+  left:50%;top:50%;
+  transform:translate(-50%,-50%);
+  width:clamp(80px,12vw,160px);
+  height:clamp(120px,18vw,240px);
+  background:radial-gradient(ellipse,rgba(255,200,100,0.08) 0%,transparent 70%);
+  pointer-events:none;
+}
+
+/* Secretary desk — subtle */
+.secretary-area{
+  position:absolute;
+  left:20%;top:60%;
+  opacity:0.5;
+}
+.sec-desk{
+  width:clamp(40px,5vw,70px);height:clamp(15px,2vw,25px);
+  background:linear-gradient(180deg,#5c3d1a,#3d2810);
+  border-radius:2px;
+}
+.sec-lamp{
+  width:4px;height:clamp(12px,2vw,22px);
+  background:#8b6520;
+  position:absolute;top:-100%;left:60%;
+}
+.sec-lamp::after{
+  content:'';position:absolute;bottom:100%;left:-8px;
+  width:20px;height:12px;
+  background:rgba(255,200,80,0.15);
+  border-radius:50% 50% 0 0;
+}
+
+/* ── PLAYER ── */
+#player{
+  position:absolute;
+  bottom:10%;
+  left:50%;
+  transform:translateX(-50%);
+  width:clamp(12px,2vw,22px);
+  height:clamp(24px,4vw,44px);
+  transition:left 0.15s, bottom 0.15s, transform 0.15s;
+  z-index:10;
+}
+.player-body{
+  width:100%;height:70%;
+  background:#2c1a08;
+  border-radius:3px 3px 0 0;
+  position:relative;
+}
+.player-head{
+  width:70%;height:30%;
+  background:#c8956c;
+  border-radius:50%;
+  margin:0 auto;
+  position:relative;top:-5px;
+}
+.player-shadow{
+  width:150%;height:6px;
+  background:rgba(0,0,0,0.4);
+  border-radius:50%;
+  margin:-3px auto 0;
+}
+
+/* ── DOOR OPEN ANIMATION ── */
+.door-opening .door-frame{
+  animation:openDoor 1.2s forwards;
+  transform-origin:left center;
+}
+@keyframes openDoor{
+  0%{transform:rotateY(0deg);filter:brightness(1)}
+  100%{transform:rotateY(-75deg);filter:brightness(0.3)}
+}
+
+/* ── FADE TRANSITION ── */
+#fade{
+  position:fixed;inset:0;background:#000;
+  opacity:0;pointer-events:none;
+  transition:opacity 0.8s;z-index:1000;
+}
+#fade.show{opacity:1;pointer-events:all}
+
+/* ── OFFICE SCENE ── */
+#office{
+  position:absolute;inset:0;
+  display:none;
+  opacity:0;
+  transition:opacity 1s;
+  background:#c8b898;
+  overflow:hidden;
+}
+#office.active{display:block}
+#office.visible{opacity:1}
+
+/* Office room */
+.office-room{
+  position:absolute;inset:0;
+  background:
+    linear-gradient(180deg,#d4c4a0 0%,#c8b898 50%,#b8a888 100%);
+}
+/* Wood paneling back wall */
+.back-wall{
+  position:absolute;top:0;left:0;right:0;height:55%;
+  background:repeating-linear-gradient(
+    90deg,
+    #8b6520 0px, #7a5818 2px,
+    #9a7230 2px, #8b6520 40px
+  );
+  opacity:0.85;
+}
+.back-wall::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(0,0,0,0.3) 0%,transparent 100%);
+}
+/* Wainscoting */
+.wainscot{
+  position:absolute;top:55%;left:0;right:0;height:5%;
+  background:#5c3d1a;
+  border-top:3px solid #a07830;border-bottom:3px solid #a07830;
+}
+/* Floor */
+.office-floor{
+  position:absolute;top:60%;left:0;right:0;bottom:0;
+  background:repeating-linear-gradient(
+    90deg,
+    #8b6520 0px,#8b6520 40px,
+    #7a5818 40px,#7a5818 42px
+  );
+  opacity:0.7;
+}
+
+/* WARREN'S DESK */
+.warren-desk{
+  position:absolute;
+  left:50%;bottom:28%;
+  transform:translateX(-50%);
+  width:clamp(200px,35vw,400px);
+  height:clamp(80px,12vw,140px);
+}
+.desk-surface{
+  width:100%;height:40%;
+  background:linear-gradient(180deg,#5c3d1a,#3d2810);
+  border-radius:4px 4px 0 0;
+  border-top:3px solid #a07830;
+  position:relative;
+}
+.desk-legs{
+  width:100%;height:60%;
+  background:#3d2810;
+  display:flex;justify-content:space-between;padding:0 5%;
+}
+.desk-leg{width:8%;background:#2a1e0e;border-radius:0 0 3px 3px}
+
+/* Items on desk */
+.desk-items{
+  position:absolute;top:-clamp(30px,5vw,60px);left:0;right:0;
+  display:flex;align-items:flex-end;justify-content:center;gap:clamp(8px,1.5vw,20px);
+  padding:0 8%;
+}
+.newspaper-stack{
+  width:clamp(30px,5vw,55px);height:clamp(20px,3vw,35px);
+  background:#f5f0e0;
+  border:1px solid #ccc;
+  position:relative;transform:rotate(-2deg);
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+}
+.newspaper-stack::before{
+  content:'WSJ';font-family:'Roboto Mono',monospace;
+  font-size:clamp(5px,0.7vw,8px);font-weight:700;color:#c00;letter-spacing:1px;
+}
+.newspaper-stack::after{
+  content:'';position:absolute;top:3px;left:3px;right:3px;
+  height:1px;background:#999;
+}
+.too-hard-pile{
+  width:clamp(25px,4vw,45px);height:clamp(25px,4vw,50px);
+  display:flex;flex-direction:column;gap:2px;align-items:center;
+}
+.paper{
+  width:100%;height:clamp(5px,1vw,10px);
+  background:#f5f0e0;border:1px solid #ddd;
+  position:relative;
+}
+.paper:nth-child(1){transform:rotate(1deg)}
+.paper:nth-child(2){transform:rotate(-1deg)}
+.paper:nth-child(3){transform:rotate(2deg)}
+.too-hard-label{
+  font-size:clamp(4px,0.6vw,7px);color:#666;font-family:'Roboto Mono',monospace;
+  letter-spacing:0.5px;white-space:nowrap;margin-top:2px;
+}
+.phone{
+  width:clamp(15px,2.5vw,28px);height:clamp(20px,3vw,35px);
+  background:#1a1a1a;border-radius:3px;
+  position:relative;
+}
+.phone::after{
+  content:'';position:absolute;top:15%;left:10%;right:10%;height:50%;
+  background:rgba(255,255,255,0.05);border-radius:2px;
+}
+.cherry-coke{
+  width:clamp(8px,1.2vw,14px);height:clamp(18px,3vw,32px);
+  background:linear-gradient(180deg,#8b0000,#c00,#8b0000);
+  border-radius:2px 2px 3px 3px;
+  position:relative;
+}
+.cherry-coke::before{
+  content:'';position:absolute;top:0;left:10%;right:10%;height:15%;
+  background:rgba(255,255,255,0.3);border-radius:2px;
+}
+
+/* WARREN — figure behind desk */
+.warren-figure{
+  position:absolute;
+  left:50%;bottom:calc(28% + clamp(80px,12vw,140px));
+  transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;
+  animation:breathe 4s ease-in-out infinite;
+}
+@keyframes breathe{
+  0%,100%{transform:translateX(-50%) translateY(0)}
+  50%{transform:translateX(-50%) translateY(-3px)}
+}
+.warren-chair-back{
+  width:clamp(50px,8vw,90px);height:clamp(60px,9vw,100px);
+  background:linear-gradient(180deg,#2a1e0e,#1a1208);
+  border-radius:6px 6px 0 0;
+  border:2px solid #5c3d1a;
+}
+.warren-torso{
+  position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+  width:clamp(35px,5.5vw,65px);height:clamp(40px,6vw,70px);
+  background:#3d5a8a;  /* blue suit */
+  border-radius:4px 4px 0 0;
+}
+.warren-head{
+  position:absolute;bottom:calc(clamp(40px,6vw,70px) + clamp(5px,0.5vw,8px));
+  left:50%;transform:translateX(-50%);
+  width:clamp(22px,3.5vw,40px);height:clamp(26px,4vw,46px);
+  background:#c8956c;
+  border-radius:50% 50% 45% 45%;
+}
+.warren-hair{
+  position:absolute;top:0;left:0;right:0;height:35%;
+  background:#d4d4d4;
+  border-radius:50% 50% 0 0;
+}
+.warren-glasses{
+  position:absolute;top:40%;left:10%;right:10%;height:20%;
+  border-top:2px solid #333;
+  display:flex;gap:10%;
+}
+.warren-glasses::before,.warren-glasses::after{
+  content:'';flex:1;height:clamp(6px,1.2vw,14px);
+  border:1.5px solid #333;background:rgba(150,200,255,0.2);
+  border-radius:2px;margin-top:1px;
+}
+/* Writing motion */
+.warren-arm{
+  position:absolute;
+  bottom:clamp(5px,1vw,12px);right:5%;
+  width:clamp(20px,3vw,35px);height:clamp(8px,1.2vw,14px);
+  background:#c8956c;
+  border-radius:4px;
+  transform-origin:left center;
+  animation:writing 2s ease-in-out infinite;
+}
+@keyframes writing{
+  0%,100%{transform:rotate(-10deg) translateX(0)}
+  25%{transform:rotate(-5deg) translateX(3px)}
+  75%{transform:rotate(-15deg) translateX(-2px)}
+}
+
+/* PORTRAITS on wall */
+.portrait{
+  position:absolute;top:10%;
+  background:#f5f0e0;
+  border:3px solid #8b6520;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
+  padding-bottom:4px;
+}
+.portrait-left{left:8%;width:clamp(35px,5vw,60px);height:clamp(45px,7vw,80px)}
+.portrait-right{right:8%;width:clamp(35px,5vw,60px);height:clamp(45px,7vw,80px)}
+.portrait-face{
+  width:55%;height:50%;
+  background:#c8956c;
+  border-radius:50% 50% 45% 45%;
+  margin-bottom:4px;
+  position:relative;
+}
+.portrait-face::after{content:'';position:absolute;top:0;left:0;right:0;height:30%;background:#8b6520;border-radius:50% 50% 0 0}
+.portrait-name{font-size:clamp(4px,0.6vw,7px);font-family:'Roboto Mono',monospace;color:#5c3d1a;letter-spacing:0.5px;text-align:center;font-weight:700}
+
+/* Venetian blinds window */
+.window{
+  position:absolute;top:8%;left:50%;transform:translateX(-50%);
+  width:clamp(60px,10vw,120px);height:clamp(70px,11vw,130px);
+  background:#e8f4ff;
+  border:3px solid #8b6520;
+  overflow:hidden;
+}
+.blind-slat{
+  width:100%;height:clamp(4px,0.7vw,8px);
+  background:rgba(200,180,140,0.7);
+  border-bottom:1px solid rgba(150,130,90,0.5);
+}
+.window-light{
+  position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent 20%,rgba(255,255,200,0.15) 50%,transparent 80%);
+}
+
+/* INFO PANEL — Trivium overlay */
+#trivium-panel{
+  position:absolute;right:2%;top:50%;transform:translateY(-50%);
+  width:clamp(140px,20vw,220px);
+  background:rgba(255,250,240,0.93);
+  border:1px solid #8b6520;
+  border-left:3px solid #8b0000;
+  padding:clamp(8px,1.2vw,16px);
+  font-size:clamp(9px,1.1vw,13px);
+  display:none;
+  box-shadow:2px 2px 12px rgba(0,0,0,0.2);
+}
+#trivium-panel.show{display:block;animation:fadeInRight 0.5s forwards}
+@keyframes fadeInRight{from{opacity:0;transform:translateY(-50%) translateX(20px)}to{opacity:1;transform:translateY(-50%) translateX(0)}}
+.tp-section{margin-bottom:clamp(6px,1vw,12px)}
+.tp-label{
+  font-family:'Roboto Mono',monospace;font-size:clamp(7px,0.8vw,9px);
+  font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:#8b0000;margin-bottom:4px;
+}
+.tp-text{line-height:1.5;color:#2a1a0a;font-family:'EB Garamond',serif}
+.tp-close{
+  position:absolute;top:6px;right:8px;
+  font-size:12px;color:#8b6520;cursor:pointer;line-height:1;
+  font-family:'Roboto Mono',monospace;
+}
+.tp-close:hover{color:#8b0000}
+
+/* CLICK HINT */
+.click-hint{
+  position:absolute;
+  font-family:'Roboto Mono',monospace;font-size:clamp(6px,0.8vw,9px);
+  color:rgba(200,180,140,0.6);letter-spacing:1px;text-transform:uppercase;
+  pointer-events:none;
+}
+
+/* CAPTION BAR */
+#caption{
+  position:absolute;bottom:3%;left:50%;transform:translateX(-50%);
+  font-family:'Roboto Mono',monospace;font-size:clamp(8px,1vw,11px);
+  letter-spacing:1.5px;text-transform:uppercase;
+  color:rgba(200,180,140,0.5);
+  white-space:nowrap;
+  transition:opacity 0.5s;
+}
+
+/* ── AMBIENT PARTICLES ── */
+.dust{
+  position:absolute;
+  width:2px;height:2px;
+  background:rgba(255,220,150,0.4);
+  border-radius:50%;
+  animation:float linear infinite;
+}
+@keyframes float{
+  0%{transform:translateY(0) translateX(0);opacity:0}
+  10%{opacity:1}
+  90%{opacity:0.3}
+  100%{transform:translateY(-80px) translateX(20px);opacity:0}
+}
+
+/* ESC hint */
+#esc-hint{
+  position:absolute;top:2%;left:50%;transform:translateX(-50%);
+  font-family:'Roboto Mono',monospace;font-size:clamp(7px,0.8vw,10px);
+  color:rgba(180,160,120,0.4);letter-spacing:2px;text-transform:uppercase;
+  display:none;
+}
+</style>
+</head>
+<body>
+
+<div id="scene">
+
+  <!-- FADE OVERLAY -->
+  <div id="fade"></div>
+
+  <!-- ── CORRIDOR ── -->
+  <div id="corridor">
+    <div class="corridor-bg"></div>
+    <div class="floor"></div>
+    <div class="ceiling"></div>
+    <div class="wall-l"></div>
+    <div class="wall-r"></div>
+    <div class="panels-l">
+      <div class="panel-strip"></div>
+      <div class="panel-strip"></div>
+      <div class="panel-strip"></div>
+    </div>
+    <div class="panels-r">
+      <div class="panel-strip"></div>
+      <div class="panel-strip"></div>
+      <div class="panel-strip"></div>
+    </div>
+
+    <!-- Secretary -->
+    <div class="secretary-area">
+      <div class="sec-lamp"></div>
+      <div class="sec-desk"></div>
+    </div>
+
+    <!-- Door glow -->
+    <div class="door-glow"></div>
+
+    <!-- THE DOOR -->
+    <div id="door-wrap" onclick="enterDoor()">
+      <div class="door-frame">
+        <div class="door-panel-top"></div>
+        <div class="door-panel-bot"></div>
+        <div class="door-knob"></div>
+        <div class="door-light"></div>
+      </div>
+      <div class="door-sign">Buffett &bull; Office 2</div>
+    </div>
+
+    <!-- Player -->
+    <div id="player">
+      <div class="player-head"></div>
+      <div class="player-body"></div>
+      <div class="player-shadow"></div>
+    </div>
+
+    <!-- Caption -->
+    <div id="caption">Use arrow keys to move &bull; Approach the door &bull; Press Enter to knock</div>
+  </div>
+
+  <!-- ── OFFICE ── -->
+  <div id="office">
+    <div class="office-room"></div>
+    <div class="back-wall"></div>
+    <div class="wainscot"></div>
+    <div class="office-floor"></div>
+
+    <!-- Window with blinds -->
+    <div class="window" id="window-el">
+      <div id="blind-container"></div>
+      <div class="window-light"></div>
+    </div>
+
+    <!-- Portraits -->
+    <div class="portrait portrait-left">
+      <div class="portrait-face"></div>
+      <div class="portrait-name">B. Graham</div>
+    </div>
+    <div class="portrait portrait-right">
+      <div class="portrait-face" style="background:#b8806c"></div>
+      <div class="portrait-name">C. Munger</div>
+    </div>
+
+    <!-- Warren's desk -->
+    <div class="warren-desk">
+      <div class="desk-surface">
+        <div class="desk-items">
+          <div class="newspaper-stack"></div>
+          <div class="too-hard-pile">
+            <div class="paper"></div>
+            <div class="paper"></div>
+            <div class="paper"></div>
+            <div class="too-hard-label">TOO HARD</div>
+          </div>
+          <div class="phone"></div>
+          <div class="cherry-coke"></div>
+        </div>
+      </div>
+      <div class="desk-legs">
+        <div class="desk-leg"></div>
+        <div class="desk-leg"></div>
+        <div class="desk-leg"></div>
+        <div class="desk-leg"></div>
+      </div>
+    </div>
+
+    <!-- Warren figure -->
+    <div class="warren-figure" id="warren" onclick="showTrivium('warren')">
+      <div class="warren-chair-back">
+        <div class="warren-torso">
+          <div class="warren-head">
+            <div class="warren-hair"></div>
+            <div class="warren-glasses"></div>
+          </div>
+          <div class="warren-arm"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Clickable items hints -->
+    <div class="click-hint" style="left:50%;bottom:calc(28% + clamp(80px,12vw,140px) + clamp(60px,9vw,100px));transform:translateX(-50%) translateY(-8px)">
+      &#9650; Click Warren
+    </div>
+
+    <!-- Trivium panel -->
+    <div id="trivium-panel">
+      <div class="tp-close" onclick="closeTrivium()">&#215;</div>
+      <div id="tp-content"></div>
+    </div>
+
+    <!-- Dust particles -->
+    <div id="dust-container"></div>
+
+    <!-- ESC hint -->
+    <div id="esc-hint">Press ESC to leave</div>
+
+    <!-- Caption -->
+    <div id="office-caption" style="position:absolute;bottom:3%;left:50%;transform:translateX(-50%);font-family:'Roboto Mono',monospace;font-size:clamp(7px,0.9vw,10px);letter-spacing:1.5px;text-transform:uppercase;color:rgba(139,101,32,0.5);white-space:nowrap">
+      Kiewit Plaza &bull; Omaha, Nebraska &bull; Office 2
+    </div>
+  </div>
+
+</div>
+
+<script>
+var playerX = 50;
+var playerY = 10;
+var atDoor = false;
+var inOffice = false;
+var keys = {};
+var TRIVIUM_DATA = {
+  warren: {
+    grammar: "Warren Buffett. 93 years old. Net worth $130 billion. Still works in this same office he has occupied since 1962. No computer on the desk.",
+    logic: "He reads 500 pages a day. The newspaper stack, the annual reports, the cherry Coke  --  these aren't affectations. They are the inputs of a system that has compounded at 20% annually for 60 years. The 'TOO HARD' pile means he only swings at pitches he understands completely. That restraint is the strategy.",
+    rhetoric: "The move: define your circle of competence ruthlessly. Everything outside it goes in the TOO HARD pile. Everything inside it  --  you study until you know it better than anyone alive. Then you wait. And when the pitch comes, you swing hard."
+  },
+  graham_portrait: {
+    grammar: "Benjamin Graham. 'The Intelligent Investor.' Columbia Business School professor. Warren Buffett's teacher and employer.",
+    logic: "Graham invented the concept of intrinsic value  --  the idea that a stock is not a ticker symbol but a fractional ownership of a real business. Mr. Market is not your boss. He is your servant. When he offers you something at a discount to what it's worth, you buy. When he's manic, you sell.",
+    rhetoric: "The move: always calculate what something is worth before you look at what it costs. If you do it in that order, Mr. Market can never manipulate you."
+  },
+  munger_portrait: {
+    grammar: "Charlie Munger. Vice Chairman, Berkshire Hathaway. 99 years old when he died in 2023. Architecture degree. Self-taught investor. Built his mental model lattice across physics, biology, psychology, history, mathematics.",
+    logic: "Munger's insight: the big money is not in buying good businesses at fair prices. It's in buying great businesses at good prices and then doing nothing. Sit on your ass investing. The tax advantages of inactivity compound alongside the business itself.",
+    rhetoric: "The move: learn something from every discipline. Not surface knowledge -- the actual mechanism. When you have 100 mental models, the world starts explaining itself to you."
+  },
+  window: {
+    grammar: "Venetian blinds. South-facing window. Omaha, Nebraska. He could afford floor-to-ceiling glass in any skyscraper in any city on earth.",
+    logic: "He stayed in Omaha deliberately. Distance from Wall Street means distance from the noise. The blinds are always half-closed. Not because he doesn't want to see the world  --  because the world he needs to see is in the annual reports on his desk, not through the window.",
+    rhetoric: "The move: control your information diet with the same discipline you control your investment portfolio. Most of what comes through the window is noise. Most of what's in the annual report is signal."
+  },
+  desk: {
+    grammar: "A desk. Newspapers. A stack of papers labeled TOO HARD. A landline phone. One Cherry Coke.",
+    logic: "No Bloomberg terminal. No Reuters feed. No second monitor. Every piece of technology that Wall Street considers essential, he has concluded is unnecessary or counterproductive. The phone is for rare outbound calls he initiates. He is never reactive.",
+    rhetoric: "The move: the person who controls the speed of the conversation controls the negotiation. Never let urgency be imposed on you from the outside. Think on your schedule."
+  }
+};
+
+function showTrivium(key) {
+  var data = TRIVIUM_DATA[key];
+  if (!data) return;
+  var html =
+    '<div class="tp-section"><div class="tp-label">Grammar &mdash; What</div><div class="tp-text">' + data.grammar + '</div></div>' +
+    '<div class="tp-section"><div class="tp-label">Logic &mdash; Why</div><div class="tp-text">' + data.logic + '</div></div>' +
+    '<div class="tp-section"><div class="tp-label">Rhetoric &mdash; The Move</div><div class="tp-text">' + data.rhetoric + '</div></div>';
+  document.getElementById('tp-content').innerHTML = html;
+  document.getElementById('trivium-panel').classList.add('show');
+}
+
+function closeTrivium() {
+  document.getElementById('trivium-panel').classList.remove('show');
+}
+
+function buildBlinds() {
+  var container = document.getElementById('blind-container');
+  var html = '';
+  for (var i = 0; i < 14; i++) {
+    html += '<div class="blind-slat"></div>';
+  }
+  container.innerHTML = html;
+}
+
+function buildDust() {
+  var container = document.getElementById('dust-container');
+  var html = '';
+  for (var i = 0; i < 12; i++) {
+    var left = 10 + Math.random() * 80;
+    var delay = Math.random() * 6;
+    var duration = 4 + Math.random() * 6;
+    var size = 1 + Math.random() * 2;
+    html += '<div class="dust" style="left:' + left + '%;bottom:' + (20 + Math.random() * 40) + '%;' +
+      'width:' + size + 'px;height:' + size + 'px;' +
+      'animation-delay:' + delay + 's;animation-duration:' + duration + 's"></div>';
+  }
+  container.innerHTML = html;
+}
+
+function updatePlayer() {
+  var el = document.getElementById('player');
+  el.style.left = playerX + '%';
+  el.style.bottom = (10 + playerY * 0.3) + '%';
+  var scale = 0.5 + playerY * 0.015;
+  el.style.transform = 'translateX(-50%) scale(' + scale + ')';
+
+  var doorDist = Math.abs(playerX - 50) + Math.abs(playerY - 80);
+  atDoor = (doorDist < 18);
+
+  var caption = document.getElementById('caption');
+  if (atDoor) {
+    caption.textContent = 'Press ENTER to knock';
+    caption.style.opacity = '1';
+  } else if (playerY > 40) {
+    caption.textContent = 'Getting closer...';
+    caption.style.opacity = '0.7';
+  } else {
+    caption.textContent = 'Use arrow keys \u2022 Approach the door \u2022 Press Enter to knock';
+    caption.style.opacity = '0.5';
+  }
+}
+
+function enterDoor() {
+  if (inOffice) return;
+  triggerEntry();
+}
+
+function triggerEntry() {
+  inOffice = true;
+  document.getElementById('door-wrap').classList.add('door-opening');
+  setTimeout(function() {
+    var fade = document.getElementById('fade');
+    fade.classList.add('show');
+    setTimeout(function() {
+      document.getElementById('corridor').style.display = 'none';
+      var office = document.getElementById('office');
+      office.classList.add('active');
+      document.getElementById('esc-hint').style.display = 'block';
+      buildBlinds();
+      buildDust();
+      // Add click targets
+      document.querySelector('.warren-figure').onclick = function(){ showTrivium('warren'); };
+      document.querySelector('.portrait-left').onclick = function(){ showTrivium('graham_portrait'); };
+      document.querySelector('.portrait-right').onclick = function(){ showTrivium('munger_portrait'); };
+      document.querySelector('.window').onclick = function(){ showTrivium('window'); };
+      document.querySelector('.warren-desk').onclick = function(){ showTrivium('desk'); };
+      setTimeout(function() {
+        fade.classList.remove('show');
+        setTimeout(function() {
+          office.classList.add('visible');
+        }, 100);
+      }, 400);
+    }, 800);
+  }, 800);
+}
+
+function exitOffice() {
+  if (!inOffice) return;
+  var fade = document.getElementById('fade');
+  fade.classList.add('show');
+  setTimeout(function() {
+    document.getElementById('office').classList.remove('active','visible');
+    document.getElementById('corridor').style.display = 'flex';
+    document.getElementById('esc-hint').style.display = 'none';
+    document.getElementById('door-wrap').classList.remove('door-opening');
+    inOffice = false;
+    playerX = 50; playerY = 10;
+    updatePlayer();
+    setTimeout(function() { fade.classList.remove('show'); }, 400);
+  }, 600);
+}
+
+document.addEventListener('keydown', function(e) {
+  if (inOffice) {
+    if (e.key === 'Escape') { closeTrivium(); exitOffice(); }
+    return;
+  }
+  var speed = 2.5;
+  if (e.key === 'ArrowLeft')  { playerX = Math.max(15, playerX - speed); }
+  if (e.key === 'ArrowRight') { playerX = Math.min(85, playerX + speed); }
+  if (e.key === 'ArrowUp')    { playerY = Math.min(90, playerY + speed); }
+  if (e.key === 'ArrowDown')  { playerY = Math.max(0,  playerY - speed); }
+  if ((e.key === 'Enter' || e.key === ' ') && atDoor) { triggerEntry(); }
+  updatePlayer();
+  e.preventDefault();
+});
+
+// Mobile touch
+var touchStartX, touchStartY;
+document.addEventListener('touchstart', function(e) {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+});
+document.addEventListener('touchend', function(e) {
+  if (inOffice) return;
+  var dx = e.changedTouches[0].clientX - touchStartX;
+  var dy = e.changedTouches[0].clientY - touchStartY;
+  var speed = 5;
+  if (Math.abs(dx) > Math.abs(dy)) {
+    playerX = Math.max(15, Math.min(85, playerX + (dx > 0 ? speed : -speed)));
+  } else {
+    playerY = Math.max(0, Math.min(90, playerY + (dy < 0 ? speed : -speed)));
+  }
+  updatePlayer();
+});
+
+// Tap door on mobile
+document.getElementById('door-wrap').addEventListener('touchend', function(e) {
+  e.preventDefault();
+  if (!inOffice) triggerEntry();
+});
+
+updatePlayer();
+</script>
+</body>
+</html>
