@@ -4,307 +4,414 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Payton Loop — Operations</title>
-<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Roboto+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&family=Roboto+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --black:#0a0a0a;
-  --black2:#111;
-  --surface:#161616;
-  --surface2:#1e1e1e;
-  --border:rgba(255,255,255,0.07);
-  --border2:rgba(255,255,255,0.04);
-  --off:#f0ebe0;
-  --dim:rgba(240,235,224,0.5);
-  --muted:rgba(240,235,224,0.28);
-  --gold:#c9a84c;
-  --gold2:rgba(201,168,76,0.12);
-  --red:#e05555;
-  --green:#4caf7d;
-  --blue:#5b8dee;
-  --serif:'EB Garamond',Georgia,serif;
-  --mono:'Roboto Mono',monospace;
-  --sans:'Inter',sans-serif;
+  /* Warm charcoal — not cold black */
+  --bg:       #141210;
+  --bg2:      #1c1917;
+  --bg3:      #242220;
+  --bg4:      #2c2a27;
+  --border:   rgba(201,168,76,0.1);
+  --border2:  rgba(255,255,255,0.06);
+
+  /* Text — warm not clinical */
+  --txt:      #f0ebe0;
+  --txt2:     #c8bfa8;
+  --txt3:     #8a7e68;
+  --txt4:     #5a5040;
+
+  /* Gold — warm amber */
+  --gold:     #c9a84c;
+  --gold-lt:  #e8c96a;
+  --gold-dim: rgba(201,168,76,0.15);
+
+  /* Signals */
+  --green:    #5a9e6f;
+  --red:      #c45c5c;
+  --amber:    #c48a3a;
+
+  --serif:    'EB Garamond', Georgia, serif;
+  --sans:     'Inter', system-ui, sans-serif;
+  --mono:     'Roboto Mono', monospace;
+
+  --r:        6px;
+  --r-sm:     4px;
 }
 
-html{scroll-behavior:smooth}
-body{background:var(--black);color:var(--off);font-family:var(--sans);min-height:100vh;padding-bottom:56px}
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--txt);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+  padding-bottom: 60px;
+}
 
-/* ── TOP NAV ── */
-.topnav{
-  position:sticky;top:0;z-index:200;
-  height:48px;
-  display:flex;align-items:center;
-  background:rgba(10,10,10,0.96);
-  border-bottom:1px solid var(--border);
-  backdrop-filter:blur(16px);
-  padding:0 20px;
-  gap:2px;
+/* ─── TOP NAV ─────────────────────────── */
+.topnav {
+  position: sticky; top: 0; z-index: 100;
+  height: 52px;
+  display: flex; align-items: center;
+  background: rgba(20,18,16,0.95);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  padding: 0 24px;
+  gap: 0;
 }
-.nav-brand{
-  font-family:var(--mono);font-size:11px;letter-spacing:3px;
-  color:var(--gold);text-transform:uppercase;
-  margin-right:20px;white-space:nowrap;
+.nav-brand {
+  font-family: var(--serif);
+  font-size: 18px; font-weight: 500;
+  color: var(--txt); letter-spacing: 0.5px;
+  margin-right: 32px; white-space: nowrap;
 }
-.nav-tab{
-  font-family:var(--mono);font-size:10px;letter-spacing:1.5px;
-  color:var(--muted);text-transform:uppercase;
-  padding:0 14px;height:48px;display:flex;align-items:center;
-  cursor:pointer;border-bottom:2px solid transparent;
-  transition:all 0.15s;white-space:nowrap;background:none;border-left:none;border-right:none;border-top:none;
-  text-decoration:none;
+.nav-brand em {
+  color: var(--gold); font-style: normal;
 }
-.nav-tab:hover{color:var(--off)}
-.nav-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
-.nav-spacer{flex:1}
-.nav-action{
-  font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
-  color:var(--black);background:var(--gold);
-  padding:7px 16px;text-decoration:none;
-  transition:opacity 0.15s;white-space:nowrap;
+.nav-tabs {
+  display: flex; align-items: center; gap: 0; flex: 1;
 }
-.nav-action:hover{opacity:0.85}
+.nav-tab {
+  font-family: var(--sans); font-size: 13px; font-weight: 400;
+  color: var(--txt3); letter-spacing: 0.2px;
+  padding: 0 18px; height: 52px;
+  display: flex; align-items: center;
+  cursor: pointer; border: none; background: none;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+  white-space: nowrap; text-decoration: none;
+}
+.nav-tab:hover { color: var(--txt2); }
+.nav-tab.active { color: var(--txt); border-bottom-color: var(--gold); }
+.nav-spacer { flex: 1; }
+.nav-cta {
+  font-family: var(--sans); font-size: 12px; font-weight: 500;
+  color: var(--bg); background: var(--gold);
+  padding: 8px 20px; border-radius: var(--r-sm);
+  text-decoration: none; letter-spacing: 0.3px;
+  transition: background 0.2s;
+}
+.nav-cta:hover { background: var(--gold-lt); }
 
-/* ── VIEWS ── */
-.view{display:none;padding:28px 20px;max-width:1200px;margin:0 auto}
-.view.active{display:block}
+/* ─── VIEWS ──────────────────────────── */
+.view { display: none; max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+.view.active { display: block; }
 
-/* ── HOME VIEW ── */
+/* ─── HOME ───────────────────────────── */
 
-/* Big metrics strip */
-.metrics-strip{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:1px;
-  background:var(--border);
-  border:1px solid var(--border);
-  margin-bottom:24px;
+/* Metrics row */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 32px;
 }
-.metric-cell{
-  background:var(--surface);
-  padding:20px 20px 16px;
-  position:relative;
-  cursor:default;
+.metric {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  padding: 20px 20px 16px;
+  position: relative;
+  transition: border-color 0.2s;
 }
-.metric-cell:hover{background:var(--surface2)}
-.metric-label{
-  font-family:var(--mono);font-size:8px;letter-spacing:3px;
-  text-transform:uppercase;color:var(--muted);
-  margin-bottom:8px;
+.metric:hover { border-color: var(--border); }
+.metric-label {
+  font-size: 11px; font-weight: 500;
+  color: var(--txt3); letter-spacing: 0.8px;
+  text-transform: uppercase; margin-bottom: 10px;
 }
-.metric-value{
-  font-family:var(--mono);font-size:28px;font-weight:500;
-  line-height:1;margin-bottom:4px;
+.metric-num {
+  font-family: var(--serif);
+  font-size: 36px; font-weight: 500;
+  line-height: 1; color: var(--txt);
+  margin-bottom: 6px;
 }
-.metric-sub{
-  font-family:var(--mono);font-size:9px;color:var(--muted);
-  letter-spacing:0.5px;
+.metric-sub {
+  font-size: 12px; color: var(--txt3); line-height: 1.4;
 }
-.metric-delta{
-  position:absolute;top:16px;right:16px;
-  font-family:var(--mono);font-size:9px;letter-spacing:1px;
-  padding:2px 8px;border:1px solid;
+.badge {
+  position: absolute; top: 16px; right: 16px;
+  font-size: 10px; font-weight: 500; letter-spacing: 0.8px;
+  padding: 2px 8px; border-radius: 100px;
 }
-.delta-up{color:var(--green);border-color:rgba(76,175,125,0.3)}
-.delta-dn{color:var(--red);border-color:rgba(224,85,85,0.3)}
-.delta-nt{color:var(--muted);border-color:var(--border)}
+.badge-red   { background: rgba(196,92,92,0.15); color: var(--red); }
+.badge-green { background: rgba(90,158,111,0.15); color: var(--green); }
+.badge-gold  { background: var(--gold-dim); color: var(--gold); }
+.badge-muted { background: rgba(90,80,64,0.2); color: var(--txt3); }
+
+/* Progress bars */
+.prog-section { margin-bottom: 32px; }
+.prog-item { margin-bottom: 14px; }
+.prog-header {
+  display: flex; justify-content: space-between;
+  font-size: 12px; color: var(--txt3);
+  margin-bottom: 6px;
+}
+.prog-header strong { color: var(--txt2); font-weight: 500; }
+.prog-track {
+  height: 3px; background: var(--bg4);
+  border-radius: 2px; overflow: hidden;
+}
+.prog-fill {
+  height: 100%; border-radius: 2px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-lt));
+  transition: width 1.2s cubic-bezier(.4,0,.2,1);
+}
+.prog-fill.red { background: linear-gradient(90deg, var(--red), #e07070); }
+
+/* Section label */
+.sec-label {
+  font-size: 11px; font-weight: 500; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--txt4);
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 10px;
+}
+.sec-label::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, var(--border2), transparent);
+}
 
 /* Action cards */
-.action-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:12px;
-  margin-bottom:24px;
+.cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 32px;
 }
-.action-card{
-  background:var(--surface);
-  border:1px solid var(--border);
-  padding:24px;
-  cursor:pointer;
-  text-decoration:none;
-  display:block;
-  position:relative;
-  overflow:hidden;
-  transition:border-color 0.2s,background 0.2s;
+.card {
+  display: block; text-decoration: none;
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  padding: 24px;
+  transition: border-color 0.2s, background 0.2s;
+  position: relative; overflow: hidden;
 }
-.action-card:hover{border-color:var(--gold);background:var(--surface2)}
-.action-card::after{
-  content:'→';
-  position:absolute;right:20px;top:50%;transform:translateY(-50%);
-  font-size:20px;color:var(--muted);
-  transition:color 0.2s,right 0.2s;
+.card:hover {
+  border-color: rgba(201,168,76,0.25);
+  background: var(--bg3);
 }
-.action-card:hover::after{color:var(--gold);right:16px}
-.ac-eyebrow{
-  font-family:var(--mono);font-size:8px;letter-spacing:3px;
-  text-transform:uppercase;color:var(--gold);margin-bottom:10px;
-  opacity:0.7;
+.card-tag {
+  font-size: 10px; font-weight: 600; letter-spacing: 1.2px;
+  text-transform: uppercase; color: var(--gold);
+  margin-bottom: 10px; opacity: 0.8;
 }
-.ac-title{
-  font-family:var(--serif);font-size:22px;font-weight:600;
-  color:var(--off);margin-bottom:6px;line-height:1.2;
+.card-title {
+  font-family: var(--serif);
+  font-size: 22px; font-weight: 500;
+  color: var(--txt); line-height: 1.2;
+  margin-bottom: 8px;
 }
-.ac-desc{
-  font-size:12px;color:var(--muted);line-height:1.6;
-  max-width:280px;
+.card-desc {
+  font-size: 13px; color: var(--txt3);
+  line-height: 1.65; max-width: 300px;
 }
+.card-arrow {
+  position: absolute; right: 20px; bottom: 20px;
+  font-size: 18px; color: var(--txt4);
+  transition: color 0.2s, transform 0.2s;
+}
+.card:hover .card-arrow { color: var(--gold); transform: translateX(3px); }
 
-/* Status bar */
-.status-bar{
-  display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;
+/* Quick links */
+.quick-links {
+  display: flex; gap: 8px; flex-wrap: wrap;
 }
-.status-pill{
-  font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
-  padding:6px 14px;border:1px solid var(--border);
-  color:var(--muted);display:flex;align-items:center;gap:6px;
+.quick-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 400; color: var(--txt2);
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-sm);
+  padding: 8px 16px;
+  text-decoration: none;
+  transition: border-color 0.2s, color 0.2s;
+  white-space: nowrap;
 }
-.status-pill .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.dot-green{background:var(--green)}
-.dot-amber{background:#e0a030}
-.dot-red{background:var(--red)}
+.quick-link:hover { border-color: var(--border); color: var(--txt); }
+.quick-link.highlight {
+  background: var(--gold-dim);
+  border-color: rgba(201,168,76,0.3);
+  color: var(--gold);
+}
+.quick-link.highlight:hover { background: rgba(201,168,76,0.2); }
 
-/* Quick actions row */
-.quick-row{
-  display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;
+/* Status strip */
+.status-strip {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  margin-bottom: 28px;
 }
-.qbtn{
-  font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;
-  padding:10px 20px;border:1px solid var(--border);
-  color:var(--dim);background:transparent;cursor:pointer;
-  text-decoration:none;display:inline-flex;align-items:center;gap:8px;
-  transition:all 0.15s;white-space:nowrap;
+.status-chip {
+  font-size: 11px; font-weight: 500;
+  padding: 4px 12px; border-radius: 100px;
+  display: flex; align-items: center; gap: 5px;
 }
-.qbtn:hover{border-color:var(--gold);color:var(--gold)}
-.qbtn.primary{background:var(--gold);color:var(--black);border-color:var(--gold)}
-.qbtn.primary:hover{opacity:0.85;color:var(--black)}
+.chip-green { background: rgba(90,158,111,0.12); color: var(--green); }
+.chip-amber { background: rgba(196,138,58,0.12); color: var(--amber); }
+.chip-red   { background: rgba(196,92,92,0.12); color: var(--red); }
+.dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
 
-/* ── FINANCIALS VIEW ── */
-.fin-grid{
-  display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;
+/* ─── FINANCIALS ──────────────────────── */
+.fin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+.fin-card {
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-radius: var(--r); padding: 24px;
 }
-.fin-card{
-  background:var(--surface);border:1px solid var(--border);padding:24px;
+.fin-card-title {
+  font-size: 11px; font-weight: 600; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--txt3);
+  margin-bottom: 18px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--border2);
 }
-.fin-title{
-  font-family:var(--mono);font-size:9px;letter-spacing:3px;text-transform:uppercase;
-  color:var(--muted);margin-bottom:16px;
+.fin-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.03);
+  font-size: 13px; gap: 12px;
 }
-.fin-table{width:100%;border-collapse:collapse}
-.fin-table td{
-  padding:8px 0;border-bottom:1px solid var(--border2);
-  font-size:13px;color:var(--dim);
+.fin-row:last-child { border-bottom: none; }
+.fin-row-label { color: var(--txt2); flex: 1; }
+.fin-row-val {
+  font-family: var(--mono); font-size: 12px;
+  font-weight: 400; color: var(--txt3);
+  white-space: nowrap;
 }
-.fin-table td:last-child{text-align:right;font-family:var(--mono);font-size:12px}
-.fin-table tr:last-child td{border-bottom:none;font-weight:600;color:var(--off)}
+.fin-row-val.red { color: var(--red); }
+.fin-row-val.green { color: var(--green); }
+.fin-row-val.gold { color: var(--gold); }
+.fin-row-val.dim { color: var(--txt4); }
+.fin-total .fin-row-label { color: var(--txt); font-weight: 600; }
+.fin-total .fin-row-val { font-size: 14px; }
 
-/* Progress bar */
-.progress-row{margin-bottom:20px}
-.prog-labels{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:6px}
-.prog-track{height:4px;background:var(--border);position:relative}
-.prog-fill{height:100%;background:var(--gold);transition:width 1s ease}
+/* Actions table */
+.actions-table {
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-radius: var(--r); overflow: hidden;
+}
+.actions-table table { width: 100%; border-collapse: collapse; }
+.actions-table th {
+  font-size: 10px; font-weight: 600; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--txt4);
+  padding: 12px 20px; text-align: left;
+  background: var(--bg3); border-bottom: 1px solid var(--border2);
+}
+.actions-table td {
+  padding: 12px 20px; font-size: 13px; color: var(--txt2);
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.actions-table tr:last-child td { border-bottom: none; }
+.actions-table tr:hover td { background: var(--bg3); }
+.tag {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.8px;
+  text-transform: uppercase; padding: 2px 10px;
+  border-radius: 100px; white-space: nowrap;
+}
+.tag-red   { background: rgba(196,92,92,0.12); color: var(--red); }
+.tag-gold  { background: var(--gold-dim); color: var(--gold); }
+.tag-muted { background: rgba(90,80,64,0.15); color: var(--txt3); }
 
-/* ── QUEUE VIEW ── */
-.queue-cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-.queue-col{background:var(--surface);border:1px solid var(--border);padding:20px}
-.qcol-title{
-  font-family:var(--mono);font-size:9px;letter-spacing:3px;text-transform:uppercase;
-  color:var(--muted);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);
+/* ─── QUEUE ───────────────────────────── */
+.queue-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+.queue-col {
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-radius: var(--r); padding: 20px;
 }
-.queue-item{
-  padding:12px;border:1px solid var(--border2);margin-bottom:8px;
-  font-size:12px;color:var(--dim);line-height:1.5;cursor:pointer;
-  transition:border-color 0.15s;
+.queue-col-title {
+  font-size: 11px; font-weight: 600; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--txt3);
+  margin-bottom: 16px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--border2);
+  display: flex; align-items: center; gap: 8px;
 }
-.queue-item:hover{border-color:var(--gold)}
-.qi-title{font-weight:600;color:var(--off);margin-bottom:4px;font-size:13px}
-.qi-meta{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px}
+.col-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.queue-item {
+  padding: 12px 14px;
+  border: 1px solid var(--border2);
+  border-radius: var(--r-sm);
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.queue-item:hover { border-color: var(--border); background: var(--bg3); }
+.qi-name { font-size: 13px; color: var(--txt); margin-bottom: 5px; line-height: 1.35; }
+.qi-meta { font-size: 11px; color: var(--txt3); line-height: 1.4; }
 
-/* ── BELMONT VIEW ── */
-.belmont-frame{
-  background:var(--surface);border:1px solid var(--border);
-  padding:40px;max-width:700px;margin:0 auto;text-align:center;
+/* ─── BELMONT ─────────────────────────── */
+.belmont-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.belmont-hero {
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-radius: var(--r); padding: 32px;
 }
-.bf-title{
-  font-family:var(--serif);font-size:36px;font-weight:600;
-  color:var(--off);margin-bottom:8px;
+.bh-name {
+  font-family: var(--serif); font-size: 32px;
+  font-weight: 500; color: var(--txt); margin-bottom: 6px;
 }
-.bf-sub{
-  font-family:var(--mono);font-size:10px;letter-spacing:3px;
-  text-transform:uppercase;color:var(--gold);margin-bottom:32px;
+.bh-tagline {
+  font-size: 13px; color: var(--txt3);
+  margin-bottom: 28px; letter-spacing: 0.2px;
 }
-.service-list{text-align:left;margin-bottom:32px}
-.svc-item{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:16px 0;border-bottom:1px solid var(--border);
+.svc-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 0; border-bottom: 1px solid var(--border2);
+  gap: 12px;
 }
-.svc-name{font-size:15px;color:var(--off)}
-.svc-price{font-family:var(--mono);font-size:13px;color:var(--gold)}
+.svc-row:last-of-type { border-bottom: none; }
+.svc-name { font-size: 14px; color: var(--txt2); }
+.svc-price {
+  font-family: var(--mono); font-size: 13px;
+  color: var(--gold); white-space: nowrap;
+}
+.bh-cta {
+  display: inline-block; margin-top: 24px;
+  font-size: 13px; font-weight: 500;
+  color: var(--bg); background: var(--gold);
+  padding: 10px 24px; border-radius: var(--r-sm);
+  text-decoration: none; transition: background 0.2s;
+}
+.bh-cta:hover { background: var(--gold-lt); }
 
-/* ── BOTTOM NAV ── */
-.bottom-nav{
-  position:fixed;bottom:0;left:0;right:0;z-index:200;
-  height:48px;display:flex;
-  background:rgba(10,10,10,0.97);
-  border-top:1px solid var(--border);
-  backdrop-filter:blur(16px);
-  overflow-x:auto;
+/* ─── BOTTOM NAV ──────────────────────── */
+.btm {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  height: 52px; display: flex;
+  background: rgba(20,18,16,0.97);
+  border-top: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  overflow-x: auto;
 }
-.bottom-nav::-webkit-scrollbar{display:none}
-.bn{
-  font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
-  color:var(--muted);
-  flex:1;min-width:60px;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
-  text-decoration:none;border-right:1px solid var(--border2);
-  transition:color 0.15s;cursor:pointer;
-  padding:0 8px;
+.btm::-webkit-scrollbar { display: none; }
+.btm-link {
+  flex: 1; min-width: 64px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 3px;
+  font-size: 10px; font-weight: 500;
+  color: var(--txt4); letter-spacing: 0.5px;
+  text-decoration: none; text-transform: uppercase;
+  border-right: 1px solid var(--border2);
+  transition: color 0.15s;
+  cursor: pointer; background: none; border-top: none; border-left: none; border-bottom: none;
+  padding: 0 8px;
 }
-.bn:hover{color:var(--off)}
-.bn.active{color:var(--gold)}
-.bn-icon{font-size:14px;line-height:1}
-.bn-label{font-size:7px;letter-spacing:1.5px}
+.btm-link:last-child { border-right: none; }
+.btm-link:hover { color: var(--txt2); }
+.btm-link.active { color: var(--gold); }
+.btm-icon { font-size: 15px; line-height: 1; }
+.btm-lbl { font-size: 8px; letter-spacing: 1px; }
 
-/* ── SECTION HEADER ── */
-.sec-hdr{
-  display:flex;align-items:center;gap:12px;
-  margin-bottom:20px;
+/* ─── RESPONSIVE ──────────────────────── */
+@media (max-width: 900px) {
+  .metrics { grid-template-columns: repeat(2, 1fr); }
+  .fin-grid { grid-template-columns: 1fr; }
+  .queue-grid { grid-template-columns: 1fr; }
+  .belmont-layout { grid-template-columns: 1fr; }
 }
-.sec-hdr::after{content:'';flex:1;height:1px;background:var(--border)}
-.sec-hdr span{
-  font-family:var(--mono);font-size:9px;letter-spacing:3px;
-  text-transform:uppercase;color:var(--muted);white-space:nowrap;
-}
-
-/* ── LEDGER INPUT ── */
-.ledger-form{
-  background:var(--surface);border:1px solid var(--border);
-  padding:24px;margin-bottom:20px;
-  display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:12px;align-items:end;
-}
-.lf-group label{
-  display:block;font-family:var(--mono);font-size:8px;letter-spacing:2px;
-  text-transform:uppercase;color:var(--muted);margin-bottom:6px;
-}
-.lf-group input,.lf-group select{
-  width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);
-  color:var(--off);font-family:var(--mono);font-size:12px;padding:6px 0;outline:none;
-}
-.lf-group input::placeholder{color:var(--muted)}
-.lf-group select option{background:var(--black)}
-
-/* ── RESPONSIVE ── */
-@media(max-width:768px){
-  .metrics-strip{grid-template-columns:1fr 1fr}
-  .action-grid{grid-template-columns:1fr}
-  .fin-grid{grid-template-columns:1fr}
-  .queue-cols{grid-template-columns:1fr}
-  .ledger-form{grid-template-columns:1fr 1fr}
-  .topnav{padding:0 12px}
-  .nav-brand{font-size:10px;letter-spacing:2px}
-}
-@media(max-width:480px){
-  .metrics-strip{grid-template-columns:1fr 1fr}
-  .metric-value{font-size:22px}
+@media (max-width: 600px) {
+  .view { padding: 20px 16px; }
+  .topnav { padding: 0 16px; }
+  .metric-num { font-size: 28px; }
+  .cards { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -312,346 +419,294 @@ body{background:var(--black);color:var(--off);font-family:var(--sans);min-height
 
 <!-- TOP NAV -->
 <nav class="topnav">
-  <span class="nav-brand">&#9670; PL</span>
-  <button class="nav-tab active" onclick="switchView('home',this)">Home</button>
-  <button class="nav-tab" onclick="switchView('financials',this)">Financials</button>
-  <button class="nav-tab" onclick="switchView('queue',this)">Queue</button>
-  <button class="nav-tab" onclick="switchView('belmont',this)">Belmont</button>
+  <span class="nav-brand">Payton <em>Loop</em></span>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="show('home',this)">Home</button>
+    <button class="nav-tab" onclick="show('financials',this)">Financials</button>
+    <button class="nav-tab" onclick="show('queue',this)">Queue</button>
+    <button class="nav-tab" onclick="show('belmont',this)">Belmont</button>
+  </div>
   <div class="nav-spacer"></div>
-  <a class="nav-action" href="belmont.html">Belmont Group &rarr;</a>
+  <a class="nav-cta" href="belmont.html">Belmont Group &rarr;</a>
 </nav>
 
-<!-- ══════════════ HOME VIEW ══════════════ -->
-<div class="view active" id="view-home">
+<!-- ══ HOME ══ -->
+<div class="view active" id="v-home">
 
-  <!-- Status pills -->
-  <div class="status-bar">
-    <div class="status-pill"><span class="dot dot-green"></span>Cloudflare Live</div>
-    <div class="status-pill"><span class="dot dot-green"></span>Server Online</div>
-    <div class="status-pill"><span class="dot dot-amber"></span>YouTube Unblocked (CF)</div>
-    <div class="status-pill"><span class="dot dot-amber"></span>Domain Needed</div>
-    <div class="status-pill"><span class="dot dot-red"></span>Revenue: $0</div>
+  <div class="status-strip">
+    <div class="status-chip chip-green"><span class="dot"></span>Cloudflare Live</div>
+    <div class="status-chip chip-green"><span class="dot"></span>Server Online</div>
+    <div class="status-chip chip-amber"><span class="dot"></span>Domain Needed</div>
+    <div class="status-chip chip-red"><span class="dot"></span>Revenue $0</div>
+    <div class="status-chip chip-amber"><span class="dot"></span>$12.50 Credits Left</div>
   </div>
 
-  <!-- Big metrics -->
-  <div class="metrics-strip">
-    <div class="metric-cell">
+  <div class="metrics">
+    <div class="metric">
       <div class="metric-label">Total Invested</div>
-      <div class="metric-value" style="color:var(--red)">$221</div>
-      <div class="metric-sub">Claude $196 + InVideo $25</div>
+      <div class="metric-num" style="color:var(--red)">$221</div>
+      <div class="metric-sub">Claude $196 · InVideo $25</div>
+      <span class="badge badge-red">Day 3</span>
     </div>
-    <div class="metric-cell">
+    <div class="metric">
       <div class="metric-label">Total Earned</div>
-      <div class="metric-value" style="color:var(--muted)">$0</div>
+      <div class="metric-num" style="color:var(--txt3)">$0</div>
       <div class="metric-sub">Break-even: $221 away</div>
-      <div class="metric-delta delta-nt">Day 3</div>
+      <span class="badge badge-muted">—</span>
     </div>
-    <div class="metric-cell">
+    <div class="metric">
       <div class="metric-label">Video Views</div>
-      <div class="metric-value" style="color:var(--gold)">306</div>
-      <div class="metric-sub">3 videos live &mdash; Day 1</div>
-      <div class="metric-delta delta-up">&uarr; Live</div>
+      <div class="metric-num" style="color:var(--gold)">306</div>
+      <div class="metric-sub">3 videos · Day 1 total</div>
+      <span class="badge badge-gold">Live</span>
     </div>
-    <div class="metric-cell">
-      <div class="metric-label">Independence Target</div>
-      <div class="metric-value" style="color:var(--off)">$5,821</div>
-      <div class="metric-sub">Per month. Current: $0.</div>
+    <div class="metric">
+      <div class="metric-label">Monthly Target</div>
+      <div class="metric-num">$5,821</div>
+      <div class="metric-sub">Independence threshold</div>
+      <span class="badge badge-muted">0%</span>
     </div>
   </div>
 
-  <!-- Break-even progress -->
-  <div class="progress-row">
-    <div class="prog-labels">
-      <span>Break-Even Progress</span>
-      <span>$0 / $221</span>
+  <div class="prog-section">
+    <div class="prog-item">
+      <div class="prog-header">
+        <strong>Break-Even</strong>
+        <span>$0 earned / $221 invested</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill red" style="width:0%"></div></div>
     </div>
-    <div class="prog-track"><div class="prog-fill" style="width:0%"></div></div>
-  </div>
-  <div class="progress-row">
-    <div class="prog-labels">
-      <span>Independence Progress</span>
-      <span>$0 / $5,821 per month</span>
+    <div class="prog-item">
+      <div class="prog-header">
+        <strong>Independence Progress</strong>
+        <span>$0 / $5,821 per month</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" style="width:0%"></div></div>
     </div>
-    <div class="prog-track"><div class="prog-fill" style="width:0%"></div></div>
   </div>
 
-  <!-- Action cards -->
-  <div class="sec-hdr"><span>Command Center</span></div>
-  <div class="action-grid">
-    <a class="action-card" href="belmont.html">
-      <div class="ac-eyebrow">Revenue Path 1</div>
-      <div class="ac-title">Belmont Group</div>
-      <div class="ac-desc">Client services firm. Web tools $500+, AI automation $750+, brand infrastructure $350+. One client = first revenue.</div>
+  <div class="sec-label">Command Center</div>
+  <div class="cards">
+    <a class="card" href="belmont.html">
+      <div class="card-tag">Revenue Path · Client Services</div>
+      <div class="card-title">Belmont Group</div>
+      <div class="card-desc">Web tools $500+, AI automation $750+, brand infrastructure $350+. One client changes the scoreboard.</div>
+      <span class="card-arrow">→</span>
     </a>
-    <a class="action-card" href="tv.html">
-      <div class="ac-eyebrow">Content Engine</div>
-      <div class="ac-title">Knowledge Hub</div>
-      <div class="ac-desc">YouTube channels, curated streams, and content library. Cloudflare-served — YouTube unblocked.</div>
+    <a class="card" href="tv.html">
+      <div class="card-tag">Content Engine · YouTube</div>
+      <div class="card-title">Knowledge Hub</div>
+      <div class="card-desc">Curated channels. Finance, psychology, history, business. Cloudflare-served — YouTube unblocked.</div>
+      <span class="card-arrow">→</span>
     </a>
-    <a class="action-card" href="mind.html">
-      <div class="ac-eyebrow">Daily Fuel</div>
-      <div class="ac-title">Daily Mind</div>
-      <div class="ac-desc">55 curated quotes across Resilience, Wealth, Identity, and Forward. Rotating. Filterable. Open when the noise gets loud.</div>
+    <a class="card" href="mind.html">
+      <div class="card-tag">Daily Fuel · 55 Quotes</div>
+      <div class="card-title">Daily Mind</div>
+      <div class="card-desc">Resilience. Wealth. Identity. Forward. Open when the noise gets loud.</div>
+      <span class="card-arrow">→</span>
     </a>
-    <a class="action-card" href="private.html">
-      <div class="ac-eyebrow">Private</div>
-      <div class="ac-title">Situation Control</div>
-      <div class="ac-desc">Personal triage dashboard. Bills, sell-off inventory, housing command center, 14-day plan. Private — not indexed.</div>
+    <a class="card" href="private.html">
+      <div class="card-tag">Private · Not Indexed</div>
+      <div class="card-title">Situation Control</div>
+      <div class="card-desc">Personal triage. Bills, sell-off tracker, housing command center, 14-day plan.</div>
+      <span class="card-arrow">→</span>
     </a>
   </div>
 
-  <!-- Quick actions -->
-  <div class="sec-hdr"><span>Quick Access</span></div>
-  <div class="quick-row">
-    <a class="qbtn primary" href="belmont.html">&#9670; Belmont Group</a>
-    <a class="qbtn" href="bets.html">&#9654; Bets Desk</a>
-    <a class="qbtn" href="ledger.html">&#9632; Ledger</a>
-    <a class="qbtn" href="calc.html">&#9632; Calculators</a>
-    <a class="qbtn" href="predict.html">&#9632; Predict</a>
-    <a class="qbtn" href="https://paytonloop.gumroad.com/l/rtznx" target="_blank">&#8599; Gumroad</a>
-    <a class="qbtn" href="https://www.notion.so/Payton-Loop-HQ-32db9861b4c8803bb49ff2a6ffeb94fe" target="_blank">&#8599; Notion HQ</a>
+  <div class="sec-label">Quick Access</div>
+  <div class="quick-links">
+    <a class="quick-link highlight" href="belmont.html">&#9670; Belmont Group</a>
+    <a class="quick-link" href="bets.html">Bets Desk</a>
+    <a class="quick-link" href="ledger.html">Ledger</a>
+    <a class="quick-link" href="calc.html">Calculators</a>
+    <a class="quick-link" href="predict.html">Predict</a>
+    <a class="quick-link" href="https://paytonloop.gumroad.com/l/rtznx" target="_blank">Gumroad ↗</a>
+    <a class="quick-link" href="https://www.notion.so/Payton-Loop-HQ-32db9861b4c8803bb49ff2a6ffeb94fe" target="_blank">Notion HQ ↗</a>
   </div>
-
 </div>
 
-<!-- ══════════════ FINANCIALS VIEW ══════════════ -->
-<div class="view" id="view-financials">
-
+<!-- ══ FINANCIALS ══ -->
+<div class="view" id="v-financials">
   <div class="fin-grid">
-
     <div class="fin-card">
-      <div class="fin-title">Business Investment Ledger</div>
-      <table class="fin-table">
-        <tr><td>Claude API Credits</td><td style="color:var(--red)">-$196.00</td></tr>
-        <tr><td>InVideo AI (Apr 24 renewal)</td><td style="color:var(--red)">-$25.00</td></tr>
-        <tr><td style="color:var(--off);font-weight:600">Total Invested</td><td style="color:var(--red)">-$221.00</td></tr>
-      </table>
-      <div style="margin-top:20px">
-        <div class="prog-labels" style="margin-bottom:6px"><span style="font-family:var(--mono);font-size:9px;color:var(--muted)">Credits Remaining</span><span style="font-family:var(--mono);font-size:9px;color:var(--muted)">$12.50 / $196.00</span></div>
-        <div class="prog-track"><div class="prog-fill" style="width:6%;background:var(--red)"></div></div>
-      </div>
+      <div class="fin-card-title">Investment Ledger</div>
+      <div class="fin-row"><span class="fin-row-label">Claude API Credits</span><span class="fin-row-val red">−$196.00</span></div>
+      <div class="fin-row"><span class="fin-row-label">InVideo AI (renews Apr 24)</span><span class="fin-row-val red">−$25.00</span></div>
+      <div class="fin-row"><span class="fin-row-label">Credits Remaining</span><span class="fin-row-val gold">$12.50</span></div>
+      <div class="fin-row fin-total"><span class="fin-row-label">Total Invested</span><span class="fin-row-val red">−$221.00</span></div>
     </div>
-
     <div class="fin-card">
-      <div class="fin-title">Revenue Tracker</div>
-      <table class="fin-table">
-        <tr><td>Gumroad Sales</td><td style="color:var(--muted)">$0.00</td></tr>
-        <tr><td>YouTube AdSense</td><td style="color:var(--muted)">$0.00</td></tr>
-        <tr><td>Affiliate Income</td><td style="color:var(--muted)">$0.00</td></tr>
-        <tr><td>Belmont Group Clients</td><td style="color:var(--muted)">$0.00</td></tr>
-        <tr><td style="color:var(--off);font-weight:600">Total Earned</td><td style="color:var(--muted)">$0.00</td></tr>
-      </table>
+      <div class="fin-card-title">Revenue Tracker</div>
+      <div class="fin-row"><span class="fin-row-label">Gumroad Sales</span><span class="fin-row-val dim">$0.00</span></div>
+      <div class="fin-row"><span class="fin-row-label">YouTube AdSense</span><span class="fin-row-val dim">$0.00</span></div>
+      <div class="fin-row"><span class="fin-row-label">Affiliate Income</span><span class="fin-row-val dim">$0.00</span></div>
+      <div class="fin-row"><span class="fin-row-label">Belmont Group</span><span class="fin-row-val dim">$0.00</span></div>
+      <div class="fin-row fin-total"><span class="fin-row-label">Total Earned</span><span class="fin-row-val dim">$0.00</span></div>
     </div>
-
     <div class="fin-card">
-      <div class="fin-title">Independence Roadmap</div>
-      <table class="fin-table">
-        <tr><td>Target / Month</td><td style="color:var(--gold)">$5,821</td></tr>
-        <tr><td>Belmont Retainers (2)</td><td>$3,000</td></tr>
-        <tr><td>Gumroad Digital Products</td><td>$1,500</td></tr>
-        <tr><td>Affiliate Income</td><td>$1,500</td></tr>
-        <tr><td>YouTube AdSense</td><td>$821</td></tr>
-        <tr><td style="color:var(--off);font-weight:600">Current Monthly</td><td style="color:var(--muted)">$0</td></tr>
-      </table>
+      <div class="fin-card-title">Independence Roadmap</div>
+      <div class="fin-row"><span class="fin-row-label">Monthly Target</span><span class="fin-row-val gold">$5,821</span></div>
+      <div class="fin-row"><span class="fin-row-label">Belmont Retainers (2×)</span><span class="fin-row-val">$3,000</span></div>
+      <div class="fin-row"><span class="fin-row-label">Gumroad Products</span><span class="fin-row-val">$1,500</span></div>
+      <div class="fin-row"><span class="fin-row-label">Affiliate Income</span><span class="fin-row-val">$1,500</span></div>
+      <div class="fin-row"><span class="fin-row-label">YouTube AdSense</span><span class="fin-row-val">$821</span></div>
+      <div class="fin-row fin-total"><span class="fin-row-label">Current Monthly</span><span class="fin-row-val dim">$0</span></div>
     </div>
-
     <div class="fin-card">
-      <div class="fin-title">Content Scoreboard</div>
-      <table class="fin-table">
-        <tr><td>Finance video (V1)</td><td style="color:var(--green)">198 views</td></tr>
-        <tr><td>McDonald's Tricks</td><td>83 views</td></tr>
-        <tr><td>AI Jobs</td><td style="color:var(--muted)">25 views</td></tr>
-        <tr><td>Batch 2 (10 videos)</td><td style="color:var(--muted)">Ready to post</td></tr>
-        <tr><td style="color:var(--off);font-weight:600">Total Views</td><td style="color:var(--gold)">306</td></tr>
-      </table>
+      <div class="fin-card-title">Content Scoreboard</div>
+      <div class="fin-row"><span class="fin-row-label">Finance video (V1)</span><span class="fin-row-val green">198 views</span></div>
+      <div class="fin-row"><span class="fin-row-label">McDonald's Tricks</span><span class="fin-row-val">83 views</span></div>
+      <div class="fin-row"><span class="fin-row-label">AI Jobs</span><span class="fin-row-val dim">25 views</span></div>
+      <div class="fin-row"><span class="fin-row-label">Batch 2 (10 videos)</span><span class="fin-row-val gold">Ready</span></div>
+      <div class="fin-row fin-total"><span class="fin-row-label">Total Views</span><span class="fin-row-val gold">306</span>
     </div>
-
+    </div>
   </div>
 
-  <!-- Affiliate pending -->
-  <div class="sec-hdr"><span>Pending Actions — High Priority</span></div>
-  <div style="background:var(--surface);border:1px solid var(--border);padding:20px">
-    <table class="fin-table">
-      <tr><td>Buy belmontgroup.co domain</td><td style="color:var(--red);font-family:var(--mono);font-size:11px">$10 — BLOCKING</td></tr>
-      <tr><td>Post Batch 2 videos (10 ready)</td><td style="color:var(--gold);font-family:var(--mono);font-size:11px">HIGH ROI</td></tr>
-      <tr><td>Gumroad display name fix (paytonp5 → The Payton Loop Team)</td><td style="color:var(--muted);font-family:var(--mono);font-size:11px">Quick win</td></tr>
-      <tr><td>YNAB affiliate signup</td><td style="color:var(--muted);font-family:var(--mono);font-size:11px">Revenue unlock</td></tr>
-      <tr><td>Skillshare affiliate signup</td><td style="color:var(--muted);font-family:var(--mono);font-size:11px">Revenue unlock</td></tr>
-      <tr><td>Gumroad cover image</td><td style="color:var(--muted);font-family:var(--mono);font-size:11px">Conversion lift</td></tr>
+  <div class="sec-label">Priority Actions</div>
+  <div class="actions-table">
+    <table>
+      <thead><tr><th>Action</th><th>Impact</th></tr></thead>
+      <tbody>
+        <tr><td>Buy belmontgroup.co domain ($10)</td><td><span class="tag tag-red">Blocking</span></td></tr>
+        <tr><td>Post Batch 2 videos — 10 scripts ready</td><td><span class="tag tag-gold">High ROI</span></td></tr>
+        <tr><td>Gumroad name → "The Payton Loop Team"</td><td><span class="tag tag-muted">Quick win</span></td></tr>
+        <tr><td>YNAB affiliate signup</td><td><span class="tag tag-muted">Revenue unlock</span></td></tr>
+        <tr><td>Skillshare affiliate signup</td><td><span class="tag tag-muted">Revenue unlock</span></td></tr>
+        <tr><td>Gumroad cover image</td><td><span class="tag tag-muted">Conversion lift</span></td></tr>
+      </tbody>
     </table>
   </div>
-
 </div>
 
-<!-- ══════════════ QUEUE VIEW ══════════════ -->
-<div class="view" id="view-queue">
-
-  <div class="queue-cols">
-
+<!-- ══ QUEUE ══ -->
+<div class="view" id="v-queue">
+  <div class="queue-grid">
     <div class="queue-col">
-      <div class="qcol-title">&#9711; Ready to Post</div>
+      <div class="queue-col-title"><span class="col-dot" style="background:var(--gold)"></span>Ready to Post</div>
       <div class="queue-item">
-        <div class="qi-title">Batch 2 — Athletes Who Made More Off Court</div>
-        <div class="qi-meta">Sports &bull; Lead Video &bull; Highest viral ceiling</div>
+        <div class="qi-name">Athletes Who Made More Money Sitting Out</div>
+        <div class="qi-meta">Sports · Lead video · Highest viral ceiling</div>
       </div>
       <div class="queue-item">
-        <div class="qi-title">Batch 2 — Animals That Hunt Apex Predators</div>
-        <div class="qi-meta">Animals &bull; Hook: "What eats a shark?"</div>
+        <div class="qi-name">Animals That Hunt Apex Predators</div>
+        <div class="qi-meta">Animals · Hook: "What eats a shark?"</div>
       </div>
       <div class="queue-item">
-        <div class="qi-title">Batch 2 — Luxury Brands You Didn't Know Were Old</div>
-        <div class="qi-meta">Luxury &bull; History angle</div>
+        <div class="qi-name">Luxury Brands You Didn't Know Were Ancient</div>
+        <div class="qi-meta">Luxury · History angle · High share</div>
       </div>
       <div class="queue-item">
-        <div class="qi-title">Batch 2 — Countries You Can Move To Easily</div>
-        <div class="qi-meta">Travel &bull; High share trigger</div>
+        <div class="qi-name">Countries You Can Move To Right Now</div>
+        <div class="qi-meta">Travel · Share trigger · Global appeal</div>
       </div>
-      <div class="queue-item">
-        <div class="qi-title">+ 6 more Batch 2 scripts</div>
-        <div class="qi-meta">All with thumbnails generated</div>
+      <div class="queue-item" style="opacity:0.6">
+        <div class="qi-name">+ 6 more Batch 2 scripts</div>
+        <div class="qi-meta">All thumbnails generated · All ready</div>
       </div>
     </div>
 
     <div class="queue-col">
-      <div class="qcol-title">&#9998; In Development</div>
+      <div class="queue-col-title"><span class="col-dot" style="background:var(--amber)"></span>In Development</div>
       <div class="queue-item">
-        <div class="qi-title">Why You'll Never Be Rich (Batch 3 Lead)</div>
-        <div class="qi-meta">Finance &bull; New infotainment format &bull; Pro InVideo prompt ready</div>
+        <div class="qi-name">Why You'll Never Be Rich (Batch 3 Lead)</div>
+        <div class="qi-meta">Financial infotainment · Pro InVideo prompt ready</div>
       </div>
       <div class="queue-item">
-        <div class="qi-title">4 more Batch 3 scripts</div>
-        <div class="qi-meta">Financial infotainment pivot format</div>
+        <div class="qi-name">4 more Batch 3 scripts</div>
+        <div class="qi-meta">New pivot format — emotion-driven, shareable</div>
       </div>
       <div class="queue-item">
-        <div class="qi-title">AI Money Playbook (Gumroad)</div>
-        <div class="qi-meta">Written &bull; Live at $27 &bull; Needs cover image</div>
+        <div class="qi-name">AI Money Playbook — $27</div>
+        <div class="qi-meta">Live on Gumroad · Needs cover image</div>
       </div>
     </div>
 
     <div class="queue-col">
-      <div class="qcol-title">&#10003; Live</div>
-      <div class="queue-item" style="border-color:rgba(76,175,125,0.2)">
-        <div class="qi-title" style="color:var(--green)">Finance Video — 198 Views</div>
-        <div class="qi-meta">Top 5 Things You Buy &bull; Day 1 surge</div>
+      <div class="queue-col-title"><span class="col-dot" style="background:var(--green)"></span>Live</div>
+      <div class="queue-item" style="border-color:rgba(90,158,111,0.2)">
+        <div class="qi-name" style="color:var(--green)">Finance Video — 198 Views 🔥</div>
+        <div class="qi-meta">Top 5 Things You Buy · Day 1 surge</div>
       </div>
-      <div class="queue-item" style="border-color:rgba(76,175,125,0.2)">
-        <div class="qi-title" style="color:var(--green)">McDonald's Tricks — 83 Views</div>
-        <div class="qi-meta">Psychology niche</div>
+      <div class="queue-item" style="border-color:rgba(90,158,111,0.15)">
+        <div class="qi-name">McDonald's Tricks — 83 Views</div>
+        <div class="qi-meta">Psychology niche · Steady growth</div>
       </div>
-      <div class="queue-item" style="border-color:rgba(76,175,125,0.2)">
-        <div class="qi-title" style="color:var(--green)">AI Jobs — 25 Views</div>
-        <div class="qi-meta">AI niche</div>
-      </div>
-      <div class="queue-item" style="border-color:rgba(201,168,76,0.2)">
-        <div class="qi-title" style="color:var(--gold)">AI Money Playbook — $27</div>
-        <div class="qi-meta">Gumroad &bull; 0 sales &bull; Needs cover</div>
+      <div class="queue-item" style="border-color:rgba(90,158,111,0.1)">
+        <div class="qi-name" style="color:var(--txt3)">AI Jobs — 25 Views</div>
+        <div class="qi-meta">AI niche · Flat</div>
       </div>
     </div>
-
   </div>
 </div>
 
-<!-- ══════════════ BELMONT VIEW ══════════════ -->
-<div class="view" id="view-belmont">
-
-  <div class="belmont-frame">
-    <div class="bf-title">Belmont Group</div>
-    <div class="bf-sub">Digital Services &mdash; Edmond, Oklahoma</div>
-
-    <div class="service-list">
-      <div class="svc-item">
-        <div class="svc-name">Custom Web Tools</div>
-        <div class="svc-price">$500+</div>
-      </div>
-      <div class="svc-item">
-        <div class="svc-name">AI Automation</div>
-        <div class="svc-price">$750+</div>
-      </div>
-      <div class="svc-item">
-        <div class="svc-name">Digital Brand Infrastructure</div>
-        <div class="svc-price">$350+</div>
-      </div>
-      <div class="svc-item">
-        <div class="svc-name">Monthly Retainer</div>
-        <div class="svc-price">$1,500/mo</div>
-      </div>
+<!-- ══ BELMONT ══ -->
+<div class="view" id="v-belmont">
+  <div class="belmont-layout">
+    <div class="belmont-hero">
+      <div class="bh-name">Belmont Group</div>
+      <div class="bh-tagline">Digital Services · Edmond, Oklahoma</div>
+      <div class="svc-row"><span class="svc-name">Custom Web Tools</span><span class="svc-price">$500+</span></div>
+      <div class="svc-row"><span class="svc-name">AI Automation</span><span class="svc-price">$750+</span></div>
+      <div class="svc-row"><span class="svc-name">Digital Brand Infrastructure</span><span class="svc-price">$350+</span></div>
+      <div class="svc-row"><span class="svc-name">Monthly Retainer</span><span class="svc-price">$1,500 / mo</span></div>
+      <a class="bh-cta" href="belmont.html">View Public Page →</a>
     </div>
 
-    <a class="qbtn primary" href="belmont.html" style="display:inline-flex;margin:0 auto">View Public Page &rarr;</a>
-  </div>
-
-  <div style="margin-top:24px">
-    <div class="sec-hdr"><span>Outreach Pipeline</span></div>
-    <div style="background:var(--surface);border:1px solid var(--border);padding:24px">
-      <table class="fin-table">
-        <tr>
-          <td style="color:var(--off)">Target: Independent Insurance Agents</td>
-          <td style="font-family:var(--mono);font-size:10px;color:var(--gold)">HIGHEST EV</td>
-        </tr>
-        <tr>
-          <td>Domain belmontgroup.co purchased</td>
-          <td style="font-family:var(--mono);font-size:10px;color:var(--red)">NEEDED</td>
-        </tr>
-        <tr>
-          <td>Outreach emails sent</td>
-          <td style="font-family:var(--mono);font-size:10px;color:var(--muted)">0</td>
-        </tr>
-        <tr>
-          <td>Clients signed</td>
-          <td style="font-family:var(--mono);font-size:10px;color:var(--muted)">0</td>
-        </tr>
-        <tr>
-          <td style="color:var(--off);font-weight:600">Revenue</td>
-          <td style="font-family:var(--mono);font-size:12px;color:var(--muted)">$0</td>
-        </tr>
-      </table>
+    <div>
+      <div class="fin-card" style="margin-bottom:12px">
+        <div class="fin-card-title">Outreach Pipeline</div>
+        <div class="fin-row"><span class="fin-row-label">Target: Independent Insurance Agents</span><span class="fin-row-val gold">Highest EV</span></div>
+        <div class="fin-row"><span class="fin-row-label">Domain belmontgroup.co</span><span class="fin-row-val red">Needed</span></div>
+        <div class="fin-row"><span class="fin-row-label">Outreach emails sent</span><span class="fin-row-val dim">0</span></div>
+        <div class="fin-row"><span class="fin-row-label">Clients signed</span><span class="fin-row-val dim">0</span></div>
+        <div class="fin-row fin-total"><span class="fin-row-label">Revenue</span><span class="fin-row-val dim">$0</span></div>
+      </div>
+      <div class="fin-card">
+        <div class="fin-card-title">Path to $5,000 in 14 Days</div>
+        <div class="fin-row"><span class="fin-row-label">1 insurance agent retainer</span><span class="fin-row-val gold">$1,500</span></div>
+        <div class="fin-row"><span class="fin-row-label">2 web tool projects</span><span class="fin-row-val gold">$1,000+</span></div>
+        <div class="fin-row"><span class="fin-row-label">1 brand infrastructure project</span><span class="fin-row-val gold">$350+</span></div>
+        <div class="fin-row fin-total"><span class="fin-row-label">Realistic 2-week total</span><span class="fin-row-val gold">$2,850+</span></div>
+      </div>
     </div>
   </div>
-
 </div>
 
 <!-- BOTTOM NAV -->
-<nav class="bottom-nav">
-  <a class="bn active" onclick="switchView('home',null);setActiveBottom(this)">
-    <span class="bn-icon">&#9670;</span>
-    <span class="bn-label">Home</span>
+<nav class="btm">
+  <button class="btm-link active" onclick="show('home',null);setBot(this)">
+    <span class="btm-icon">◆</span><span class="btm-lbl">Home</span>
+  </button>
+  <a class="btm-link" href="belmont.html">
+    <span class="btm-icon">■</span><span class="btm-lbl">Belmont</span>
   </a>
-  <a class="bn" href="belmont.html">
-    <span class="bn-icon">&#9632;</span>
-    <span class="bn-label">Belmont</span>
+  <a class="btm-link" href="tv.html">
+    <span class="btm-icon">▶</span><span class="btm-lbl">TV</span>
   </a>
-  <a class="bn" href="tv.html">
-    <span class="bn-icon">&#9654;</span>
-    <span class="bn-label">TV</span>
+  <a class="btm-link" href="mind.html">
+    <span class="btm-icon">◆</span><span class="btm-lbl">Mind</span>
   </a>
-  <a class="bn" href="mind.html">
-    <span class="bn-icon">&#9670;</span>
-    <span class="bn-label">Mind</span>
+  <a class="btm-link" href="bets.html">
+    <span class="btm-icon">■</span><span class="btm-lbl">Bets</span>
   </a>
-  <a class="bn" href="bets.html">
-    <span class="bn-icon">&#9632;</span>
-    <span class="bn-label">Bets</span>
+  <a class="btm-link" href="ledger.html">
+    <span class="btm-icon">■</span><span class="btm-lbl">Ledger</span>
   </a>
-  <a class="bn" href="ledger.html">
-    <span class="bn-icon">&#9632;</span>
-    <span class="bn-label">Ledger</span>
-  </a>
-  <a class="bn" href="private.html">
-    <span class="bn-icon">&#128274;</span>
-    <span class="bn-label">Private</span>
+  <a class="btm-link" href="private.html">
+    <span class="btm-icon">🔒</span><span class="btm-lbl">Private</span>
   </a>
 </nav>
 
 <script>
-function switchView(name, btn) {
+function show(name, btn) {
   document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
   document.querySelectorAll('.nav-tab').forEach(function(t){ t.classList.remove('active'); });
-  document.getElementById('view-' + name).classList.add('active');
+  document.getElementById('v-' + name).classList.add('active');
   if (btn) btn.classList.add('active');
 }
-
-function setActiveBottom(el) {
-  document.querySelectorAll('.bn').forEach(function(b){ b.classList.remove('active'); });
+function setBot(el) {
+  document.querySelectorAll('.btm-link').forEach(function(b){ b.classList.remove('active'); });
   el.classList.add('active');
 }
 </script>
