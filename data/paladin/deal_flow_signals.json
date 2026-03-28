@@ -21,7 +21,33 @@
       "form": "8-K",
       "signal": "Going concern doubt \u2014 may be 60-180 days from restructuring or forced sale",
       "implication": "Distressed asset acquisition window. Buyers have leverage. Assets sell at 30-60% discount.",
-      "actionability": 92
+      "actionability": 92,
+      "legal_context": [
+        {
+          "title": "11",
+          "section": "101",
+          "name": "Bankruptcy \u2014 Definitions",
+          "url": "https://www.law.cornell.edu/uscode/text/11/101"
+        },
+        {
+          "title": "11",
+          "section": "362",
+          "name": "Automatic Stay",
+          "url": "https://www.law.cornell.edu/uscode/text/11/362"
+        },
+        {
+          "title": "11",
+          "section": "1129",
+          "name": "Plan Confirmation Standards",
+          "url": "https://www.law.cornell.edu/uscode/text/11/1129"
+        },
+        {
+          "title": "11",
+          "section": "363",
+          "name": "363 Asset Sale",
+          "url": "https://www.law.cornell.edu/uscode/text/11/363"
+        }
+      ]
     },
     {
       "type": "DISTRESS_GOING_CONCERN",
@@ -33,7 +59,33 @@
       "form": "8-K",
       "signal": "Going concern doubt \u2014 may be 60-180 days from restructuring or forced sale",
       "implication": "Distressed asset acquisition window. Buyers have leverage. Assets sell at 30-60% discount.",
-      "actionability": 92
+      "actionability": 92,
+      "legal_context": [
+        {
+          "title": "11",
+          "section": "101",
+          "name": "Bankruptcy \u2014 Definitions",
+          "url": "https://www.law.cornell.edu/uscode/text/11/101"
+        },
+        {
+          "title": "11",
+          "section": "362",
+          "name": "Automatic Stay",
+          "url": "https://www.law.cornell.edu/uscode/text/11/362"
+        },
+        {
+          "title": "11",
+          "section": "1129",
+          "name": "Plan Confirmation Standards",
+          "url": "https://www.law.cornell.edu/uscode/text/11/1129"
+        },
+        {
+          "title": "11",
+          "section": "363",
+          "name": "363 Asset Sale",
+          "url": "https://www.law.cornell.edu/uscode/text/11/363"
+        }
+      ]
     },
     {
       "type": "DISTRESS_GOING_CONCERN",
@@ -45,7 +97,33 @@
       "form": "8-K",
       "signal": "Going concern doubt \u2014 may be 60-180 days from restructuring or forced sale",
       "implication": "Distressed asset acquisition window. Buyers have leverage. Assets sell at 30-60% discount.",
-      "actionability": 92
+      "actionability": 92,
+      "legal_context": [
+        {
+          "title": "11",
+          "section": "101",
+          "name": "Bankruptcy \u2014 Definitions",
+          "url": "https://www.law.cornell.edu/uscode/text/11/101"
+        },
+        {
+          "title": "11",
+          "section": "362",
+          "name": "Automatic Stay",
+          "url": "https://www.law.cornell.edu/uscode/text/11/362"
+        },
+        {
+          "title": "11",
+          "section": "1129",
+          "name": "Plan Confirmation Standards",
+          "url": "https://www.law.cornell.edu/uscode/text/11/1129"
+        },
+        {
+          "title": "11",
+          "section": "363",
+          "name": "363 Asset Sale",
+          "url": "https://www.law.cornell.edu/uscode/text/11/363"
+        }
+      ]
     },
     {
       "type": "DISTRESS_GOING_CONCERN",
@@ -57,7 +135,33 @@
       "form": "8-K",
       "signal": "Going concern doubt \u2014 may be 60-180 days from restructuring or forced sale",
       "implication": "Distressed asset acquisition window. Buyers have leverage. Assets sell at 30-60% discount.",
-      "actionability": 92
+      "actionability": 92,
+      "legal_context": [
+        {
+          "title": "11",
+          "section": "101",
+          "name": "Bankruptcy \u2014 Definitions",
+          "url": "https://www.law.cornell.edu/uscode/text/11/101"
+        },
+        {
+          "title": "11",
+          "section": "362",
+          "name": "Automatic Stay",
+          "url": "https://www.law.cornell.edu/uscode/text/11/362"
+        },
+        {
+          "title": "11",
+          "section": "1129",
+          "name": "Plan Confirmation Standards",
+          "url": "https://www.law.cornell.edu/uscode/text/11/1129"
+        },
+        {
+          "title": "11",
+          "section": "363",
+          "name": "363 Asset Sale",
+          "url": "https://www.law.cornell.edu/uscode/text/11/363"
+        }
+      ]
     },
     {
       "type": "DISTRESS_GOING_CONCERN",
@@ -69,7 +173,33 @@
       "form": "8-K",
       "signal": "Going concern doubt \u2014 may be 60-180 days from restructuring or forced sale",
       "implication": "Distressed asset acquisition window. Buyers have leverage. Assets sell at 30-60% discount.",
-      "actionability": 92
+      "actionability": 92,
+      "legal_context": [
+        {
+          "title": "11",
+          "section": "101",
+          "name": "Bankruptcy \u2014 Definitions",
+          "url": "https://www.law.cornell.edu/uscode/text/11/101"
+        },
+        {
+          "title": "11",
+          "section": "362",
+          "name": "Automatic Stay",
+          "url": "https://www.law.cornell.edu/uscode/text/11/362"
+        },
+        {
+          "title": "11",
+          "section": "1129",
+          "name": "Plan Confirmation Standards",
+          "url": "https://www.law.cornell.edu/uscode/text/11/1129"
+        },
+        {
+          "title": "11",
+          "section": "363",
+          "name": "363 Asset Sale",
+          "url": "https://www.law.cornell.edu/uscode/text/11/363"
+        }
+      ]
     },
     {
       "type": "DISTRESS_GOING_CONCERN",
@@ -81,7 +211,33 @@
       "form": "8-K",
       "signal": "Going concern doubt \u2014 may be 60-180 days from restructuring or forced sale",
       "implication": "Distressed asset acquisition window. Buyers have leverage. Assets sell at 30-60% discount.",
-      "actionability": 92
+      "actionability": 92,
+      "legal_context": [
+        {
+          "title": "11",
+          "section": "101",
+          "name": "Bankruptcy \u2014 Definitions",
+          "url": "https://www.law.cornell.edu/uscode/text/11/101"
+        },
+        {
+          "title": "11",
+          "section": "362",
+          "name": "Automatic Stay",
+          "url": "https://www.law.cornell.edu/uscode/text/11/362"
+        },
+        {
+          "title": "11",
+          "section": "1129",
+          "name": "Plan Confirmation Standards",
+          "url": "https://www.law.cornell.edu/uscode/text/11/1129"
+        },
+        {
+          "title": "11",
+          "section": "363",
+          "name": "363 Asset Sale",
+          "url": "https://www.law.cornell.edu/uscode/text/11/363"
+        }
+      ]
     },
     {
       "type": "DISTRESS_GOING_CONCERN",
@@ -93,7 +249,33 @@
       "form": "8-K",
       "signal": "Going concern doubt \u2014 may be 60-180 days from restructuring or forced sale",
       "implication": "Distressed asset acquisition window. Buyers have leverage. Assets sell at 30-60% discount.",
-      "actionability": 92
+      "actionability": 92,
+      "legal_context": [
+        {
+          "title": "11",
+          "section": "101",
+          "name": "Bankruptcy \u2014 Definitions",
+          "url": "https://www.law.cornell.edu/uscode/text/11/101"
+        },
+        {
+          "title": "11",
+          "section": "362",
+          "name": "Automatic Stay",
+          "url": "https://www.law.cornell.edu/uscode/text/11/362"
+        },
+        {
+          "title": "11",
+          "section": "1129",
+          "name": "Plan Confirmation Standards",
+          "url": "https://www.law.cornell.edu/uscode/text/11/1129"
+        },
+        {
+          "title": "11",
+          "section": "363",
+          "name": "363 Asset Sale",
+          "url": "https://www.law.cornell.edu/uscode/text/11/363"
+        }
+      ]
     },
     {
       "type": "DISTRESS_GOING_CONCERN",
@@ -105,7 +287,33 @@
       "form": "8-K",
       "signal": "Going concern doubt \u2014 may be 60-180 days from restructuring or forced sale",
       "implication": "Distressed asset acquisition window. Buyers have leverage. Assets sell at 30-60% discount.",
-      "actionability": 92
+      "actionability": 92,
+      "legal_context": [
+        {
+          "title": "11",
+          "section": "101",
+          "name": "Bankruptcy \u2014 Definitions",
+          "url": "https://www.law.cornell.edu/uscode/text/11/101"
+        },
+        {
+          "title": "11",
+          "section": "362",
+          "name": "Automatic Stay",
+          "url": "https://www.law.cornell.edu/uscode/text/11/362"
+        },
+        {
+          "title": "11",
+          "section": "1129",
+          "name": "Plan Confirmation Standards",
+          "url": "https://www.law.cornell.edu/uscode/text/11/1129"
+        },
+        {
+          "title": "11",
+          "section": "363",
+          "name": "363 Asset Sale",
+          "url": "https://www.law.cornell.edu/uscode/text/11/363"
+        }
+      ]
     },
     {
       "type": "DISTRESS_GOING_CONCERN",
@@ -117,7 +325,33 @@
       "form": "8-K",
       "signal": "Going concern doubt \u2014 may be 60-180 days from restructuring or forced sale",
       "implication": "Distressed asset acquisition window. Buyers have leverage. Assets sell at 30-60% discount.",
-      "actionability": 92
+      "actionability": 92,
+      "legal_context": [
+        {
+          "title": "11",
+          "section": "101",
+          "name": "Bankruptcy \u2014 Definitions",
+          "url": "https://www.law.cornell.edu/uscode/text/11/101"
+        },
+        {
+          "title": "11",
+          "section": "362",
+          "name": "Automatic Stay",
+          "url": "https://www.law.cornell.edu/uscode/text/11/362"
+        },
+        {
+          "title": "11",
+          "section": "1129",
+          "name": "Plan Confirmation Standards",
+          "url": "https://www.law.cornell.edu/uscode/text/11/1129"
+        },
+        {
+          "title": "11",
+          "section": "363",
+          "name": "363 Asset Sale",
+          "url": "https://www.law.cornell.edu/uscode/text/11/363"
+        }
+      ]
     },
     {
       "type": "DISTRESS_GOING_CONCERN",
@@ -129,7 +363,33 @@
       "form": "8-K",
       "signal": "Going concern doubt \u2014 may be 60-180 days from restructuring or forced sale",
       "implication": "Distressed asset acquisition window. Buyers have leverage. Assets sell at 30-60% discount.",
-      "actionability": 92
+      "actionability": 92,
+      "legal_context": [
+        {
+          "title": "11",
+          "section": "101",
+          "name": "Bankruptcy \u2014 Definitions",
+          "url": "https://www.law.cornell.edu/uscode/text/11/101"
+        },
+        {
+          "title": "11",
+          "section": "362",
+          "name": "Automatic Stay",
+          "url": "https://www.law.cornell.edu/uscode/text/11/362"
+        },
+        {
+          "title": "11",
+          "section": "1129",
+          "name": "Plan Confirmation Standards",
+          "url": "https://www.law.cornell.edu/uscode/text/11/1129"
+        },
+        {
+          "title": "11",
+          "section": "363",
+          "name": "363 Asset Sale",
+          "url": "https://www.law.cornell.edu/uscode/text/11/363"
+        }
+      ]
     },
     {
       "type": "DISTRESS_GOING_CONCERN",
@@ -141,7 +401,33 @@
       "form": "8-K",
       "signal": "Going concern doubt \u2014 may be 60-180 days from restructuring or forced sale",
       "implication": "Distressed asset acquisition window. Buyers have leverage. Assets sell at 30-60% discount.",
-      "actionability": 92
+      "actionability": 92,
+      "legal_context": [
+        {
+          "title": "11",
+          "section": "101",
+          "name": "Bankruptcy \u2014 Definitions",
+          "url": "https://www.law.cornell.edu/uscode/text/11/101"
+        },
+        {
+          "title": "11",
+          "section": "362",
+          "name": "Automatic Stay",
+          "url": "https://www.law.cornell.edu/uscode/text/11/362"
+        },
+        {
+          "title": "11",
+          "section": "1129",
+          "name": "Plan Confirmation Standards",
+          "url": "https://www.law.cornell.edu/uscode/text/11/1129"
+        },
+        {
+          "title": "11",
+          "section": "363",
+          "name": "363 Asset Sale",
+          "url": "https://www.law.cornell.edu/uscode/text/11/363"
+        }
+      ]
     },
     {
       "type": "DISTRESS_GOING_CONCERN",
@@ -153,7 +439,33 @@
       "form": "8-K",
       "signal": "Going concern doubt \u2014 may be 60-180 days from restructuring or forced sale",
       "implication": "Distressed asset acquisition window. Buyers have leverage. Assets sell at 30-60% discount.",
-      "actionability": 92
+      "actionability": 92,
+      "legal_context": [
+        {
+          "title": "11",
+          "section": "101",
+          "name": "Bankruptcy \u2014 Definitions",
+          "url": "https://www.law.cornell.edu/uscode/text/11/101"
+        },
+        {
+          "title": "11",
+          "section": "362",
+          "name": "Automatic Stay",
+          "url": "https://www.law.cornell.edu/uscode/text/11/362"
+        },
+        {
+          "title": "11",
+          "section": "1129",
+          "name": "Plan Confirmation Standards",
+          "url": "https://www.law.cornell.edu/uscode/text/11/1129"
+        },
+        {
+          "title": "11",
+          "section": "363",
+          "name": "363 Asset Sale",
+          "url": "https://www.law.cornell.edu/uscode/text/11/363"
+        }
+      ]
     },
     {
       "type": "MA_DEFINITIVE",
@@ -165,7 +477,27 @@
       "form": "8-K",
       "signal": "Definitive merger agreement filed",
       "implication": "Deal is live. Sector heating up \u2014 adjacent companies become targets. Watch competitors.",
-      "actionability": 80
+      "actionability": 80,
+      "legal_context": [
+        {
+          "title": "15",
+          "section": "18a",
+          "name": "HSR Pre-Merger Notification",
+          "url": "https://www.law.cornell.edu/uscode/text/15/18a"
+        },
+        {
+          "title": "15",
+          "section": "78m",
+          "name": "SEC Reporting Requirements",
+          "url": "https://www.law.cornell.edu/uscode/text/15/78m"
+        },
+        {
+          "title": "8",
+          "section": "251",
+          "name": "Delaware \u2014 Merger of Corporations (via LII CFR)",
+          "url": "https://www.law.cornell.edu/cfr/text/17/240.14a-101"
+        }
+      ]
     },
     {
       "type": "MA_DEFINITIVE",
@@ -177,7 +509,27 @@
       "form": "8-K",
       "signal": "Definitive merger agreement filed",
       "implication": "Deal is live. Sector heating up \u2014 adjacent companies become targets. Watch competitors.",
-      "actionability": 80
+      "actionability": 80,
+      "legal_context": [
+        {
+          "title": "15",
+          "section": "18a",
+          "name": "HSR Pre-Merger Notification",
+          "url": "https://www.law.cornell.edu/uscode/text/15/18a"
+        },
+        {
+          "title": "15",
+          "section": "78m",
+          "name": "SEC Reporting Requirements",
+          "url": "https://www.law.cornell.edu/uscode/text/15/78m"
+        },
+        {
+          "title": "8",
+          "section": "251",
+          "name": "Delaware \u2014 Merger of Corporations (via LII CFR)",
+          "url": "https://www.law.cornell.edu/cfr/text/17/240.14a-101"
+        }
+      ]
     },
     {
       "type": "MA_DEFINITIVE",
@@ -189,7 +541,27 @@
       "form": "8-K",
       "signal": "Definitive merger agreement filed",
       "implication": "Deal is live. Sector heating up \u2014 adjacent companies become targets. Watch competitors.",
-      "actionability": 80
+      "actionability": 80,
+      "legal_context": [
+        {
+          "title": "15",
+          "section": "18a",
+          "name": "HSR Pre-Merger Notification",
+          "url": "https://www.law.cornell.edu/uscode/text/15/18a"
+        },
+        {
+          "title": "15",
+          "section": "78m",
+          "name": "SEC Reporting Requirements",
+          "url": "https://www.law.cornell.edu/uscode/text/15/78m"
+        },
+        {
+          "title": "8",
+          "section": "251",
+          "name": "Delaware \u2014 Merger of Corporations (via LII CFR)",
+          "url": "https://www.law.cornell.edu/cfr/text/17/240.14a-101"
+        }
+      ]
     },
     {
       "type": "MA_DEFINITIVE",
@@ -383,5 +755,96 @@
       "implication": "Leadership vacuum precedes strategic pivot or acquisition in ~45% of cases. Company vulnerable.",
       "actionability": 71
     }
-  ]
+  ],
+  "legal_map": {
+    "DISTRESS_GOING_CONCERN": [
+      {
+        "title": "11",
+        "section": "101",
+        "name": "Bankruptcy \u2014 Definitions",
+        "url": "https://www.law.cornell.edu/uscode/text/11/101"
+      },
+      {
+        "title": "11",
+        "section": "362",
+        "name": "Automatic Stay",
+        "url": "https://www.law.cornell.edu/uscode/text/11/362"
+      },
+      {
+        "title": "11",
+        "section": "1129",
+        "name": "Plan Confirmation Standards",
+        "url": "https://www.law.cornell.edu/uscode/text/11/1129"
+      },
+      {
+        "title": "11",
+        "section": "363",
+        "name": "363 Asset Sale",
+        "url": "https://www.law.cornell.edu/uscode/text/11/363"
+      }
+    ],
+    "MA_DEFINITIVE": [
+      {
+        "title": "15",
+        "section": "18a",
+        "name": "HSR Pre-Merger Notification",
+        "url": "https://www.law.cornell.edu/uscode/text/15/18a"
+      },
+      {
+        "title": "15",
+        "section": "78m",
+        "name": "SEC Reporting Requirements",
+        "url": "https://www.law.cornell.edu/uscode/text/15/78m"
+      },
+      {
+        "title": "8",
+        "section": "251",
+        "name": "Delaware \u2014 Merger of Corporations (via LII CFR)",
+        "url": "https://www.law.cornell.edu/cfr/text/17/240.14a-101"
+      }
+    ],
+    "ACTIVIST_STAKE": [
+      {
+        "title": "15",
+        "section": "78m",
+        "name": "13D/G Disclosure Requirements",
+        "url": "https://www.law.cornell.edu/uscode/text/15/78m"
+      },
+      {
+        "title": "17",
+        "section": "240.13d-1",
+        "name": "SEC Rule 13d-1 \u2014 Acquisition of Beneficial Ownership",
+        "url": "https://www.law.cornell.edu/cfr/text/17/240.13d-1"
+      }
+    ],
+    "EXEC_DEPARTURE": [
+      {
+        "title": "15",
+        "section": "7241",
+        "name": "SOX \u00a7 302 \u2014 CEO/CFO Certification",
+        "url": "https://www.law.cornell.edu/uscode/text/15/7241"
+      },
+      {
+        "title": "15",
+        "section": "78j-1",
+        "name": "Auditor Independence Requirements",
+        "url": "https://www.law.cornell.edu/uscode/text/15/78j-1"
+      }
+    ],
+    "WORKFORCE_REDUCTION": [
+      {
+        "title": "29",
+        "section": "2101",
+        "name": "WARN Act \u2014 60-Day Notice Required",
+        "url": "https://www.law.cornell.edu/uscode/text/29/2101"
+      },
+      {
+        "title": "29",
+        "section": "2102",
+        "name": "WARN \u2014 Employer Obligations",
+        "url": "https://www.law.cornell.edu/uscode/text/29/2102"
+      }
+    ]
+  },
+  "engine_6_status": "integrated"
 }

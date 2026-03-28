@@ -233,6 +233,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
     <button class="eng-tab" onclick="showView('e3',this)">E3 Predictive Intel <span class="count count-g" id="e3-count">—</span></button>
     <button class="eng-tab" onclick="showView('e4',this)">E4 Competitive <span class="count count-d" id="e4-count">—</span></button>
     <button class="eng-tab" onclick="showView('e5',this)">E5 Jurisdiction Arb <span class="count count-g" id="e5-count">—</span></button>
+    <button class="eng-tab" onclick="showView('e6',this)">E6 Legal Context <span class="count count-b" id="e6-count">—</span></button>
   </div>
 </header>
 
@@ -268,6 +269,12 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
       <div class="ov-engine">Engine 05</div>
       <div class="ov-num" id="ov-e5">—</div>
       <div class="ov-status">Jurisdiction Arb</div>
+    </div>
+    <div class="ov-card" onclick="showView('e6',document.querySelectorAll('.eng-tab')[6])">
+      <div class="ov-dot dot-live"></div>
+      <div class="ov-engine">Engine 06</div>
+      <div class="ov-num" id="ov-e6">—</div>
+      <div class="ov-status">Legal Context</div>
     </div>
   </div>
 
@@ -366,6 +373,31 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
       <thead><tr><th>Opportunity</th><th>Jurisdiction</th><th>Mechanism</th><th>Est. Value</th><th>Expires</th></tr></thead>
       <tbody id="e5-body">
         <tr class="loading-row"><td colspan="5">Engine 05 initializing — scanning state economic development portals</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- E6 LEGAL CONTEXT -->
+<div class="view" id="v-e6">
+  <div class="signal-table-wrap">
+    <div class="st-hdr">
+      <span class="st-title">Engine 06 — Legal Context</span>
+      <span style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.4);margin-left:16px">Cornell LII · US Code · CFR · Auto-mapped to active signals</span>
+      <button class="st-refresh" onclick="loadE6()">&#8635; Refresh</button>
+    </div>
+    <table class="sig-table">
+      <thead>
+        <tr>
+          <th style="width:120px">Signal Type</th>
+          <th>Company &amp; Signal</th>
+          <th>Governing Law</th>
+          <th style="width:90px">Filed</th>
+        </tr>
+      </thead>
+      <tbody id="e6-body">
+        <tr class="loading-row"><td colspan="4"><span class="pulse">Loading legal context...</span></td></tr>
       </tbody>
     </table>
   </div>
@@ -473,10 +505,56 @@ function updateClock() {
   document.getElementById('mast-date').textContent = days[now.getDay()] + ' ' + months[now.getMonth()] + ' ' + now.getDate() + ' ' + now.getFullYear();
 }
 
+
+function loadE6() {
+  if (!E1_DATA) { loadE1(); return; }
+  renderE6();
+}
+
+function renderE6() {
+  if (!E1_DATA) return;
+  var legalMap = E1_DATA.legal_map || {};
+  var sigs = (E1_DATA.signals || []).filter(function(s){ return s.legal_context && s.legal_context.length > 0; });
+
+  document.getElementById('e6-count').textContent = sigs.length;
+  document.getElementById('ov-e6').textContent = sigs.length;
+
+  if (sigs.length === 0) {
+    document.getElementById('e6-body').innerHTML = '<tr class="loading-row"><td colspan="4">No legal context mapped yet.</td></tr>';
+    return;
+  }
+
+  var html = '';
+  sigs.forEach(function(s) {
+    var tm = TYPE_META[s.type] || {label:s.type, cls:'t-layoff'};
+    var ticker = s.ticker ? ' <span class="sig-ticker">' + s.ticker + '</span>' : '';
+    var statutes = (s.legal_context || []).map(function(st) {
+      return '<div style="margin-bottom:8px">' +
+        '<a href="' + st.url + '" target="_blank" style="color:var(--blue);font-weight:600;font-size:13px;text-decoration:none">' +
+        '&#167; ' + st.name + ' &nearr;</a>' +
+        '<div style="font-size:11px;color:var(--ink3);margin-top:2px;font-family:var(--mono)">USC Title ' + st.title + (st.section ? ' &sect; ' + st.section : '') + '</div>' +
+        '</div>';
+    }).join('');
+
+    html += '<tr>' +
+      '<td><span class="sig-type ' + tm.cls + '">' + tm.label + '</span></td>' +
+      '<td><div class="sig-company">' + s.company + ticker + '</div>' +
+        '<div class="sig-signal" style="margin-top:4px">' + s.signal + '</div>' +
+        '<div class="sig-impl">' + s.implication + '</div>' +
+      '</td>' +
+      '<td>' + statutes + '</td>' +
+      '<td class="sig-date">' + (s.date||'').substring(0,10) + '</td>' +
+      '</tr>';
+  });
+
+  document.getElementById('e6-body').innerHTML = html;
+}
+
 window.onload = function() {
   updateClock();
   setInterval(updateClock, 1000);
   loadE1();
+  setTimeout(function(){ renderE6(); }, 1500);
 };
 </script>
 </body>
