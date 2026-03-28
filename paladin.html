@@ -246,6 +246,126 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
   .venn-svg-col{width:100%;display:flex;justify-content:center}
 }
 
+
+/* PROGRESS TRACKING */
+.progress-bar-wrap{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 16px;background:var(--bg2);
+  border-bottom:1px solid var(--border);
+}
+.prog-label{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink3)}
+.prog-track{flex:1;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.prog-fill-bar{height:100%;background:var(--red);border-radius:2px;transition:width 0.5s ease;width:0%}
+.prog-count{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--ink2);white-space:nowrap}
+.prog-pct{font-family:var(--mono);font-size:10px;color:var(--ink3)}
+
+/* MODULE PILLS */
+.module-strip{
+  display:flex;gap:8px;flex-wrap:wrap;
+  padding:12px 16px;border-bottom:1px solid var(--border);
+  background:var(--bg);
+}
+.mod-pill{
+  font-family:var(--mono);font-size:9px;font-weight:700;
+  letter-spacing:1px;text-transform:uppercase;
+  padding:4px 12px;border-radius:100px;cursor:pointer;
+  border:1px solid var(--border);color:var(--ink3);
+  background:var(--bg);transition:all 0.15s;
+}
+.mod-pill:hover{border-color:var(--ink);color:var(--ink)}
+.mod-pill.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.mod-pill.completed{background:#f0fdf4;color:var(--green);border-color:rgba(42,122,58,0.3)}
+
+/* BRIEF CARD — replaces raw table row */
+.brief-card-row td{padding:0!important;border-bottom:2px solid var(--border)!important}
+.brief-card{
+  padding:16px 20px;
+  display:grid;grid-template-columns:auto 1fr auto;
+  gap:12px;align-items:start;
+  cursor:pointer;transition:background 0.1s;
+}
+.brief-card:hover{background:var(--bg2)}
+.brief-num{
+  font-family:var(--mono);font-size:11px;font-weight:700;
+  color:var(--ink4);width:28px;padding-top:2px;
+}
+.brief-main{}
+.brief-type-tag{
+  font-family:var(--mono);font-size:8px;font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;
+  padding:2px 8px;margin-bottom:6px;display:inline-block;
+}
+.brief-co{font-size:15px;font-weight:600;color:var(--ink);margin-bottom:3px}
+.brief-ticker{font-family:var(--mono);font-size:11px;color:var(--ink3);margin-left:6px}
+.brief-loc{font-size:11px;color:var(--ink3);margin-bottom:6px}
+.brief-headline{font-size:13px;color:var(--ink2);line-height:1.5}
+.brief-actions{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.brief-priority{
+  font-family:var(--mono);font-size:11px;font-weight:700;
+  color:var(--red);
+}
+.brief-date{font-family:var(--mono);font-size:10px;color:var(--ink4)}
+.brief-status{
+  font-family:var(--mono);font-size:8px;font-weight:700;
+  letter-spacing:1px;text-transform:uppercase;
+  padding:3px 8px;border-radius:100px;
+}
+.bs-new{background:#fef2f2;color:var(--red)}
+.bs-read{background:var(--bg3);color:var(--ink4)}
+.bs-done{background:#f0fdf4;color:var(--green)}
+.learn-btn{
+  font-family:var(--mono);font-size:8px;font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;
+  padding:5px 12px;border:1px solid rgba(26,58,107,0.25);
+  color:var(--blue);background:none;cursor:pointer;
+  transition:all 0.15s;
+}
+.learn-btn:hover{background:rgba(26,58,107,0.06);border-color:var(--blue)}
+.learn-btn.open{color:var(--red);border-color:rgba(200,32,26,0.3)}
+
+/* QUIZ SYSTEM */
+.quiz-wrap{
+  border-top:1px solid var(--border);
+  padding:16px 20px;
+  background:#fffbf0;
+}
+.quiz-label{
+  font-family:var(--mono);font-size:8px;font-weight:700;
+  letter-spacing:2px;text-transform:uppercase;
+  color:var(--gold);margin-bottom:10px;
+}
+.quiz-q{font-size:14px;font-weight:500;color:var(--ink);margin-bottom:12px;font-family:'EB Garamond',serif}
+.quiz-opts{display:flex;flex-direction:column;gap:6px}
+.quiz-opt{
+  padding:9px 14px;border:1px solid var(--border);
+  font-size:13px;color:var(--ink2);cursor:pointer;
+  background:var(--bg);transition:all 0.15s;text-align:left;
+  font-family:inherit;
+}
+.quiz-opt:hover{border-color:var(--ink);background:var(--bg2)}
+.quiz-opt.correct{background:#f0fdf4;border-color:var(--green);color:var(--green);font-weight:600}
+.quiz-opt.wrong{background:#fef2f2;border-color:var(--red);color:var(--red)}
+.quiz-opt:disabled{cursor:default}
+.quiz-result{
+  margin-top:10px;padding:10px 14px;
+  font-size:13px;line-height:1.6;
+  border-left:3px solid var(--green);
+  background:#f0fdf4;color:var(--ink2);
+  display:none;
+}
+.quiz-result.show{display:block}
+.quiz-result.wrong-result{border-color:var(--red);background:#fef2f2}
+.mark-done-btn{
+  margin-top:12px;
+  font-family:var(--mono);font-size:9px;font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;
+  padding:7px 18px;background:var(--ink);color:#fff;
+  border:none;cursor:pointer;transition:opacity 0.15s;
+  display:none;
+}
+.mark-done-btn.show{display:inline-block}
+.mark-done-btn:hover{opacity:0.8}
+
 </style>
 </head>
 <body>
@@ -259,8 +379,8 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
     </div>
     <div class="mast-stats">
       <div class="mast-stat">
-        <div class="ms-label">Signals Active</div>
-        <div class="ms-val ms-red" id="total-signals">—</div>
+        <div class="ms-label">Active Briefs</div>
+        <div class="ms-val ms-red" id="total-briefs">—</div>
         <div class="ms-sub">across 5 engines</div>
       </div>
       <div class="mast-stat">
@@ -338,7 +458,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
 
   <div class="signal-table-wrap">
     <div class="st-hdr">
-      <span class="st-title">Priority Signal Feed — All Engines</span>
+      <span class="st-title">Intelligence Brief Feed — All Engines</span>
       <span class="st-count" id="overview-count"></span>
       <span style="margin-left:auto;font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.3)" id="last-updated"></span>
     </div>
@@ -370,11 +490,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
     <table class="sig-table">
       <thead>
         <tr>
-          <th style="width:120px">Signal Type</th>
-          <th>Company</th>
-          <th>Intelligence</th>
-          <th style="width:80px">Priority</th>
-          <th style="width:90px">Filed</th>
+          <th colspan="5" style="letter-spacing:0;text-transform:none;font-size:11px;color:var(--ink3);font-weight:400">Intelligence briefs ranked by actionability &bull; Click Study Brief to open Trivium &bull; Complete the quiz to mark done</th>
         </tr>
       </thead>
       <tbody id="e1-body">
@@ -484,6 +600,88 @@ var TYPE_META = {
 };
 
 
+
+var QUIZ_DATA = {
+  DISTRESS_GOING_CONCERN: {
+    q: "A going concern brief has been filed. What is the typical window for a distressed asset acquisition?",
+    opts: ["6-12 months after filing", "30-90 days after filing", "The day of the filing", "18-24 months after filing"],
+    correct: 1,
+    explain: "Correct. The going concern disclosure itself accelerates the crisis -- suppliers demand cash, lenders call loans. The acquisition window is typically 30-90 days. After that, either emergency capital has been raised or Chapter 11 has begun, changing the dynamics entirely."
+  },
+  ACTIVIST_STAKE: {
+    q: "An activist investor has crossed 5% and filed a 13D. What phrase in their letter signals a sale of the company is the primary goal?",
+    opts: ["'Improve operational efficiency'", "'Return capital to shareholders'", "'Explore strategic alternatives'", "'Strengthen the board'"],
+    correct: 2,
+    explain: "Correct. 'Explore strategic alternatives' is the clearest signal that the activist wants a sale. 'Operational efficiency' means they want to cut costs and keep it public. 'Strategic alternatives' means they're already shopping the company."
+  },
+  MA_DEFINITIVE: {
+    q: "A definitive merger agreement just filed. What percentage of definitive deals actually close?",
+    opts: ["55-65%", "70-75%", "85-90%", "95-99%"],
+    correct: 2,
+    explain: "Correct. Roughly 85-90% of definitive merger agreements close. The 10-15% that break typically involve regulatory blocking (FTC/DOJ), financing failure, or a material adverse change clause being triggered. Signed is not closed -- but it's close."
+  },
+  WORKFORCE_REDUCTION: {
+    q: "After a major layoff announcement, what's the most important thing to monitor in the following 30-90 days?",
+    opts: ["The stock price", "The CEO's public statements", "New job postings by function and geography", "Competitor reactions"],
+    correct: 2,
+    explain: "Correct. Job postings reveal strategy before any announcement. If a company cuts operations staff and starts hiring sales engineers in a new geography -- they found product-market fit somewhere new. The hiring pattern is the forward signal. Stock price and statements lag reality."
+  },
+  EXEC_DEPARTURE: {
+    q: "A CEO departs with accelerated vesting of all equity and a 2-year non-compete. What does this most likely indicate?",
+    opts: ["Voluntary retirement on good terms", "The CEO was pushed out and paid to stay quiet", "The company is about to go public", "A planned leadership succession"],
+    correct: 1,
+    explain: "Correct. Accelerated vesting plus a non-compete is a buyout of a forced departure. The board wanted them gone but needed their cooperation. A voluntary departure on good terms typically involves only vested shares and no non-compete. The separation agreement tells the real story."
+  }
+};
+
+var BRIEF_READ_STATE = {};
+var BRIEF_DONE_STATE = {};
+
+function markBriefRead(rowId) {
+  BRIEF_READ_STATE[rowId] = true;
+  var el = document.getElementById('bs-' + rowId);
+  if (el) { el.className = 'brief-status bs-read'; el.textContent = 'Read'; }
+  updateProgress();
+}
+
+function markBriefDone(rowId) {
+  BRIEF_DONE_STATE[rowId] = true;
+  BRIEF_READ_STATE[rowId] = true;
+  var el = document.getElementById('bs-' + rowId);
+  if (el) { el.className = 'brief-status bs-done'; el.textContent = 'Complete'; }
+  updateProgress();
+}
+
+function updateProgress() {
+  var total = Object.keys(BRIEF_READ_STATE).length + Object.keys(BRIEF_DONE_STATE).length;
+  var done = Object.keys(BRIEF_DONE_STATE).length;
+  var allBriefs = document.querySelectorAll('.brief-card').length;
+  var pct = allBriefs > 0 ? Math.round((done / allBriefs) * 100) : 0;
+  var fill = document.getElementById('prog-fill-main');
+  if (fill) fill.style.width = pct + '%';
+  var cnt = document.getElementById('prog-count-main');
+  if (cnt) cnt.textContent = done + ' of ' + allBriefs + ' completed';
+  var pctEl = document.getElementById('prog-pct-main');
+  if (pctEl) pctEl.textContent = pct + '%';
+}
+
+function answerQuiz(rowId, optIdx, correctIdx, explainText) {
+  var opts = document.querySelectorAll('#quiz-' + rowId + ' .quiz-opt');
+  opts.forEach(function(o, i) {
+    o.disabled = true;
+    if (i === correctIdx) o.classList.add('correct');
+    else if (i === optIdx) o.classList.add('wrong');
+  });
+  var result = document.getElementById('qresult-' + rowId);
+  if (result) {
+    result.textContent = explainText;
+    result.classList.add('show');
+    if (optIdx !== correctIdx) result.classList.add('wrong-result');
+  }
+  var doneBtn = document.getElementById('qdone-' + rowId);
+  if (doneBtn) doneBtn.classList.add('show');
+}
+
 var TRIVIUM_KB = {
   DISTRESS_GOING_CONCERN: {
     grammar: "A going concern disclosure means the company's own auditors doubt it can survive the next 12 months. Filed in an 8-K. Triggers automatic scrutiny from lenders, suppliers, and customers.",
@@ -565,17 +763,37 @@ function showVenn(rowId, section) {
   detail.innerHTML = html;
 }
 
-function buildTriviumPanel(sig, rowId) {
+function buildQuiz(rowId) {
+  var qd = QUIZ_DATA[rowId._type || ''];
+  return '';
+}
+
+function buildTriviumPanel(sig, rowId, hasQuiz) {
   var kb = TRIVIUM_KB[sig.type];
   if (!kb) return '';
+  var qd = QUIZ_DATA[sig.type];
+  var quizHtml = '';
+  if (qd) {
+    var optsHtml = qd.opts.map(function(opt, i) {
+      return '<button class="quiz-opt" onclick="answerQuiz(\'' + rowId + '\',' + i + ',' + qd.correct + ',\'' + qd.explain.replace(/'/g,"\\'") + '\')">' + opt + '</button>';
+    }).join('');
+    quizHtml = '<div class="quiz-wrap" id="quiz-' + rowId + '">' +
+      '<div class="quiz-label">&#9670; Test Your Understanding</div>' +
+      '<div class="quiz-q">' + qd.q + '</div>' +
+      '<div class="quiz-opts">' + optsHtml + '</div>' +
+      '<div class="quiz-result" id="qresult-' + rowId + '"></div>' +
+      '<button class="mark-done-btn" id="qdone-' + rowId + '" onclick="markBriefDone(\'' + rowId + '\')">&#10003; Mark Complete</button>' +
+      '</div>';
+  }
   var panel = '<tr class="trv-panel" id="trv-' + rowId + '">' +
     '<td colspan="5">' +
     '<div class="venn-wrap">' +
     '<div class="venn-svg-col">' + vennSVG(rowId) + '</div>' +
     '<div class="venn-detail-col" id="vd-' + rowId + '">' +
-    '<div class="vd-placeholder">Click a circle to explore</div>' +
+    '<div class="vd-placeholder">Click a circle to explore the brief</div>' +
     '</div>' +
     '</div>' +
+    quizHtml +
     '</td></tr>';
   return panel;
 }
@@ -591,24 +809,36 @@ function toggleTrivium(rowId) {
 }
 
 var _sigIdx = 0;
-function sigRow(s) {
+function sigRow(s, idx) {
   var tm = TYPE_META[s.type] || {label:s.type, cls:"t-layoff"};
-  var ticker = s.ticker ? '<span class="sig-ticker">' + s.ticker + '</span>' : '';
-  var loc = s.location ? '<div class="sig-location">&#9679; ' + s.location + '</div>' : '';
-  var actPct = (s.actionability || 50) + '%';
+  var ticker = s.ticker ? '<span class="brief-ticker">' + s.ticker + '</span>' : '';
+  var loc = s.location ? '<div class="brief-loc">&#9679; ' + s.location + '</div>' : '';
   var rowId = 'r' + (_sigIdx++);
   var hasTrv = TRIVIUM_KB[s.type] ? true : false;
-  var trvBtn = hasTrv
-    ? '<button class="trv-toggle" id="trvbtn-' + rowId + '" onclick="toggleTrivium(\'' + rowId + '\')" >&#9670; Learn</button>'
+  var hasQuiz = QUIZ_DATA[s.type] ? true : false;
+  var learnBtn = hasTrv
+    ? '<button class="learn-btn" id="trvbtn-' + rowId + '" onclick="toggleTrivium(\'' + rowId + '\')">Study Brief</button>'
     : '';
-  var mainRow = '<tr>' +
-    '<td><span class="sig-type ' + tm.cls + '">' + tm.label + '</span></td>' +
-    '<td><div class="sig-company">' + s.company + ticker + '</div>' + loc + '</td>' +
-    '<td><div class="sig-signal">' + s.signal + '</div><div class="sig-impl">' + (s.implication||'') + '</div>' + trvBtn + '</td>' +
-    '<td><div class="act-label">' + s.actionability + '</div><div class="act-bar"><div class="act-fill" style="width:' + actPct + '"></div></div></td>' +
-    '<td class="sig-date">' + (s.date||'').substring(0,10) + '</td>' +
-    '</tr>';
-  var trvRow = hasTrv ? buildTriviumPanel(s, rowId) : '';
+
+  var mainRow = '<tr class="brief-card-row"><td colspan="5">' +
+    '<div class="brief-card" onclick="markBriefRead(\'' + rowId + '\')">' +
+    '<div class="brief-num">' + ((_sigIdx)) + '</div>' +
+    '<div class="brief-main">' +
+      '<span class="brief-type-tag ' + tm.cls + '">' + tm.label + '</span>' +
+      '<div class="brief-co">' + s.company + ticker + '</div>' +
+      loc +
+      '<div class="brief-headline">' + s.signal + '</div>' +
+      '<div style="margin-top:6px;font-size:12px;color:var(--ink3);line-height:1.5;border-left:2px solid var(--border);padding-left:8px">' + (s.implication||'') + '</div>' +
+    '</div>' +
+    '<div class="brief-actions">' +
+      '<div class="brief-priority">' + s.actionability + '</div>' +
+      '<div class="brief-date">' + (s.date||'').substring(0,10) + '</div>' +
+      '<span class="brief-status bs-new" id="bs-' + rowId + '">New</span>' +
+      learnBtn +
+    '</div>' +
+    '</div></td></tr>';
+
+  var trvRow = hasTrv ? buildTriviumPanel(s, rowId, hasQuiz) : '';
   return mainRow + trvRow;
 }
 
@@ -627,19 +857,19 @@ function loadE1() {
 
 function renderE1() {
   if (!E1_DATA) return;
-  var sigs = E1_DATA.signals || [];
-  document.getElementById('e1-count').textContent = sigs.length;
-  document.getElementById('ov-e1').textContent = sigs.length;
-  document.getElementById('deal-count').textContent = sigs.length;
-  document.getElementById('total-signals').textContent = sigs.length;
+  var briefs = E1_DATA.signals || [];
+  document.getElementById('e1-count').textContent = briefs.length;
+  document.getElementById('ov-e1').textContent = briefs.length;
+  document.getElementById('deal-count').textContent = briefs.length;
+  document.getElementById('total-briefs').textContent = briefs.length;
 
   _sigIdx = 0;
   _sigIdx = 0;
-  var sigsCopy = sigs;
-  var html = sigsCopy.map(sigRow).join('');
-  document.getElementById('e1-body').innerHTML = html || '<tr class="loading-row"><td colspan="5">No signals at this time.</td></tr>';
+  var briefsCopy = briefs;
+  var html = briefsCopy.map(sigRow).join('');
+  document.getElementById('e1-body').innerHTML = html || '<tr class="loading-row"><td colspan="5">No briefs at this time.</td></tr>';
   // Attach kb data to panel elements
-  sigsCopy.forEach(function(s, i) {
+  briefsCopy.forEach(function(s, i) {
     var panelId = 'trv-r' + i;
     var el = document.getElementById(panelId);
     if (el && TRIVIUM_KB[s.type]) { el._kb = TRIVIUM_KB[s.type]; }
@@ -647,14 +877,14 @@ function renderE1() {
 
   // Overview feed — top 15
   var ovStart = _sigIdx;
-  var ovSigs = sigs.slice(0,15);
-  document.getElementById('overview-body').innerHTML = ovSigs.map(sigRow).join('');
-  ovSigs.forEach(function(s, i) {
+  var ovBriefs = briefs.slice(0,15);
+  document.getElementById('overview-body').innerHTML = ovBriefs.map(sigRow).join('');
+  ovBriefs.forEach(function(s, i) {
     var panelId = 'trv-r' + (ovStart + i);
     var el = document.getElementById(panelId);
     if (el && TRIVIUM_KB[s.type]) { el._kb = TRIVIUM_KB[s.type]; }
   });
-  document.getElementById('overview-count').textContent = sigs.length + ' signals';
+  document.getElementById('overview-count').textContent = briefs.length + ' signals';
 
   if (E1_DATA.generated) {
     var d = new Date(E1_DATA.generated);
@@ -703,18 +933,18 @@ function loadE6() {
 function renderE6() {
   if (!E1_DATA) return;
   var legalMap = E1_DATA.legal_map || {};
-  var sigs = (E1_DATA.signals || []).filter(function(s){ return s.legal_context && s.legal_context.length > 0; });
+  var briefs = (E1_DATA.signals || []).filter(function(s){ return s.legal_context && s.legal_context.length > 0; });
 
-  document.getElementById('e6-count').textContent = sigs.length;
-  document.getElementById('ov-e6').textContent = sigs.length;
+  document.getElementById('e6-count').textContent = briefs.length;
+  document.getElementById('ov-e6').textContent = briefs.length;
 
-  if (sigs.length === 0) {
+  if (briefs.length === 0) {
     document.getElementById('e6-body').innerHTML = '<tr class="loading-row"><td colspan="4">No legal context mapped yet.</td></tr>';
     return;
   }
 
   var html = '';
-  sigs.forEach(function(s) {
+  briefs.forEach(function(s) {
     var tm = TYPE_META[s.type] || {label:s.type, cls:'t-layoff'};
     var ticker = s.ticker ? ' <span class="sig-ticker">' + s.ticker + '</span>' : '';
     var statutes = (s.legal_context || []).map(function(st) {
