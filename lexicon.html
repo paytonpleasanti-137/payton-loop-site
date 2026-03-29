@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lexicon &mdash; Payton Loop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ffffff;--bg2:#f8f8f6;--bg3:#f0ede8;
+  --ink:#0a0a08;--ink2:#2a2a26;--ink3:#5a5a54;--ink4:#9a9a92;
+  --border:#e0ddd8;
+  --red:#c8201a;--green:#2a7a3a;--gold:#b8860b;--blue:#1a3a6b;
+  --mono:'Roboto Mono',monospace;
+  --serif:'EB Garamond',serif;
+  --sans:'Inter',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:14px;line-height:1.6}
+
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;height:48px;
+  border-bottom:2px solid var(--ink);
+  position:sticky;top:0;background:var(--bg);z-index:100;
+}
+.topbar-brand{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink)}
+.topbar-back{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--blue);text-decoration:none}
+.topbar-back:hover{text-decoration:underline}
+
+.lexicon-header{
+  padding:40px 48px 32px;
+  border-bottom:1px solid var(--border);
+}
+.lex-title{font-family:var(--serif);font-size:38px;font-weight:600;color:var(--ink);margin-bottom:8px}
+.lex-sub{font-size:14px;color:var(--ink3);margin-bottom:24px}
+.lex-stats{
+  display:flex;gap:32px;flex-wrap:wrap;
+}
+.lex-stat{display:flex;flex-direction:column}
+.lex-stat-num{font-family:var(--mono);font-size:24px;font-weight:700;color:var(--ink);line-height:1}
+.lex-stat-label{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink4);margin-top:4px}
+
+.search-bar{
+  padding:16px 48px;border-bottom:1px solid var(--border);
+  position:sticky;top:48px;background:var(--bg);z-index:90;
+  display:flex;gap:12px;align-items:center;
+}
+.search-input{
+  flex:1;height:36px;padding:0 14px;
+  border:1px solid var(--border);font-family:var(--sans);font-size:13px;
+  color:var(--ink);background:var(--bg2);outline:none;
+}
+.search-input:focus{border-color:var(--ink)}
+.cat-filters{display:flex;gap:6px;flex-wrap:wrap}
+.cat-btn{
+  font-family:var(--mono);font-size:9px;font-weight:700;
+  letter-spacing:1px;text-transform:uppercase;
+  padding:4px 12px;border-radius:100px;cursor:pointer;
+  border:1px solid var(--border);color:var(--ink3);
+  background:var(--bg);transition:all 0.15s;
+}
+.cat-btn:hover{border-color:var(--ink);color:var(--ink)}
+.cat-btn.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+.lex-layout{display:flex;min-height:calc(100vh - 200px)}
+.lex-index{
+  width:220px;flex-shrink:0;
+  border-right:1px solid var(--border);
+  padding:16px 0;
+  position:sticky;top:130px;height:calc(100vh - 130px);
+  overflow-y:auto;
+}
+.lex-index-letter{
+  font-family:var(--mono);font-size:9px;font-weight:700;
+  letter-spacing:2px;text-transform:uppercase;color:var(--ink4);
+  padding:8px 20px 4px;
+}
+.lex-index-item{
+  display:block;padding:5px 20px;font-size:12px;color:var(--ink2);
+  cursor:pointer;text-decoration:none;transition:background 0.1s;
+  border-left:2px solid transparent;
+}
+.lex-index-item:hover{background:var(--bg2);border-left-color:var(--ink)}
+.lex-index-item.active{background:var(--bg3);border-left-color:var(--red);font-weight:600}
+
+.lex-content{flex:1;padding:0 48px 64px 40px;max-width:800px}
+.letter-section{margin-top:40px}
+.letter-heading{
+  font-family:var(--serif);font-size:32px;font-weight:600;
+  color:var(--ink4);padding-bottom:8px;
+  border-bottom:1px solid var(--border);margin-bottom:0;
+}
+.term-card{
+  padding:28px 0;border-bottom:1px solid var(--border);
+}
+.term-name{
+  font-family:var(--serif);font-size:22px;font-weight:600;
+  color:var(--ink);margin-bottom:6px;
+}
+.term-cat-src{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.term-cat{
+  font-family:var(--mono);font-size:8px;font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;
+  padding:2px 10px;background:var(--bg3);color:var(--ink3);
+}
+.term-src{font-family:var(--mono);font-size:10px;color:var(--ink4)}
+.term-short{
+  font-size:15px;font-weight:500;color:var(--ink);
+  margin-bottom:14px;line-height:1.5;
+}
+.term-section-label{
+  font-family:var(--mono);font-size:8px;font-weight:700;
+  letter-spacing:2px;text-transform:uppercase;
+  color:var(--ink4);margin-bottom:6px;margin-top:16px;
+}
+.term-def{font-size:13px;color:var(--ink2);line-height:1.75}
+.term-example{
+  font-size:13px;color:var(--ink2);line-height:1.7;
+  padding:14px 16px;background:var(--bg2);
+  border-left:3px solid var(--gold);margin-top:4px;
+}
+.term-example::before{
+  content:"Example: ";
+  font-family:var(--mono);font-size:8px;font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);
+  display:block;margin-bottom:4px;
+}
+.term-related{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.term-rel-link{
+  font-family:var(--mono);font-size:9px;font-weight:700;
+  letter-spacing:1px;text-transform:uppercase;
+  padding:3px 10px;border:1px solid rgba(26,58,107,0.2);
+  color:var(--blue);cursor:pointer;text-decoration:none;
+  transition:all 0.15s;background:none;
+}
+.term-rel-link:hover{background:rgba(26,58,107,0.06);border-color:var(--blue)}
+
+.no-results{
+  padding:60px 0;text-align:center;
+  font-family:var(--mono);font-size:11px;letter-spacing:1px;
+  text-transform:uppercase;color:var(--ink4);
+}
+
+@media(max-width:768px){
+  .lexicon-header{padding:24px 20px 20px}
+  .search-bar{padding:12px 20px}
+  .lex-index{display:none}
+  .lex-content{padding:0 20px 40px}
+  .lex-title{font-size:28px}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-brand">&#9670; Payton Loop / Lexicon</span>
+  <a class="topbar-back" href="paladin.html">&#8592; Back to PALADIN</a>
+</div>
+
+<div class="lexicon-header">
+  <div class="lex-title">The Lexicon</div>
+  <div class="lex-sub">Financial, legal, and strategic terms that appear in PALADIN intelligence briefs &mdash; defined precisely, sourced authoritatively, with real examples.</div>
+  <div class="lex-stats">
+<div class="lex-stat"><span class="lex-stat-num">3</span><span class="lex-stat-label">Accounting</span></div><div class="lex-stat"><span class="lex-stat-num">1</span><span class="lex-stat-label">Accounting / Audit</span></div><div class="lex-stat"><span class="lex-stat-num">2</span><span class="lex-stat-label">Activist Investing</span></div><div class="lex-stat"><span class="lex-stat-num">1</span><span class="lex-stat-label">Antitrust / Regulatory</span></div><div class="lex-stat"><span class="lex-stat-num">5</span><span class="lex-stat-label">Bankruptcy Law</span></div><div class="lex-stat"><span class="lex-stat-num">1</span><span class="lex-stat-label">Competitive Strategy</span></div><div class="lex-stat"><span class="lex-stat-num">2</span><span class="lex-stat-label">Corporate Events</span></div><div class="lex-stat"><span class="lex-stat-num">1</span><span class="lex-stat-label">Employment Law</span></div><div class="lex-stat"><span class="lex-stat-num">1</span><span class="lex-stat-label">Executive Compensation</span></div><div class="lex-stat"><span class="lex-stat-num">2</span><span class="lex-stat-label">M&A</span></div><div class="lex-stat"><span class="lex-stat-num">1</span><span class="lex-stat-label">M&A / Activist</span></div><div class="lex-stat"><span class="lex-stat-num">1</span><span class="lex-stat-label">M&A / Contract Law</span></div><div class="lex-stat"><span class="lex-stat-num">7</span><span class="lex-stat-label">Securities Law</span></div><div class="lex-stat"><span class="lex-stat-num">3</span><span class="lex-stat-label">Valuation</span></div>
+    <div class="lex-stat"><span class="lex-stat-num">31</span><span class="lex-stat-label">Total Terms</span></div>
+  </div>
+</div>
+
+<div class="search-bar">
+  <input class="search-input" type="text" id="lex-search" placeholder="Search terms, definitions, sources..." oninput="filterLexicon()">
+  <div class="cat-filters" id="cat-filters">
+    <button class="cat-btn active" onclick="setCategory('',this)">All</button>
+<button class="cat-btn" onclick="setCategory('Accounting',this)">Accounting</button><button class="cat-btn" onclick="setCategory('Accounting / Audit',this)">Accounting / Audit</button><button class="cat-btn" onclick="setCategory('Activist Investing',this)">Activist Investing</button><button class="cat-btn" onclick="setCategory('Antitrust / Regulatory',this)">Antitrust / Regulatory</button><button class="cat-btn" onclick="setCategory('Bankruptcy Law',this)">Bankruptcy Law</button><button class="cat-btn" onclick="setCategory('Competitive Strategy',this)">Competitive Strategy</button><button class="cat-btn" onclick="setCategory('Corporate Events',this)">Corporate Events</button><button class="cat-btn" onclick="setCategory('Employment Law',this)">Employment Law</button><button class="cat-btn" onclick="setCategory('Executive Compensation',this)">Executive Compensation</button><button class="cat-btn" onclick="setCategory('M&A',this)">M&A</button><button class="cat-btn" onclick="setCategory('M&A / Activist',this)">M&A / Activist</button><button class="cat-btn" onclick="setCategory('M&A / Contract Law',this)">M&A / Contract Law</button><button class="cat-btn" onclick="setCategory('Securities Law',this)">Securities Law</button><button class="cat-btn" onclick="setCategory('Valuation',this)">Valuation</button>
+  </div>
+</div>
+
+<div class="lex-layout">
+  <nav class="lex-index" id="lex-index"></nav>
+  <div class="lex-content" id="lex-content"></div>
+</div>
+
+<script>
+var LEXICON = {
+  'going-concern':{term:'Going Concern',slug:'going-concern',cat:'Accounting',src:'ASC 205-40 (FASB)',short:'A company that can no longer assume it will continue operations for the next 12 months.',def:'Under ASC 205-40, management must evaluate whether substantial doubt exists about a company\'s ability to continue as a going concern for a reasonable period (12 months). If doubt exists, management must disclose this in the financial statements and assess whether mitigation plans are sufficient. Auditors issue a going concern opinion when mitigation is insufficient.',ex:'In 2008, Circuit City\'s auditors issued a going concern opinion after the company reported significant operating losses and liquidity shortfalls. The company filed Chapter 11 four months later.',related:['chapter_11','substantial_doubt','material_adverse_change']},
+  'substantial-doubt':{term:'Substantial Doubt',slug:'substantial-doubt',cat:'Accounting',src:'ASC 205-40-50 (FASB)',short:'The threshold that triggers a going concern disclosure — when it is probable that a company cannot meet its obligations.',def:'Substantial doubt exists when relevant conditions and events, considered in aggregate, indicate it is probable the entity will be unable to meet its obligations as they become due within 12 months. \'Probable\' under GAAP means \'likely to occur.\' Management\'s plans to address the doubt are then evaluated for likelihood of implementation and effectiveness.',ex:'A company with $2M cash and $8M in debt maturing in 6 months with no refinancing in place has substantial doubt — the math makes it probable they cannot meet obligations.',related:['going_concern','chapter_11']},
+  'material-adverse-change':{term:'Material Adverse Change (MAC)',slug:'material-adverse-change',cat:'M&A / Contract Law',src:'Defined in merger agreements; litigated under Delaware Chancery',short:'A clause that allows a buyer to walk away from a signed deal if a significant negative event occurs before closing.',def:'A Material Adverse Change (also Material Adverse Effect, MAE) clause in a merger agreement defines what events allow the acquirer to terminate the deal without paying a breakup fee. Courts have rarely found MACs to have occurred — Delaware courts require a significant long-term effect, not short-term market disruption. The Akorn v. Fresenius case (2018) was the first Delaware decision finding a MAC had occurred.',ex:'In 2020, LVMH attempted to invoke the MAC clause to exit its $16.2B acquisition of Tiffany & Co., citing COVID-19. Tiffany sued. The dispute settled with LVMH paying a lower price. The MAC argument failed.',related:['definitive_agreement','breakup_fee','hell_or_high_water']},
+  'breakup-fee':{term:'Breakup Fee (Termination Fee)',slug:'breakup-fee',cat:'M&A',src:'Defined in merger agreements; typically 2–4% of deal value',short:'A fee paid by one party to the other if they terminate a signed merger agreement.',def:'A breakup fee (or termination fee) compensates the non-terminating party for time, cost, and lost opportunity if a deal falls apart. Typical range is 2–4% of deal value. A reverse termination fee is paid by the buyer if they walk away. A fiduciary out allows the target board to accept a superior offer but typically requires paying the fee.',ex:'When Microsoft acquired Activision Blizzard for $68.7B, the reverse termination fee was $3B — what Microsoft would pay if regulators blocked the deal. This signaled Microsoft\'s confidence in regulatory approval.',related:['definitive_agreement','material_adverse_change','superior_proposal']},
+  'definitive-agreement':{term:'Definitive Agreement (Merger Agreement)',slug:'definitive-agreement',cat:'M&A',src:'SEC Form 8-K Item 1.01; Securities Exchange Act',short:'A binding, signed contract between acquirer and target specifying all terms of a merger or acquisition.',def:'A definitive agreement (or merger agreement) is the fully negotiated, board-approved, and signed contract governing an M&A transaction. It specifies price, structure (cash, stock, or mixed), conditions to closing (regulatory, shareholder vote, financing), representations and warranties, MAC provisions, and termination rights. Filing a Form 8-K with the agreement is required within 4 business days of signing.',ex:'When Broadcom announced its acquisition of VMware in May 2022, the definitive agreement (SEC Form 8-K, Exhibit 2.1) specified $61B total consideration, a $1.5B reverse termination fee, and required VMware shareholder approval.',related:['material_adverse_change','breakup_fee','hsr_act']},
+  'hsr-act':{term:'Hart-Scott-Rodino Act (HSR)',slug:'hsr-act',cat:'Antitrust / Regulatory',src:'15 U.S.C. § 18a (HSR Act, 1976)',short:'U.S. law requiring parties to large mergers to notify the FTC and DOJ and wait for antitrust review before closing.',def:'The Hart-Scott-Rodino Antitrust Improvements Act requires parties to transactions above a filing threshold (adjusted annually; ~$119M in 2024) to file premerger notification with the FTC and DOJ and observe a waiting period (typically 30 days, or 15 days for cash tender offers). The agencies may issue a Second Request, extending the waiting period and requiring extensive document production. Failure to file carries civil penalties up to $50,000 per day.',ex:'In the FTC v. Meta case (2021), regulators argued Meta\'s acquisitions of Instagram and WhatsApp should have been blocked on antitrust grounds. Both deals had passed HSR review at the time — demonstrating that HSR clearance does not guarantee the deal survives later scrutiny.',related:['definitive_agreement','second_request','ftc_review']},
+  'form-4':{term:'Form 4',slug:'form-4',cat:'Securities Law',src:'Section 16(a), Securities Exchange Act of 1934; 17 CFR § 240.16a-3',short:'The SEC form that corporate insiders must file within 2 business days of any change in their ownership of company securities.',def:'Form 4 is the Statement of Changes in Beneficial Ownership, required under Section 16(a) of the Securities Exchange Act. Any officer, director, or 10%+ shareholder (collectively \'insiders\') must report transactions in company securities within 2 business days. The form discloses the type of transaction, number of shares, price, and shares owned after the transaction. It is public immediately upon filing on EDGAR.',ex:'When Elon Musk purchased Twitter shares and crossed the 5% threshold in April 2022, he was required to file Form 4. His late filing — disclosed 10 days late — drew SEC scrutiny and was later alleged to have allowed him to continue buying shares at lower prices before the market reacted.',related:['section_16','open_market_purchase','10b5_1_plan']},
+  'open-market-purchase':{term:'Open Market Purchase',slug:'open-market-purchase',cat:'Securities Law',src:'Transaction Code \'P\' on Form 4',short:'An insider buying company stock at the prevailing market price, using their own money, with no discount or special terms.',def:'An open market purchase (Form 4 transaction code \'P\') is a discretionary decision by a corporate insider to buy company shares on the open market at the current price. No discount is applied, unlike restricted stock grants or option exercises. Because the insider bears full market risk and has access to material non-public information, open market purchases are considered the highest-conviction insider signal. They are the opposite of noise — every dollar committed is a vote on undervaluation.',ex:'In 2022, when JPMorgan\'s stock fell during market volatility, CEO Jamie Dimon purchased $150M of JPM shares in the open market. The stock recovered 20%+ over the following 12 months.',related:['form_4','section_16','10b5_1_plan']},
+  '10b5-1-plan':{term:'10b5-1 Plan',slug:'10b5-1-plan',cat:'Securities Law',src:'Rule 10b5-1, Securities Exchange Act; 17 CFR § 240.10b5-1',short:'A pre-scheduled trading plan that allows insiders to buy or sell stock on automatic instructions set up in advance, providing an affirmative defense against insider trading claims.',def:'A Rule 10b5-1 plan is a written arrangement established when the insider does not possess material non-public information, specifying in advance the amount, price, and timing of trades. Because the plan is set before the insider learns anything, trades under the plan are not illegal even if MNPI is later acquired. The SEC tightened 10b5-1 rules in 2023 — plans now require a 90-day cooling-off period for officers and directors before the first trade.',ex:'When insider sales occur under a 10b5-1 plan disclosed months earlier, the signal strength is much lower than an unscheduled open market sale. Always check whether the Form 4 references a 10b5-1 plan before interpreting a sale as bearish.',related:['form_4','open_market_purchase','section_16']},
+  'section-16':{term:'Section 16 (Short-Swing Profits)',slug:'section-16',cat:'Securities Law',src:'Section 16, Securities Exchange Act of 1934',short:'The SEC rule that requires insiders to report ownership changes and disgorge profits from \'short-swing\' trades (buy and sell within 6 months).',def:'Section 16 has two key provisions: (a) reporting — Form 4 must be filed within 2 business days of any transaction; and (b) disgorgement — any profit an insider makes from buying and selling (or selling and buying) the same security within 6 months must be returned to the company. The company or shareholders can sue to recover short-swing profits. This rule prevents insiders from trading on information gleaned from board meetings.',ex:'If a director buys 10,000 shares at $10 in January and sells them at $15 in March, the $50,000 profit is a short-swing profit that must be returned to the company, regardless of whether any inside information was used.',related:['form_4','open_market_purchase']},
+  'schedule-13d':{term:'Schedule 13D',slug:'schedule-13d',cat:'Securities Law',src:'Section 13(d), Securities Exchange Act; 17 CFR § 240.13d-1',short:'The SEC filing required within 10 days when any investor acquires more than 5% of a public company\'s shares with intent to influence management.',def:'Schedule 13D is required when a person or group acquires beneficial ownership of more than 5% of a class of registered equity securities and has an intent to change or influence control of the company. It must be filed within 10 days of crossing 5% (proposed rules would shorten this to 5 days). The filing discloses the acquirer\'s identity, purpose, source of funds, and any plans regarding the company. A 13D/A amendment is required promptly when material facts change.',ex:'When Bill Ackman\'s Pershing Square acquired a 9.7% stake in Herbalife in 2018 (reversing his earlier short), he filed a 13D disclosing his intent to engage management. The stock rose 15% on the filing day.',related:['schedule_13g','activist_stake','wolf_pack']},
+  'schedule-13g':{term:'Schedule 13G',slug:'schedule-13g',cat:'Securities Law',src:'Section 13(g), Securities Exchange Act; 17 CFR § 240.13d-1(c)',short:'A simpler 5%+ ownership disclosure for passive investors — no intent to influence management.',def:'Schedule 13G is the passive counterpart to 13D. Institutional investors (mutual funds, index funds, pension funds) who cross 5% but have no intent to influence control file 13G rather than 13D. It requires less disclosure and has longer filing deadlines (within 45 days of calendar year-end for initial filings). The key distinction: 13D = activist, 13G = passive. A 13G filer who later develops activist intent must amend to a 13D within 10 days.',ex:'Vanguard holds 5–8% of most S&P 500 companies and files 13G for all of them — it\'s a passive index holder, not an activist. This is why 13G filings don\'t move stock prices the way 13D filings do.',related:['schedule_13d','activist_stake']},
+  'wolf-pack':{term:'Wolf Pack',slug:'wolf-pack',cat:'Activist Investing',src:'Section 13(d)(3); case law',short:'When multiple activist investors coordinate to collectively exceed 5% in a target without triggering 13D filing, then act in concert.',def:'A wolf pack is a group of activist investors who individually stay below the 5% 13D threshold but coordinate informally to apply collective pressure on a target company. Because no single investor crosses 5%, no 13D is triggered — but their combined stake can represent 15–25% of shares. The SEC has attempted to enforce group-filing requirements when coordination is proved, but wolf packs remain common because proving \'group\' status requires showing an explicit agreement.',ex:'In the contested proxy fight for P&G in 2017, Nelson Peltz\'s Trian Fund was publicly known to be seeking board seats. Multiple other funds built positions in the same period — a classic wolf pack formation that amplified pressure on the board.',related:['schedule_13d','activist_stake','proxy_fight']},
+  'proxy-fight':{term:'Proxy Fight (Proxy Contest)',slug:'proxy-fight',cat:'Activist Investing',src:'SEC Rule 14a, Securities Exchange Act',short:'A battle between an activist investor and a company\'s board for shareholder votes to elect new directors or approve activist proposals.',def:'A proxy fight occurs when an activist shareholder solicits other shareholders to vote for their slate of director candidates or proposals at the annual meeting, in opposition to the board\'s recommendations. Proxy materials must be filed with the SEC under Rule 14a. Universal proxy rules (adopted 2022) now allow shareholders to mix and match candidates from both slates on a single ballot, giving activists a structural advantage.',ex:'Engine No. 1\'s proxy fight against ExxonMobil in 2021 is the most cited recent example — the tiny fund ($54M AUM) won 3 board seats against one of the world\'s largest companies by convincing large institutional holders (BlackRock, Vanguard) to vote with them on climate grounds.',related:['schedule_13d','activist_stake','strategic_alternatives']},
+  'strategic-alternatives':{term:'Explore Strategic Alternatives',slug:'strategic-alternatives',cat:'M&A / Activist',src:'SEC Form 8-K; proxy filings',short:'Corporate language that almost always means the company is for sale.',def:'When a company announces it is \'exploring strategic alternatives,\' it has typically retained an investment bank to run a sale process. The phrase is a legal and PR construct — it signals to potential buyers that the company is receptive to acquisition offers without explicitly saying \'we are for sale.\' Boards use this language to satisfy their fiduciary duty to consider all options while running a discreet auction. Statistically, ~70% of \'exploring strategic alternatives\' announcements result in a transaction.',ex:'When Twitter announced in April 2022 that it was \'exploring strategic alternatives\' after Elon Musk disclosed his 9.2% stake, the translation was immediate: the company was for sale. Musk made an offer 8 days later.',related:['definitive_agreement','activist_stake','breakup_fee']},
+  'chapter-11':{term:'Chapter 11 Bankruptcy',slug:'chapter-11',cat:'Bankruptcy Law',src:'11 U.S.C. §§ 1101–1195 (Bankruptcy Code)',short:'A U.S. bankruptcy proceeding that allows a company to reorganize its debts while continuing to operate, under court supervision.',def:'Chapter 11 of the U.S. Bankruptcy Code allows a company (the \'debtor in possession\') to continue operating while restructuring its obligations. The company proposes a reorganization plan that must be confirmed by creditors and the court. Chapter 11 provides an automatic stay — all collection actions, lawsuits, and foreclosures are paused. It differs from Chapter 7 (liquidation) in that the goal is emergence as a going entity. The process typically takes 12–18 months.',ex:'When Hertz filed Chapter 11 in May 2020 due to COVID-19 decimating travel, it continued renting cars throughout the proceeding. It emerged from bankruptcy in June 2021, with equity holders unusually receiving some recovery — the result of retail investor speculation driving up the stock during the proceeding.',related:['going_concern','363_sale','dip_financing','automatic_stay']},
+  '363-sale':{term:'363 Sale',slug:'363-sale',cat:'Bankruptcy Law',src:'11 U.S.C. § 363 (Bankruptcy Code)',short:'A fast-track asset sale in bankruptcy that allows a buyer to acquire assets free and clear of all liens and liabilities.',def:'A Section 363 sale allows a debtor to sell assets outside the normal reorganization plan process, with court approval. The key advantage: assets are sold \'free and clear\' of all liens, claims, and encumbrances — the buyer takes a clean title. Sales require competitive bidding (often with a stalking horse bid), court approval, and 21+ days of notice to creditors. The speed (60–90 days vs. 12–18 months for full reorganization) makes 363 the preferred structure for distressed M&A.',ex:'The sale of Chrysler\'s assets to Fiat in 2009 was structured as a 363 sale — completed in just 42 days. The buyer (a \'new Chrysler\' entity backed by Fiat) acquired the desirable assets without the legacy liabilities, while the old entity continued in bankruptcy to address claims.',related:['chapter_11','stalking_horse','dip_financing']},
+  'stalking-horse':{term:'Stalking Horse Bid',slug:'stalking-horse',cat:'Bankruptcy Law',src:'11 U.S.C. § 363; auction procedures',short:'The initial, pre-negotiated bid in a bankruptcy auction that sets the floor price and terms for competing bidders.',def:'In a 363 sale, the debtor typically selects a stalking horse bidder before the open auction. The stalking horse negotiates a purchase agreement with the debtor, which becomes the baseline — other bidders must beat it. The stalking horse receives protections for their effort: a breakup fee (typically 2–3% of bid) and expense reimbursement if outbid. This structure ensures a minimum recovery for creditors while creating a competitive auction.',ex:'When Toys R Us went bankrupt in 2017, multiple private equity firms positioned themselves as stalking horse bidders for different asset groups (U.S. stores, international operations, intellectual property). The IP and brand ended up being acquired separately.',related:['363_sale','chapter_11','breakup_fee']},
+  'dip-financing':{term:'DIP Financing (Debtor-in-Possession)',slug:'dip-financing',cat:'Bankruptcy Law',src:'11 U.S.C. § 364 (Bankruptcy Code)',short:'New loans provided to a company after it files Chapter 11, which take priority over all pre-existing debt.',def:'Debtor-in-Possession (DIP) financing is new credit extended to a company in Chapter 11 bankruptcy. The bankruptcy court grants DIP lenders \'super-priority\' status — their claims are paid before all pre-petition creditors, including secured lenders. This extraordinary priority is what makes DIP loans possible: lenders will extend credit to a bankrupt entity only if they are first in line. DIP lenders often become the acquirer of the restructured company.',ex:'When Caesars Entertainment filed Chapter 11 in 2015, it raised $1.75B in DIP financing. The DIP lenders effectively controlled the bankruptcy process and had significant influence over the reorganization plan — a common dynamic where DIP creditors become the de facto power brokers in the proceeding.',related:['chapter_11','363_sale','going_concern']},
+  'automatic-stay':{term:'Automatic Stay',slug:'automatic-stay',cat:'Bankruptcy Law',src:'11 U.S.C. § 362 (Bankruptcy Code)',short:'The immediate halt to all creditor collection actions the moment a company files for bankruptcy.',def:'The automatic stay is one of the most powerful provisions in bankruptcy law. The instant a Chapter 11 petition is filed, all collection actions against the debtor are automatically suspended — lawsuits, foreclosures, repossessions, wage garnishments, and contract terminations. The stay gives the debtor breathing room to reorganize. Creditors must petition the court to lift the stay if they believe their collateral is at risk. The stay applies to all creditors simultaneously, preventing a race to collect.',ex:'When a landlord is in the middle of evicting a retail tenant and that tenant files Chapter 11, the eviction stops immediately upon filing — the landlord cannot proceed without court permission. This is why commercial landlords closely monitor tenant financial health.',related:['chapter_11','going_concern']},
+  'warn-act':{term:'WARN Act',slug:'warn-act',cat:'Employment Law',src:'29 U.S.C. §§ 2101–2109 (WARN Act, 1988)',short:'U.S. law requiring employers with 100+ employees to give 60 days advance notice before mass layoffs or plant closings.',def:'The Worker Adjustment and Retraining Notification Act requires covered employers (100+ full-time employees) to provide 60 calendar days advance written notice to affected workers, state agencies, and local governments before a \'plant closing\' (50+ employees at a single site) or \'mass layoff\' (500+ employees, or 50–499 employees if they constitute 33% of the workforce). Failure to provide notice results in liability for up to 60 days back pay and benefits per affected employee. Exceptions exist for \'faltering company,\' \'unforeseeable business circumstances,\' and natural disasters.',ex:'When Twitter (post-Musk acquisition) laid off approximately 3,700 employees in November 2022, former employees filed class action suits alleging WARN Act violations for failure to provide 60 days notice. The cases settled for approximately $8M.',related:['workforce_reduction','layoff_signal']},
+  'workforce-reduction':{term:'Workforce Reduction (Mass Layoff)',slug:'workforce-reduction',cat:'Corporate Events',src:'SEC Form 8-K Item 2.05; WARN Act',short:'A company\'s planned elimination of a significant portion of its workforce, typically disclosed via SEC Form 8-K and WARN Act notices.',def:'A workforce reduction becomes a reportable SEC event (Form 8-K, Item 2.05) when it constitutes a material charge to earnings. Companies must disclose the expected number of employees affected, the type of charge (severance, facility costs), and the expected timeline. WARN Act notices, filed separately with state agencies, often appear before the SEC filing and reveal more operational detail — which locations, which functions, and how many employees per site.',ex:'When Meta announced 11,000 layoffs in November 2022 (13% of workforce), the SEC filing disclosed $3–5B in expected restructuring charges. WARN Act filings in California and other states showed the specific locations and timing, revealing which product lines were being cut before any press conference.',related:['warn_act','restructuring_charge','sec_8k']},
+  'restructuring-charge':{term:'Restructuring Charge',slug:'restructuring-charge',cat:'Accounting',src:'ASC 420 (Exit or Disposal Cost Obligations)',short:'A one-time expense recognized when a company commits to a plan to eliminate jobs, close facilities, or exit a business.',def:'Under ASC 420, companies recognize restructuring charges when they commit to a formal plan of termination or exit and the plan meets specific criteria (management approval, identification of affected employees, communication to employees). Charges include severance, lease termination costs, asset write-downs, and contract exit costs. Companies often use restructuring charges to \'kitchen sink\' — bundle multiple years of underperformance into a single quarter, resetting the earnings baseline.',ex:'GE\'s 2018 announcement of a $6.2B restructuring charge was partly a kitchen-sinking exercise — writing down decades of underperforming assets in one quarter. Investors focused on the cash flow implications rather than the accounting charge itself.',related:['workforce_reduction','warn_act']},
+  'sarbanes-oxley-302':{term:'SOX Section 302',slug:'sarbanes-oxley-302',cat:'Securities Law',src:'Sarbanes-Oxley Act § 302 (2002); 15 U.S.C. § 7241',short:'The provision requiring CEOs and CFOs to personally certify the accuracy of financial statements — and face criminal liability if they lie.',def:'SOX Section 302 requires the principal executive officer (CEO) and principal financial officer (CFO) to personally certify in each quarterly and annual SEC filing that: (1) they have reviewed the filing; (2) it contains no material misstatements; (3) financial statements fairly present the company\'s condition; and (4) they have evaluated internal controls and disclosed material weaknesses. False certifications carry up to $5M in fines and 20 years imprisonment. When executives depart suddenly, their departure from personal certification responsibility is a meaningful signal.',ex:'When Enron\'s executives signed SOX-equivalent certifications (the law predates Enron but the principle applies), they were personally attesting to financial statements that contained massive fraud. SOX was enacted precisely because of this — to create personal accountability where corporate liability wasn\'t sufficient.',related:['exec_departure','sarbanes_oxley_404','material_weakness']},
+  'material-weakness':{term:'Material Weakness',slug:'material-weakness',cat:'Accounting / Audit',src:'SOX Section 404; PCAOB AS 2201',short:'A deficiency in a company\'s internal controls that creates a reasonable possibility that a material misstatement in financial statements would not be prevented or detected.',def:'A material weakness in internal controls is the most serious level of control deficiency under SOX 404. When management or auditors identify a material weakness, it must be disclosed publicly. A material weakness does not mean fraud occurred — but it means the controls to prevent or detect financial misstatement are insufficient. Companies disclosing material weaknesses often see significant stock price declines. Repeated material weaknesses are a strong signal of management dysfunction.',ex:'When Luckin Coffee disclosed a material weakness in 2020 (alongside revealing $310M in fabricated sales), the stock dropped 80% in one day. The material weakness disclosure was the formal acknowledgment that the internal control environment had failed entirely.',related:['sarbanes_oxley_302','exec_departure']},
+  'exec-departure':{term:'Executive Departure (Form 8-K Item 5.02)',slug:'exec-departure',cat:'Corporate Events',src:'SEC Form 8-K Item 5.02; Regulation S-K',short:'The required SEC disclosure when a CEO, CFO, COO, or principal officer leaves a public company.',def:'SEC Form 8-K Item 5.02 requires disclosure within 4 business days when a director or principal officer (CEO, CFO, COO, president, or named executive officer) departs — whether by resignation, retirement, or termination. The disclosure must describe the nature of the departure and any subsequent agreement (separation, consulting). Critically, the company is not required to state whether the departure was voluntary or involuntary — this ambiguity is where the intelligence lies.',ex:'When Boeing CEO Dennis Muilenburg was removed in December 2019 following the 737 MAX crisis, the Form 8-K stated he departed. The separation agreement revealed $62M in compensation, suggesting a negotiated exit rather than a simple resignation.',related:['sarbanes_oxley_302','separation_agreement','golden_parachute']},
+  'golden-parachute':{term:'Golden Parachute',slug:'golden-parachute',cat:'Executive Compensation',src:'IRC § 280G; SEC Item 402(t) disclosure',short:'Large financial benefits — cash, stock, options — paid to executives if the company is acquired or they are terminated following a change of control.',def:'A golden parachute is a contractual arrangement providing executives with substantial compensation upon a change of control (acquisition) or termination following a change of control. Under IRC § 280G, \'excess parachute payments\' exceeding 3x the executive\'s average compensation over 5 years trigger a 20% excise tax on the executive and loss of corporate tax deduction. SEC rules require disclosure of estimated change-of-control payments in proxy statements. Investors scrutinize parachutes as evidence of board entrenchment.',ex:'When Hewlett-Packard fired CEO Léo Apotheker after 11 months in 2011, he received $13.2M in severance and equity — despite overseeing an 18-month strategic disaster. The payout became a boardroom governance case study.',related:['exec_departure','separation_agreement']},
+  'intrinsic-value':{term:'Intrinsic Value',slug:'intrinsic-value',cat:'Valuation',src:'Graham & Dodd, Security Analysis (1934); Berkshire Hathaway Annual Letters',short:'The true underlying value of a business based on its future cash flows, independent of what the market is currently pricing it at.',def:'Intrinsic value is the discounted present value of all future cash that can be taken out of a business during its remaining life. Warren Buffett defines it as \'the only logical way to evaluate the relative attractiveness of investments and businesses.\' It requires estimating future owner earnings, choosing an appropriate discount rate, and accounting for competitive advantages (moat) that protect those earnings. The gap between intrinsic value and market price is the margin of safety.',ex:'In 1973, Buffett estimated the Washington Post Company\'s intrinsic value at $400–500M. Its market cap was $80M. He bought. This was the canonical intrinsic value gap — a business any analyst could value, trading at a 75–80% discount because of market panic during the Watergate crisis.',related:['margin_of_safety','owner_earnings','moat']},
+  'margin-of-safety':{term:'Margin of Safety',slug:'margin-of-safety',cat:'Valuation',src:'Benjamin Graham, The Intelligent Investor (1949), Chapter 20',short:'Buying a security at a significant discount to its intrinsic value, creating a buffer against errors in analysis or adverse events.',def:'Benjamin Graham\'s margin of safety principle holds that investors should only purchase securities when their market price is significantly below their calculated intrinsic value — the difference being the safety margin. This buffer protects against: errors in intrinsic value calculation, unforeseen negative events, and market irrationality persisting longer than expected. Graham recommended margins of 30–50%. Buffett later extended the concept to include qualitative factors (management quality, competitive moat) that reduce the required numerical discount.',ex:'Graham\'s classic example: a bond with $1,000 face value, earning $100/year. If purchased at $500, the investor has a 50% margin of safety — even if earnings fall 50%, the investment still works. The principle extends to equities: buy good businesses at prices that assume the worst.',related:['intrinsic_value','owner_earnings']},
+  'owner-earnings':{term:'Owner Earnings',slug:'owner-earnings',cat:'Valuation',src:'Warren Buffett, Berkshire Hathaway Annual Letter (1986)',short:'Net income plus depreciation/amortization minus the capital expenditures required to maintain competitive position — the true cash earnings available to the owner.',def:'Warren Buffett defined owner earnings in his 1986 annual letter as: net income + depreciation/amortization + other non-cash charges - average annual capital expenditures required to maintain long-term competitive position. The formula strips out accounting distortions to reveal actual cash available. It differs from free cash flow in that it uses normalized maintenance capex, not reported capex (which fluctuates). Owner earnings is the cash a business generates that belongs to the owner — the foundation of intrinsic value calculation.',ex:'A railroad company might report $1B in net income, add back $500M of depreciation, but require $800M in annual maintenance capex to keep the tracks operational. Owner earnings: $700M. EBITDA would show $1.5B — misleadingly high for a capital-intensive business.',related:['intrinsic_value','moat']},
+  'moat':{term:'Economic Moat',slug:'moat',cat:'Competitive Strategy',src:'Warren Buffett, Berkshire Hathaway Annual Letters; Morningstar popularized the framework',short:'A durable competitive advantage that protects a company\'s profits and market position from competitors over a long period.',def:'The economic moat metaphor (from Buffett) describes structural advantages that prevent competitors from eroding profitability. Morningstar identifies five moat sources: (1) cost advantages — producing at lower cost than competitors; (2) switching costs — expensive or disruptive for customers to switch; (3) network effects — product becomes more valuable as more people use it; (4) efficient scale — market only supports one or few profitable players; (5) intangible assets — brands, patents, regulatory licenses. Wide moat = 20+ year durability. Narrow moat = 10-year durability.',ex:'Visa\'s moat combines network effects (merchants accept Visa because cardholders have it; cardholders carry Visa because merchants accept it) with switching costs (replacing payment infrastructure is expensive) and a regulatory license. This is why Visa\'s operating margins exceed 50% consistently.',related:['intrinsic_value','owner_earnings']}
+};
+
+var ACTIVE_CAT = '';
+
+function slugToTerm(slug) {
+  var t = LEXICON[slug];
+  return t ? t.term : slug.replace(/-/g,' ');
+}
+
+function renderLexicon(filterText, filterCat) {
+  var terms = Object.values(LEXICON);
+  if (filterCat) terms = terms.filter(function(t){ return t.cat === filterCat; });
+  if (filterText) {
+    var q = filterText.toLowerCase();
+    terms = terms.filter(function(t){
+      return t.term.toLowerCase().indexOf(q) >= 0
+        || t.short.toLowerCase().indexOf(q) >= 0
+        || t.def.toLowerCase().indexOf(q) >= 0
+        || t.cat.toLowerCase().indexOf(q) >= 0;
+    });
+  }
+  terms.sort(function(a,b){ return a.term.localeCompare(b.term); });
+
+  if (!terms.length) {
+    document.getElementById('lex-content').innerHTML = '<div class="no-results">No terms found</div>';
+    document.getElementById('lex-index').innerHTML = '';
+    return;
+  }
+
+  // Group by first letter
+  var byLetter = {};
+  terms.forEach(function(t){
+    var l = t.term[0].toUpperCase();
+    if (!byLetter[l]) byLetter[l] = [];
+    byLetter[l].push(t);
+  });
+  var letters = Object.keys(byLetter).sort();
+
+  // Build index
+  var indexHtml = letters.map(function(l){
+    return '<div class="lex-index-letter">' + l + '</div>' +
+      byLetter[l].map(function(t){
+        return '<a class="lex-index-item" href="#term-' + t.slug + '" onclick="highlightIndex(\'' + t.slug + '\')">' + t.term + '</a>';
+      }).join('');
+  }).join('');
+  document.getElementById('lex-index').innerHTML = indexHtml;
+
+  // Build content
+  var contentHtml = letters.map(function(l){
+    var termCards = byLetter[l].map(function(t){
+      var relHtml = (t.related && t.related.length)
+        ? '<div class="term-section-label">See Also</div><div class="term-related">' +
+          t.related.map(function(r){
+            return '<a class="term-rel-link" href="#term-' + r + '" onclick="scrollToTerm(\'' + r + '\')">' + slugToTerm(r) + '</a>';
+          }).join('') + '</div>'
+        : '';
+      return '<div class="term-card" id="term-' + t.slug + '">' +
+        '<div class="term-name">' + t.term + '</div>' +
+        '<div class="term-cat-src"><span class="term-cat">' + t.cat + '</span><span class="term-src">' + t.src + '</span></div>' +
+        '<div class="term-short">' + t.short + '</div>' +
+        '<div class="term-section-label">Definition</div>' +
+        '<div class="term-def">' + t.def + '</div>' +
+        '<div class="term-section-label">Real-World Example</div>' +
+        '<div class="term-example">' + t.ex + '</div>' +
+        relHtml +
+        '</div>';
+    }).join('');
+    return '<div class="letter-section"><div class="letter-heading">' + l + '</div>' + termCards + '</div>';
+  }).join('');
+  document.getElementById('lex-content').innerHTML = contentHtml;
+}
+
+function filterLexicon() {
+  var q = document.getElementById('lex-search').value;
+  renderLexicon(q, ACTIVE_CAT);
+}
+
+function setCategory(cat, btn) {
+  ACTIVE_CAT = cat;
+  document.querySelectorAll('.cat-btn').forEach(function(b){ b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  var q = document.getElementById('lex-search').value;
+  renderLexicon(q, cat);
+}
+
+function scrollToTerm(slug) {
+  setTimeout(function(){
+    var el = document.getElementById('term-' + slug);
+    if (el) el.scrollIntoView({behavior:'smooth', block:'start'});
+    highlightIndex(slug);
+  }, 100);
+}
+
+function highlightIndex(slug) {
+  document.querySelectorAll('.lex-index-item').forEach(function(a){ a.classList.remove('active'); });
+  var match = document.querySelector('.lex-index-item[href="#term-' + slug + '"]');
+  if (match) match.classList.add('active');
+}
+
+// Init
+renderLexicon('', '');
+
+// Intersection observer for index highlighting
+window.addEventListener('scroll', function(){
+  var cards = document.querySelectorAll('.term-card');
+  var closest = null, closestTop = Infinity;
+  cards.forEach(function(c){
+    var top = c.getBoundingClientRect().top;
+    if (top >= 0 && top < closestTop) { closestTop = top; closest = c; }
+  });
+  if (closest) highlightIndex(closest.id.replace('term-',''));
+});
+</script>
+</body>
+</html>
