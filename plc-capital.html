@@ -49,307 +49,84 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
 .tick-dn{color:#f87171}
 
 /* ── TOP NAV ── */
-.topnav{
-  border-bottom:1px solid var(--border);
-  background:var(--bg);
-  position:sticky;top:0;z-index:200;
+/* ── NAV ── */
+.plc-topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;height:48px;border-bottom:1px solid var(--border);
+  background:var(--bg);position:sticky;top:0;z-index:200;
 }
-.topnav-top{
-  display:flex;align-items:center;
-  padding:10px 24px;
-  border-bottom:1px solid var(--border);
-  gap:24px;
-}
-.nav-brand{
-  font-family:var(--serif);font-size:26px;font-weight:700;
-  color:var(--ink);letter-spacing:-0.5px;margin-right:auto;
-}
-.nav-brand em{color:var(--red);font-style:normal}
-.nav-date{font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:0.5px}
-.nav-cta{
-  background:var(--red);color:#fff;
-  font-size:12px;font-weight:600;letter-spacing:0.3px;
-  padding:7px 18px;text-decoration:none;
-  transition:opacity 0.15s;
-}
-.nav-cta:hover{opacity:0.85}
+.plc-brand{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--ink)}
+.plc-topright{display:flex;align-items:center;gap:16px}
+.plc-date{font-family:var(--mono);font-size:10px;color:var(--ink4)}
 
-.topnav-tabs{
-  display:flex;align-items:center;
-  padding:0 24px;height:36px;gap:0;
+.plc-secnav{
+  display:flex;border-bottom:2px solid var(--border);
+  background:var(--bg);position:sticky;top:48px;z-index:190;
+  padding:0 24px;
+}
+.plc-sec{
+  font-family:var(--mono);font-size:10px;font-weight:700;
+  letter-spacing:2px;text-transform:uppercase;
+  padding:0 20px;height:38px;border:none;background:none;
+  cursor:pointer;color:var(--ink4);
+  border-bottom:3px solid transparent;
+  margin-bottom:-2px;transition:color 0.15s,border-color 0.15s;
+}
+.plc-sec:hover{color:var(--ink)}
+.plc-sec.active{color:var(--ink);border-bottom-color:var(--ink)}
+.plc-private{margin-left:auto}
+.plc-private:hover{color:var(--red)}
+.plc-private.active{color:var(--red);border-bottom-color:var(--red)}
+
+.plc-subnav{
+  display:flex;border-bottom:1px solid var(--border);
+  background:var(--bg2);
+  padding:0 24px;
+  position:sticky;top:86px;z-index:180;
   overflow-x:auto;
 }
-.topnav-tabs::-webkit-scrollbar{display:none}
-.nav-tab{
-  font-family:var(--sans);font-size:13px;font-weight:400;
-  color:var(--ink3);padding:0 16px;height:36px;
+.plc-subnav::-webkit-scrollbar{display:none}
+.plc-sub{
+  font-family:var(--sans);font-size:12px;font-weight:400;
+  color:var(--ink3);padding:0 14px;height:30px;
   display:flex;align-items:center;cursor:pointer;
-  border:none;background:none;
+  border:none;background:none;text-decoration:none;
   border-bottom:2px solid transparent;
-  transition:color 0.15s,border-color 0.15s;
-  white-space:nowrap;text-decoration:none;
+  white-space:nowrap;transition:color 0.12s;
 }
-.nav-tab:hover{color:var(--ink)}
-.nav-tab.active{color:var(--ink);border-bottom-color:var(--red);font-weight:500}
+.plc-sub:hover{color:var(--ink)}
+.plc-sub.active{color:var(--ink);border-bottom-color:var(--red);font-weight:500}
 
-/* ── VIEWS ── */
-.view{display:none;max-width:1200px;margin:0 auto;padding:24px}
-.view.active{display:block}
-
-/* ── HOME ── */
-.home-grid{
-  display:grid;
-  grid-template-columns:2fr 1fr;
-  gap:24px;
+/* PRIVATE MODAL */
+.priv-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(10,10,8,0.7);z-index:500;
+  align-items:center;justify-content:center;
 }
-
-/* Metrics bar */
-.metrics-bar{
-  display:grid;grid-template-columns:repeat(4,1fr);
-  gap:0;border:1px solid var(--border);
-  margin-bottom:24px;
+.priv-overlay.show{display:flex}
+.priv-box{
+  background:var(--bg);border:2px solid var(--ink);
+  padding:40px;min-width:320px;text-align:center;
 }
-.metric{
-  padding:16px 20px;
-  border-right:1px solid var(--border);
-  position:relative;
+.priv-title{font-family:var(--serif);font-size:24px;font-weight:600;margin-bottom:8px}
+.priv-sub{font-size:13px;color:var(--ink3);margin-bottom:24px}
+.priv-input{
+  width:100%;padding:10px 14px;border:1px solid var(--border);
+  font-family:var(--mono);font-size:14px;letter-spacing:3px;
+  text-align:center;outline:none;background:var(--bg2);
+  margin-bottom:12px;
 }
-.metric:last-child{border-right:none}
-.metric-label{
-  font-size:10px;font-weight:600;letter-spacing:1px;
-  text-transform:uppercase;color:var(--ink3);
-  margin-bottom:6px;
+.priv-input:focus{border-color:var(--ink)}
+.priv-btn{
+  font-family:var(--mono);font-size:10px;font-weight:700;
+  letter-spacing:2px;text-transform:uppercase;
+  padding:10px 28px;background:var(--ink);color:#fff;
+  border:none;cursor:pointer;width:100%;
 }
-.metric-val{
-  font-family:var(--serif);font-size:28px;font-weight:600;
-  line-height:1;color:var(--ink);margin-bottom:4px;
-}
-.metric-sub{font-size:11px;color:var(--ink3)}
-.metric-badge{
-  position:absolute;top:12px;right:12px;
-  font-family:var(--mono);font-size:9px;font-weight:500;
-  padding:2px 7px;letter-spacing:0.5px;
-}
-.badge-red{background:#fef2f2;color:var(--red)}
-.badge-green{background:#f0fdf4;color:var(--green)}
-.badge-blue{background:#eff6ff;color:var(--blue)}
-.badge-gray{background:var(--bg3);color:var(--ink3)}
-
-/* Section headers */
-.sec-hdr{
-  font-family:var(--sans);font-size:10px;font-weight:700;
-  letter-spacing:1.5px;text-transform:uppercase;color:var(--ink);
-  padding-bottom:8px;border-bottom:2px solid var(--ink);
-  margin-bottom:16px;display:flex;align-items:center;gap:8px;
-}
-.sec-hdr-sub{font-weight:400;color:var(--ink3);margin-left:auto;font-size:10px;text-transform:none;letter-spacing:0}
-
-/* Action cards — Bloomberg story card style */
-.story-list{display:flex;flex-direction:column;gap:0}
-.story-card{
-  padding:16px 0;border-bottom:1px solid var(--border);
-  text-decoration:none;display:block;
-  transition:background 0.1s;
-}
-.story-card:first-child{padding-top:0}
-.story-card:hover{background:var(--bg2);padding-left:8px;margin-left:-8px;padding-right:8px;margin-right:-8px}
-.sc-cat{
-  font-size:10px;font-weight:700;letter-spacing:1.5px;
-  text-transform:uppercase;color:var(--red);margin-bottom:6px;
-}
-.sc-headline{
-  font-family:var(--serif);font-size:18px;font-weight:600;
-  color:var(--ink);line-height:1.3;margin-bottom:6px;
-}
-.sc-desc{font-size:12px;color:var(--ink3);line-height:1.6}
-.sc-arrow{color:var(--ink3);font-size:12px}
-
-/* Right sidebar */
-.sidebar{}
-.sidebar-widget{
-  border:1px solid var(--border);
-  margin-bottom:16px;overflow:hidden;
-}
-.sw-hdr{
-  background:var(--ink);color:#fff;
-  font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
-  padding:8px 14px;
-}
-.sw-body{padding:0}
-.sw-row{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:9px 14px;border-bottom:1px solid var(--border);
-  font-size:12px;
-}
-.sw-row:last-child{border-bottom:none}
-.sw-label{color:var(--ink2)}
-.sw-val{font-family:var(--mono);font-size:11px;font-weight:500}
-.sw-red{color:var(--red)}
-.sw-green{color:var(--green)}
-.sw-gold{color:var(--gold)}
-.sw-gray{color:var(--ink3)}
-
-/* Status bar */
-.status-bar{
-  display:flex;gap:0;margin-bottom:20px;
-  border:1px solid var(--border);overflow:hidden;
-}
-.status-item{
-  flex:1;padding:6px 12px;
-  font-size:10px;font-weight:600;letter-spacing:0.8px;
-  text-transform:uppercase;text-align:center;
-  border-right:1px solid var(--border);
-  display:flex;align-items:center;justify-content:center;gap:5px;
-}
-.status-item:last-child{border-right:none}
-.dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
-.si-green{background:#f0fdf4;color:var(--green)}
-.si-amber{background:#fffbeb;color:var(--gold)}
-.si-red{background:#fef2f2;color:var(--red)}
-
-/* Progress */
-.prog-item{margin-bottom:14px}
-.prog-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--ink3);margin-bottom:5px}
-.prog-labels strong{color:var(--ink);font-weight:600}
-.prog-track{height:3px;background:var(--bg3);border:1px solid var(--border)}
-.prog-fill{height:100%;background:var(--red);transition:width 1s ease}
-.prog-fill.green{background:var(--green)}
-
-/* Quick links */
-.quick-bar{
-  display:flex;gap:8px;flex-wrap:wrap;margin-top:20px;
-}
-.qlink{
-  font-size:12px;font-weight:500;color:var(--ink2);
-  padding:6px 14px;border:1px solid var(--border2);
-  text-decoration:none;transition:all 0.15s;
-  display:inline-flex;align-items:center;gap:5px;
-}
-.qlink:hover{border-color:var(--ink);color:var(--ink)}
-.qlink.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
-.qlink.primary:hover{background:var(--ink2)}
-
-/* ── FINANCIALS ── */
-.fin-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
-.fin-table-wrap{border:1px solid var(--border)}
-.fin-table-hdr{background:var(--ink);color:#fff;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:8px 16px}
-.fin-table{width:100%;border-collapse:collapse}
-.fin-table td{padding:9px 16px;border-bottom:1px solid var(--border);font-size:13px}
-.fin-table tr:last-child td{border-bottom:none;font-weight:600}
-.fin-table td:last-child{text-align:right;font-family:var(--mono);font-size:11px}
-.td-red{color:var(--red)}
-.td-green{color:var(--green)}
-.td-gold{color:var(--gold)}
-.td-gray{color:var(--ink3)}
-
-.pri-table{border:1px solid var(--border);margin-bottom:20px}
-.pri-table table{width:100%;border-collapse:collapse}
-.pri-table th{background:var(--bg2);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink3);padding:8px 16px;text-align:left;border-bottom:1px solid var(--border)}
-.pri-table td{padding:10px 16px;border-bottom:1px solid var(--border);font-size:13px;color:var(--ink2)}
-.pri-table tr:last-child td{border-bottom:none}
-.pri-table tr:hover td{background:var(--bg2)}
-.tag{font-size:10px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;padding:2px 8px}
-.tag-red{background:#fef2f2;color:var(--red)}
-.tag-gold{background:#fffbeb;color:var(--gold)}
-.tag-gray{background:var(--bg3);color:var(--ink3)}
-
-/* ── QUEUE ── */
-.queue-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--border)}
-.q-col{border-right:1px solid var(--border)}
-.q-col:last-child{border-right:none}
-.q-col-hdr{
-  background:var(--ink);color:#fff;
-  font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
-  padding:8px 16px;display:flex;align-items:center;gap:8px;
-}
-.q-item{
-  padding:12px 16px;border-bottom:1px solid var(--border);
-  cursor:pointer;transition:background 0.1s;
-}
-.q-item:last-child{border-bottom:none}
-.q-item:hover{background:var(--bg2)}
-.qi-title{font-size:13px;font-weight:500;color:var(--ink);margin-bottom:3px;line-height:1.3}
-.qi-meta{font-size:11px;color:var(--ink3)}
-.qi-flag{font-size:10px;font-weight:700;color:var(--red)}
-
-/* ── BELMONT ── */
-.belmont-layout{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.bel-hero{border:1px solid var(--border);padding:28px}
-.bel-name{font-family:var(--serif);font-size:34px;font-weight:700;color:var(--ink);margin-bottom:4px}
-.bel-loc{font-size:12px;color:var(--ink3);letter-spacing:0.5px;margin-bottom:24px;text-transform:uppercase;font-weight:600}
-.bel-svc{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}
-.bel-svc:last-of-type{border-bottom:none}
-.bel-svc-name{font-size:14px;color:var(--ink)}
-.bel-svc-price{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--ink)}
-.bel-cta{display:inline-block;margin-top:20px;background:var(--ink);color:#fff;padding:10px 24px;font-size:13px;font-weight:600;text-decoration:none;transition:opacity 0.15s}
-.bel-cta:hover{opacity:0.8}
-
-/* ── BOTTOM NAV ── */
-.btm{
-  position:fixed;bottom:0;left:0;right:0;z-index:200;
-  height:44px;display:flex;
-  background:var(--ink);
-  border-top:2px solid var(--red);
-  overflow-x:auto;
-}
-.btm::-webkit-scrollbar{display:none}
-.btm-link{
-  flex:1;min-width:56px;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:2px;
-  color:rgba(255,255,255,0.4);font-size:7px;font-weight:600;
-  letter-spacing:1px;text-transform:uppercase;
-  text-decoration:none;border-right:1px solid rgba(255,255,255,0.08);
-  transition:color 0.15s;cursor:pointer;background:none;border-top:none;border-left:none;border-bottom:none;
-  padding:0 6px;
-}
-.btm-link:last-child{border-right:none}
-.btm-link:hover,.btm-link.active{color:#fff}
-.btm-link.active{background:rgba(255,255,255,0.06)}
-.btm-icon{font-size:13px;line-height:1}
-
-@media(max-width:900px){
-  .home-grid{grid-template-columns:1fr}
-  .metrics-bar{grid-template-columns:1fr 1fr}
-  .fin-grid{grid-template-columns:1fr}
-  .queue-grid{grid-template-columns:1fr}
-  .belmont-layout{grid-template-columns:1fr}
-}
-@media(max-width:600px){
-  .view{padding:16px}
-  .topnav-top{padding:8px 16px}
-  .topnav-tabs{padding:0 16px}
-  .nav-brand{font-size:20px}
-  .metric-val{font-size:22px}
-  .metrics-bar{grid-template-columns:1fr 1fr}
-  .status-bar{flex-wrap:wrap}
-  .status-item{flex:0 0 50%}
-}
-
-/* ===== BERKSHIRE ===== */
-.brk-tab{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:5px 14px;border:1px solid var(--border);background:var(--bg);color:var(--ink3);cursor:pointer;transition:all 0.15s}
-.brk-tab:hover{color:var(--ink);border-color:var(--ink)}
-.brk-tab.active{background:var(--ink);color:#fff;border-color:var(--ink)}
-.brk-field-group{margin-bottom:14px}
-.brk-label{display:block;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink4);margin-bottom:5px}
-.brk-hint{display:block;font-size:11px;color:var(--ink4);margin-top:3px}
-.brk-input{width:100%;padding:8px 12px;border:1px solid var(--border);font-family:var(--sans);font-size:13px;color:var(--ink);background:var(--bg2);outline:none}
-.brk-input:focus{border-color:var(--ink)}
-textarea.brk-input{resize:vertical;min-height:72px}
-.brk-bar{position:absolute;bottom:0;cursor:pointer;transition:opacity 0.15s;background:var(--red)}
-.brk-bar:hover{opacity:0.75}
-.calc-result-row{display:flex;justify-content:space-between;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--border)}
-.calc-result-row:last-child{border-bottom:none}
-.calc-result-label{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink4)}
-.calc-result-val{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--ink)}
-.calc-result-val.highlight{color:var(--red)}
-.calc-verdict{margin-top:16px;padding:12px 16px;background:var(--bg3);border-left:3px solid var(--gold);font-size:13px;color:var(--ink2);line-height:1.7}
+.priv-btn:hover{background:var(--ink2)}
+.priv-err{font-family:var(--mono);font-size:10px;color:var(--red);margin-top:8px;display:none}
 
 
-/* ===== FOUR FILTERS ===== */
-.brk-label{display:block;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink4);margin-bottom:5px}
-.brk-input{width:100%;padding:8px 12px;border:1px solid var(--border);font-family:var(--sans);font-size:13px;color:var(--ink);background:var(--bg2);outline:none}
-.brk-input:focus{border-color:var(--ink)}
-textarea.brk-input{resize:vertical;min-height:60px}
 
 .ff-card{border:1px solid var(--border);margin-bottom:2px;background:var(--bg)}
 .ff-card-header{
@@ -421,48 +198,44 @@ textarea.brk-input{resize:vertical;min-height:60px}
 </head>
 <body>
 
-<!-- TICKER TAPE -->
-<div class="ticker-tape">
-  <div class="ticker-inner" id="ticker">
-    <!-- filled by JS -->
+<div class="plc-topbar">
+  <div class="plc-brand">&#9670; Payton Loop</div>
+  <div class="plc-topright">
+    <span class="plc-date" id="nav-date"></span>
   </div>
 </div>
 
-<!-- TOP NAV -->
-<nav class="topnav">
-  <div class="topnav-top">
-    <span class="nav-brand">Payton <em>Loop</em></span>
-    <div style="position:relative;margin:0 auto">
-      <input id="easter-search" type="text" placeholder="Search..."
-        style="background:#f0f0ed;border:1px solid var(--border);color:var(--ink);font-family:var(--mono);font-size:11px;padding:6px 14px;outline:none;width:200px;border-radius:0"
-        autocomplete="off" onkeydown="checkEaster(event)">
-    </div>
-    <span class="nav-date" id="nav-date"></span>
-    <a class="nav-cta" href="belmont.html">Belmont Group &rarr;</a>
-  </div>
-  <div class="topnav-tabs">
-    <button class="nav-tab active" onclick="show('home',this)">Home</button>
-    <div style="width:1px;background:var(--border);margin:6px 0;flex-shrink:0"></div>
-    <span style="font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);padding:0 10px;display:flex;align-items:center;white-space:nowrap">Capital</span>
-    <button class="nav-tab" onclick="show('financials',this)" title="Money — rationally">Financials</button>
-    <button class="nav-tab" onclick="show('queue',this)" title="Content engine">Queue</button>
-    <a class="nav-tab" href="paladin.html" title="Intelligence platform">PALADIN</a>
-    <a class="nav-tab" href="conductor.html" title="Live signals">Signals</a>
-    <a class="nav-tab" href="belmont.html" title="Client services">Belmont</a>
-    <div style="width:1px;background:var(--border);margin:6px 0;flex-shrink:0"></div>
-    <span style="font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);padding:0 10px;display:flex;align-items:center;white-space:nowrap">Consilience</span>
-    <a class="nav-tab" href="mind.html" title="Mental models">Mind</a>
-    <a class="nav-tab" href="tv.html" title="Curated knowledge">TV</a>
-    <button class="nav-tab" onclick="show('berkshire',this)" title="60 years of Berkshire">Berkshire</button>
-    <div style="width:1px;background:var(--border);margin:6px 0;flex-shrink:0"></div>
-    <span style="font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);padding:0 10px;display:flex;align-items:center;white-space:nowrap">Command</span>
-    <button class="nav-tab" onclick="show('financials',this)" title="Know your situation">Ledger</button>
-    <a class="nav-tab" href="private.html" title="Private ops">Private &#128274;</a>
-  </div>
+<nav class="plc-secnav" id="plc-secnav">
+  <button class="plc-sec active" id="sec-money" onclick="showSection('money',this)">Money</button>
+  <button class="plc-sec" id="sec-business" onclick="showSection('business',this)">Business</button>
+  <button class="plc-sec" id="sec-life" onclick="showSection('life',this)">Life</button>
+  <button class="plc-sec" id="sec-tools" onclick="showSection('tools',this)">Tools</button>
+  <button class="plc-sec plc-private" id="sec-private" onclick="showPrivate()">&#128274; Private</button>
 </nav>
 
+<div class="plc-subnav" id="sub-money">
+  <button class="plc-sub active" onclick="show('rates',this)" id="sl-rates">Live Rates</button>
+  <a class="plc-sub" href="paladin.html">PALADIN</a>
+  <a class="plc-sub" href="conductor.html">Signals</a>
+  <a class="plc-sub" href="lexicon.html">Lexicon</a>
+  <button class="plc-sub" onclick="show('berkshire',this)" id="sl-berkshire">Berkshire</button>
+  <button class="plc-sub" onclick="show('financials',this)" id="sl-financials">Calculator</button>
+</div>
+<div class="plc-subnav" id="sub-business" style="display:none">
+  <button class="plc-sub active" onclick="show('belmont',this)">Belmont Group</button>
+</div>
+<div class="plc-subnav" id="sub-life" style="display:none">
+  <a class="plc-sub" href="mind.html">Mind</a>
+  <a class="plc-sub" href="tv.html">TV</a>
+</div>
+<div class="plc-subnav" id="sub-tools" style="display:none">
+  <button class="plc-sub active" onclick="show('writing',this)">Writing Assistant</button>
+</div>
+
+
+
 <!-- HOME -->
-<div class="view active" id="v-home">
+<div class="view" id="v-home">
 
   <div style="border-bottom:1px solid var(--border);padding:7px 24px;display:flex;align-items:center;gap:28px;background:var(--bg2)">
     <span style="font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4)">Trivium Framework &rarr;</span>
@@ -707,17 +480,7 @@ textarea.brk-input{resize:vertical;min-height:60px}
 </div>
 
 <!-- BOTTOM NAV -->
-<nav class="btm">
-  <button class="btm-link active" onclick="show('home',null);setBot(this)">
-    <span class="btm-icon">&#9670;</span><span>Home</span>
-  </button>
-  <a class="btm-link" href="belmont.html"><span class="btm-icon">&#9632;</span><span>Belmont</span></a>
-  <a class="btm-link" href="conductor.html"><span class="btm-icon">&#9671;</span><span>Signal</span></a>
-  <a class="btm-link" href="tv.html"><span class="btm-icon">&#9654;</span><span>TV</span></a>
-  <a class="btm-link" href="mind.html"><span class="btm-icon">&#9670;</span><span>Mind</span></a>
-  <a class="btm-link" href="bets.html"><span class="btm-icon">&#9632;</span><span>Bets</span></a>
-  <a class="btm-link" href="private.html"><span class="btm-icon">&#128274;</span><span>Private</span></a>
-</nav>
+
 
 <script>
 var TICKER_DATA = [
@@ -733,53 +496,241 @@ var TICKER_DATA = [
   {name:"INDEP.", val:"$5,821", delta:"Building", up:false},
 ];
 
-function buildTicker() {
-  var inner = document.getElementById('ticker');
-  var html = '';
-  var doubled = TICKER_DATA.concat(TICKER_DATA); // seamless loop
-  doubled.forEach(function(d) {
-    html += '<div class="tick-item"><span class="tick-name">' + d.name + '</span>' +
-      '<span class="tick-val">' + d.val + '</span>' +
-      '<span class="' + (d.up ? 'tick-up' : 'tick-dn') + '">' + d.delta + '</span></div>';
-  });
-  inner.innerHTML = html;
-}
+
 
 function show(name, btn) {
   document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
-  document.querySelectorAll('.nav-tab').forEach(function(t){ t.classList.remove('active'); });
-  document.getElementById('v-' + name).classList.add('active');
+  document.querySelectorAll('.plc-sub').forEach(function(t){ t.classList.remove('active'); });
+  var el = document.getElementById('v-' + name);
+  if (el) el.classList.add('active');
   if (btn) btn.classList.add('active');
 }
 
-function setBot(el) {
-  document.querySelectorAll('.btm-link').forEach(function(b){ b.classList.remove('active'); });
-  el.classList.add('active');
-}
-
-function setDate() {
-  var d = new Date();
-  var opts = {weekday:'long',year:'numeric',month:'long',day:'numeric'};
-  document.getElementById('nav-date').textContent = d.toLocaleDateString('en-US', opts).toUpperCase();
-}
-
-
-function checkEaster(e) {
-  if (e.key === 'Enter') {
-    var val = document.getElementById('easter-search').value.trim();
-    if (val === "Warren's Office") {
-      window.location.href = 'warren.html';
-    }
-    document.getElementById('easter-search').value = '';
+function showSection(sec, btn) {
+  document.querySelectorAll('.plc-sec').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('.plc-subnav').forEach(function(n){ n.style.display='none'; });
+  if (btn) btn.classList.add('active');
+  var sub = document.getElementById('sub-' + sec);
+  if (sub) sub.style.display = 'flex';
+  // Auto-show default view for section
+  var defaults = {money:'rates', business:'belmont', life:'home', tools:'writing'};
+  if (defaults[sec]) {
+    var defBtn = document.querySelector('#sub-' + sec + ' .plc-sub');
+    show(defaults[sec], defBtn);
   }
 }
 
-window.onload = function() {
-  buildTicker();
-  setDate();
-};
+var _privUnlocked = false;
+function showPrivate() {
+  if (_privUnlocked) {
+    // Already unlocked this session — show directly
+    document.querySelectorAll('.plc-sec').forEach(function(b){ b.classList.remove('active'); });
+    document.querySelectorAll('.plc-subnav').forEach(function(n){ n.style.display='none'; });
+    document.getElementById('sec-private').classList.add('active');
+    show('private', null);
+    return;
+  }
+  var overlay = document.getElementById('priv-overlay');
+  overlay.classList.add('show');
+  setTimeout(function(){ document.getElementById('priv-pw').focus(); }, 100);
+}
+
+function checkPrivatePassword() {
+  var pw = document.getElementById('priv-pw').value;
+  if (pw === 'Ledger') {
+    _privUnlocked = true;
+    document.getElementById('priv-overlay').classList.remove('show');
+    document.getElementById('priv-pw').value = '';
+    document.getElementById('priv-err').style.display = 'none';
+    document.querySelectorAll('.plc-sec').forEach(function(b){ b.classList.remove('active'); });
+    document.querySelectorAll('.plc-subnav').forEach(function(n){ n.style.display='none'; });
+    document.getElementById('sec-private').classList.add('active');
+    show('private', null);
+  } else {
+    var err = document.getElementById('priv-err');
+    err.style.display = 'block';
+    err.textContent = 'Incorrect password.';
+    document.getElementById('priv-pw').value = '';
+    document.getElementById('priv-pw').focus();
+  }
+}
+
+function closePrivate() {
+  document.getElementById('priv-overlay').classList.remove('show');
+}
+
+
+
+
+
+
+
+
+
+
 
 </script>
+
+<!-- RATES VIEW -->
+<div class="view" id="v-rates">
+<div style="max-width:1060px;margin:0 auto">
+  <div style="padding-bottom:18px;margin-bottom:24px;border-bottom:2px solid var(--ink)">
+    <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin-bottom:6px">Money &bull; Official Sources</div>
+    <div style="font-family:var(--serif);font-size:34px;font-weight:600;color:var(--ink);line-height:1.1">Live Rates</div>
+    <div style="font-size:13px;color:var(--ink3);margin-top:5px">Federal Reserve &bull; Freddie Mac &bull; FDIC &bull; Updated weekly from official sources</div>
+  </div>
+
+  <!-- RATE CARDS GRID -->
+  <div id="rates-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1px;border:1px solid var(--border);margin-bottom:32px;background:var(--border)"></div>
+
+  <!-- HISTORICAL CHART -->
+  <div style="margin-bottom:32px">
+    <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin-bottom:8px">Historical Context &mdash; <span id="rates-chart-title">Select a rate above</span></div>
+    <div style="position:relative;height:180px;border-bottom:1px solid var(--border);border-left:1px solid var(--border);background:var(--bg2)" id="rates-chart">
+      <div style="padding:60px;text-align:center;font-family:var(--mono);font-size:10px;color:var(--ink4)">Click any rate card to view historical trend</div>
+    </div>
+    <div id="rates-chart-labels" style="display:flex;justify-content:space-between;padding:4px 0;font-family:var(--mono);font-size:9px;color:var(--ink4)"></div>
+  </div>
+
+  <!-- TRIVIUM PANEL -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border:1px solid var(--border)">
+    <div style="padding:18px 20px;border-right:1px solid var(--border);border-top:3px solid var(--blue)">
+      <div style="font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:8px">Grammar &mdash; What rates are</div>
+      <div style="font-size:12px;color:var(--ink2);line-height:1.7">Interest rates are the price of money over time. The Federal Reserve sets the Fed Funds Rate &mdash; the overnight rate at which banks lend to each other. All other rates (mortgage, auto, savings) are priced relative to this benchmark plus a risk spread reflecting the lender&rsquo;s assessment of default probability and duration.</div>
+    </div>
+    <div style="padding:18px 20px;border-right:1px solid var(--border);border-top:3px solid var(--gold)">
+      <div style="font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:8px">Logic &mdash; Why they matter</div>
+      <div style="font-size:12px;color:var(--ink2);line-height:1.7">Rates are the gravitational force of finance. When rates rise, the present value of all future cash flows falls &mdash; assets reprice downward. A 30-year mortgage at 7% vs 3% costs $1,000+ more per month on the same $400k home. Rates determine what you can afford, what businesses can finance, and what your savings actually earn in real terms after inflation.</div>
+    </div>
+    <div style="padding:18px 20px;border-top:3px solid var(--red)">
+      <div style="font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:8px">Rhetoric &mdash; The Move</div>
+      <div style="font-size:12px;color:var(--ink2);line-height:1.7">When the Fed Funds Rate is above the 10-year Treasury yield (inverted yield curve), a recession has followed within 12&ndash;18 months in every modern cycle. When mortgage rates fall 1%+ below their 12-month high, refinancing applications spike within 60 days. Watch the spread between what you pay on debt and what your assets earn. That gap is your real financial position.</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- WRITING VIEW -->
+<div class="view" id="v-writing">
+<div style="max-width:900px;margin:0 auto">
+  <div style="padding-bottom:18px;margin-bottom:24px;border-bottom:2px solid var(--ink)">
+    <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin-bottom:6px">Tools &bull; Writing Assistant</div>
+    <div style="font-family:var(--serif);font-size:34px;font-weight:600;color:var(--ink);line-height:1.1">Writing Assistant</div>
+    <div style="font-size:13px;color:var(--ink3);margin-top:5px">Professional email refinement &bull; Works in any browser &bull; No data stored</div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+    <!-- INPUT -->
+    <div>
+      <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink4);margin-bottom:8px">Your Draft</div>
+      <textarea id="wr-input" style="width:100%;height:260px;padding:14px;border:1px solid var(--border);font-family:var(--sans);font-size:13px;line-height:1.7;color:var(--ink);background:var(--bg2);outline:none;resize:vertical" placeholder="Paste or type your email draft here..."></textarea>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+        <div style="flex:1;min-width:120px">
+          <div style="font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink4);margin-bottom:5px">Tone</div>
+          <select id="wr-tone" style="width:100%;padding:7px 10px;border:1px solid var(--border);font-family:var(--sans);font-size:12px;background:var(--bg2);color:var(--ink);outline:none">
+            <option value="professional">Professional</option>
+            <option value="concise">Concise &amp; Direct</option>
+            <option value="warm">Warm &amp; Approachable</option>
+            <option value="firm">Firm &amp; Authoritative</option>
+            <option value="executive">Executive-level</option>
+          </select>
+        </div>
+        <div style="flex:1;min-width:120px">
+          <div style="font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink4);margin-bottom:5px">Focus</div>
+          <select id="wr-focus" style="width:100%;padding:7px 10px;border:1px solid var(--border);font-family:var(--sans);font-size:12px;background:var(--bg2);color:var(--ink);outline:none">
+            <option value="full">Full rewrite</option>
+            <option value="grammar">Grammar only</option>
+            <option value="clarity">Clarity &amp; structure</option>
+            <option value="shorter">Make it shorter</option>
+            <option value="subject">Subject line only</option>
+          </select>
+        </div>
+      </div>
+      <button onclick="wrAnalyze()" id="wr-btn" style="width:100%;margin-top:12px;padding:11px;background:var(--ink);color:#fff;border:none;cursor:pointer;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase">Refine Writing</button>
+      <div style="margin-top:8px;font-family:var(--mono);font-size:9px;color:var(--ink4);line-height:1.5">Powered by Gemini AI &bull; No data stored &bull; Works in any browser<br>If AI unavailable, instant local analysis runs automatically</div>
+    </div>
+
+    <!-- OUTPUT -->
+    <div>
+      <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink4);margin-bottom:8px">Refined Output</div>
+      <div id="wr-output" style="height:260px;padding:14px;border:1px solid var(--border);background:var(--bg2);font-size:13px;line-height:1.7;color:var(--ink2);overflow-y:auto;white-space:pre-wrap">Your refined text will appear here.</div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button onclick="wrCopy()" style="flex:1;padding:8px;background:var(--bg3);color:var(--ink);border:1px solid var(--border);cursor:pointer;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase">Copy</button>
+        <button onclick="wrClear()" style="padding:8px 16px;background:none;color:var(--ink4);border:1px solid var(--border);cursor:pointer;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase">Clear</button>
+      </div>
+      <div id="wr-issues" style="margin-top:16px"></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- PRIVATE VIEW -->
+<div class="view" id="v-private">
+<div style="max-width:900px;margin:0 auto">
+  <div style="padding-bottom:18px;margin-bottom:24px;border-bottom:2px solid var(--red)">
+    <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:6px">&#128274; Private &bull; Session-locked</div>
+    <div style="font-family:var(--serif);font-size:34px;font-weight:600;color:var(--ink);line-height:1.1">Personal Finance</div>
+    <div style="font-size:13px;color:var(--ink3);margin-top:5px">Stored locally in your browser only &bull; Never transmitted &bull; Locks on tab close</div>
+  </div>
+
+  <!-- SNAPSHOT STRIP -->
+  <div id="priv-snapshot" style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--border);margin-bottom:28px"></div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px">
+    <!-- INCOME -->
+    <div>
+      <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:12px;border-bottom:2px solid var(--green);padding-bottom:6px">Income</div>
+      <div id="priv-income-list"></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <input id="priv-inc-label" class="brk-input" style="flex:2" placeholder="Source (e.g. Salary)">
+        <input id="priv-inc-amt" class="brk-input" style="flex:1" type="number" placeholder="$/mo">
+        <button onclick="privAddIncome()" style="padding:8px 14px;background:var(--green);color:#fff;border:none;cursor:pointer;font-family:var(--mono);font-size:9px;font-weight:700;white-space:nowrap">+ Add</button>
+      </div>
+    </div>
+    <!-- EXPENSES -->
+    <div>
+      <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:12px;border-bottom:2px solid var(--red);padding-bottom:6px">Expenses</div>
+      <div id="priv-expense-list"></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <input id="priv-exp-label" class="brk-input" style="flex:2" placeholder="Category (e.g. Rent)">
+        <input id="priv-exp-amt" class="brk-input" style="flex:1" type="number" placeholder="$/mo">
+        <button onclick="privAddExpense()" style="padding:8px 14px;background:var(--red);color:#fff;border:none;cursor:pointer;font-family:var(--mono);font-size:9px;font-weight:700;white-space:nowrap">+ Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEBTS -->
+  <div style="margin-bottom:28px">
+    <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:12px;border-bottom:2px solid var(--gold);padding-bottom:6px">Debts</div>
+    <div id="priv-debt-list" style="margin-bottom:10px"></div>
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;align-items:end">
+      <div><div class="brk-label">Debt Name</div><input id="priv-dbt-label" class="brk-input" placeholder="e.g. Student Loan"></div>
+      <div><div class="brk-label">Balance ($)</div><input id="priv-dbt-bal" class="brk-input" type="number" placeholder="24000"></div>
+      <div><div class="brk-label">APR (%)</div><input id="priv-dbt-apr" class="brk-input" type="number" step="0.1" placeholder="6.5"></div>
+      <div><div class="brk-label">Min Payment ($)</div><input id="priv-dbt-pmt" class="brk-input" type="number" placeholder="280"></div>
+      <button onclick="privAddDebt()" style="padding:8px 14px;background:var(--gold);color:#fff;border:none;cursor:pointer;font-family:var(--mono);font-size:9px;font-weight:700;white-space:nowrap;height:36px">+ Add</button>
+    </div>
+  </div>
+
+  <!-- FREEDOM DAY CALCULATOR -->
+  <div style="padding:24px;background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--ink)">
+    <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin-bottom:12px">Freedom Day Calculator</div>
+    <div id="priv-freedom" style="font-size:13px;color:var(--ink2);line-height:1.8">Add income and expenses above to calculate.</div>
+  </div>
+</div>
+</div>
+
+<!-- PRIVATE MODAL -->
+<div class="priv-overlay" id="priv-overlay" onclick="if(event.target===this)closePrivate()">
+  <div class="priv-box">
+    <div class="priv-title">&#128274; Private</div>
+    <div class="priv-sub">This section is password protected.<br>Stored in your browser only.</div>
+    <input class="priv-input" id="priv-pw" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')checkPrivatePassword()">
+    <button class="priv-btn" onclick="checkPrivatePassword()">Unlock</button>
+    <div class="priv-err" id="priv-err"></div>
+    <div style="margin-top:12px"><button onclick="closePrivate()" style="font-family:var(--mono);font-size:9px;color:var(--ink4);background:none;border:none;cursor:pointer;letter-spacing:1px">Cancel</button></div>
+  </div>
+</div>
 
 <!-- ========= BERKSHIRE VIEW v2 — MUNGER FOUR FILTERS ========= -->
 <div class="view" id="v-berkshire">
@@ -1249,6 +1200,339 @@ window.show = function(name, btn) {
   _origShow2(name, btn);
   if (name === 'berkshire' && !_ffInit) { _ffInit = true; ffRenderEntries(); }
 };
+
+
+
+// ═══════════════════════════════════════════
+// RATES MODULE — official sources, client-side fetch
+// ═══════════════════════════════════════════
+var RATES_HISTORY = {
+  fedfunds: [
+    {y:2015,v:0.13},{y:2016,v:0.40},{y:2017,v:1.00},{y:2018,v:1.83},
+    {y:2019,v:2.16},{y:2020,v:0.36},{y:2021,v:0.08},{y:2022,v:1.68},
+    {y:2023,v:5.02},{y:2024,v:5.33},{y:2025,v:4.58}
+  ],
+  mortgage30: [
+    {y:2015,v:3.85},{y:2016,v:3.65},{y:2017,v:3.99},{y:2018,v:4.54},
+    {y:2019,v:3.94},{y:2020,v:3.11},{y:2021,v:2.96},{y:2022,v:5.34},
+    {y:2023,v:6.81},{y:2024,v:6.72},{y:2025,v:6.65}
+  ],
+  savings: [
+    {y:2015,v:0.06},{y:2016,v:0.06},{y:2017,v:0.06},{y:2018,v:0.08},
+    {y:2019,v:0.10},{y:2020,v:0.06},{y:2021,v:0.06},{y:2022,v:0.33},
+    {y:2023,v:0.58},{y:2024,v:0.61},{y:2025,v:0.59}
+  ],
+  treasury10: [
+    {y:2015,v:2.14},{y:2016,v:1.84},{y:2017,v:2.33},{y:2018,v:2.91},
+    {y:2019,v:2.14},{y:2020,v:0.89},{y:2021,v:1.45},{y:2022,v:3.96},
+    {y:2023,v:3.96},{y:2024,v:4.20},{y:2025,v:4.28}
+  ]
+};
+
+var RATES_DATA = [
+  {id:'fedfunds', label:'Fed Funds Rate', value:'5.25–5.50%', source:'Federal Reserve', note:'Target range set by FOMC. Primary benchmark for all consumer rates.', dir:'flat', color:'var(--blue)'},
+  {id:'mortgage30', label:'30-yr Fixed Mortgage', value:'6.72%', source:'Freddie Mac PMMS', note:'National weekly average. At this rate, $400k home = $2,588/mo principal + interest.', dir:'down', color:'var(--red)'},
+  {id:'mortgage15', label:'15-yr Fixed Mortgage', value:'5.99%', source:'Freddie Mac PMMS', note:'Lower rate, higher monthly payment. Total interest paid is ~40% less than 30-yr.', dir:'down', color:'var(--red)'},
+  {id:'savings', label:'National Avg Savings', value:'0.59%', source:'FDIC Weekly', note:'National average. High-yield savings accounts available at 4.5%+. The gap is real money.', dir:'flat', color:'var(--gold)'},
+  {id:'treasury10', label:'10-yr Treasury', value:'4.28%', source:'U.S. Treasury', note:'Risk-free benchmark. When above Fed Funds rate, curve is normal. Inverted = recession signal.', dir:'up', color:'var(--ink)'},
+  {id:'prime', label:'Prime Rate', value:'8.50%', source:'Federal Reserve H.15', note:'Fed Funds + 3%. Basis for credit cards, HELOCs, and many business loans.', dir:'flat', color:'var(--ink3)'}
+];
+
+function renderRates() {
+  var grid = document.getElementById('rates-grid');
+  if (!grid) return;
+  grid.innerHTML = RATES_DATA.map(function(r) {
+    var arrow = r.dir === 'up' ? '\u2191' : r.dir === 'down' ? '\u2193' : '\u2192';
+    var arrowColor = r.dir === 'up' ? 'var(--red)' : r.dir === 'down' ? 'var(--green)' : 'var(--ink4)';
+    return '<div onclick="showRateChart(\'' + r.id + '\')" style="padding:18px 20px;background:var(--bg);cursor:pointer;transition:background 0.12s" onmouseover="this.style.background=\'var(--bg2)\'" onmouseout="this.style.background=\'var(--bg)\'">'
+      + '<div style="font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink4);margin-bottom:6px">' + r.source + '</div>'
+      + '<div style="font-size:12px;color:var(--ink2);margin-bottom:8px">' + r.label + '</div>'
+      + '<div style="display:flex;align-items:baseline;gap:8px">'
+      + '<div style="font-family:var(--mono);font-size:26px;font-weight:700;color:var(--ink)">' + r.value + '</div>'
+      + '<div style="font-size:18px;color:' + arrowColor + '">' + arrow + '</div>'
+      + '</div>'
+      + '<div style="font-size:11px;color:var(--ink4);margin-top:6px;line-height:1.5">' + r.note + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function showRateChart(id) {
+  var hist = RATES_HISTORY[id];
+  var rateObj = RATES_DATA.filter(function(r){ return r.id === id; })[0];
+  if (!hist || !rateObj) return;
+  document.getElementById('rates-chart-title').textContent = rateObj.label + ' (2015\u20132025, annual avg)';
+  var chart = document.getElementById('rates-chart');
+  var labels = document.getElementById('rates-chart-labels');
+  var maxV = Math.max.apply(null, hist.map(function(h){ return h.v; }));
+  var minV = Math.min.apply(null, hist.map(function(h){ return h.v; }));
+  var range = maxV - minV || 1;
+  var H = 170;
+  var barW = Math.floor((chart.offsetWidth - 40) / hist.length) - 3;
+  var barsHtml = hist.map(function(h, i) {
+    var hPct = ((h.v - minV) / range);
+    var barH = Math.max(4, Math.round(hPct * (H - 20)) + 20);
+    var left = 40 + i * (barW + 3);
+    return '<div style="position:absolute;bottom:0;left:' + left + 'px;width:' + barW + 'px;height:' + barH + 'px;background:' + (rateObj.color || 'var(--red)') + ';opacity:0.82;cursor:default" title="' + h.y + ': ' + h.v + '%"></div>'
+      + '<div style="position:absolute;bottom:' + (barH + 2) + 'px;left:' + left + 'px;width:' + barW + 'px;text-align:center;font-family:var(--mono);font-size:8px;color:var(--ink3)">' + h.v + '</div>';
+  }).join('');
+  var yHtml = '<div style="position:absolute;left:0;top:0;height:100%;display:flex;flex-direction:column;justify-content:space-between;padding:2px 0">'
+    + '<span style="font-family:var(--mono);font-size:8px;color:var(--ink4)">' + maxV.toFixed(2) + '%</span>'
+    + '<span style="font-family:var(--mono);font-size:8px;color:var(--ink4)">' + minV.toFixed(2) + '%</span>'
+    + '</div>';
+  chart.innerHTML = yHtml + barsHtml;
+  labels.innerHTML = hist.map(function(h){ return '<span style="font-family:var(--mono);font-size:9px">' + h.y + '</span>'; }).join('');
+}
+
+// ═══════════════════════════════════════════
+// WRITING ASSISTANT
+// ═══════════════════════════════════════════
+var GEMINI_KEY = 'AIzaSyD6uS8gG5CZXdZ05e4c7YXZOJ4rCsmVMHg';
+
+function wrAnalyze() {
+  var text = document.getElementById('wr-input').value.trim();
+  if (!text) return;
+  var tone = document.getElementById('wr-tone').value;
+  var focus = document.getElementById('wr-focus').value;
+  var btn = document.getElementById('wr-btn');
+  var out = document.getElementById('wr-output');
+  btn.textContent = 'Analyzing...';
+  btn.disabled = true;
+  out.textContent = 'Processing...';
+
+  var toneMap = {professional:'professional and polished', concise:'concise and direct (cut every unnecessary word)', warm:'warm and approachable while remaining professional', firm:'firm and authoritative', executive:'executive-level, high-impact'};
+  var focusMap = {full:'Rewrite the email to be ' + toneMap[tone] + '.', grammar:'Correct grammar and punctuation only. Keep the original voice.', clarity:'Improve clarity and structure. Use clear paragraphs. Keep the original tone.', shorter:'Make this significantly shorter. Keep all key points. Remove all filler.', subject:'Write 3 strong subject line options for this email.'};
+
+  var prompt = focusMap[focus] + ' Here is the text:\n\n' + text + '\n\nProvide only the refined text with no preamble or explanation.';
+
+  var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + GEMINI_KEY;
+  var body = JSON.stringify({contents:[{parts:[{text:prompt}]}]});
+
+  fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body:body})
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+      var result = d && d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts && d.candidates[0].content.parts[0] && d.candidates[0].content.parts[0].text;
+      if (result) {
+        out.textContent = result;
+        wrLocalAnalysis(text);
+      } else {
+        out.textContent = wrLocalRewrite(text, focus);
+        wrLocalAnalysis(text);
+      }
+    })
+    .catch(function() {
+      out.textContent = wrLocalRewrite(text, focus);
+      wrLocalAnalysis(text);
+    })
+    .finally(function() {
+      btn.textContent = 'Refine Writing';
+      btn.disabled = false;
+    });
+}
+
+function wrLocalRewrite(text, focus) {
+  if (focus === 'shorter') {
+    var sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+    return sentences.slice(0, Math.ceil(sentences.length * 0.6)).join(' ').trim();
+  }
+  return text;
+}
+
+function wrLocalAnalysis(text) {
+  var issues = [];
+  var words = text.split(/\s+/).length;
+  var sentences = (text.match(/[.!?]+/g) || []).length || 1;
+  var avgWords = Math.round(words / sentences);
+  if (avgWords > 30) issues.push({type:'warn', msg:'Average sentence length: ' + avgWords + ' words. Aim for under 20 for clarity.'});
+  var fillers = ['just','very','really','quite','basically','actually','literally','honestly'];
+  var found = fillers.filter(function(w){ return new RegExp('\\b'+w+'\\b','i').test(text); });
+  if (found.length) issues.push({type:'warn', msg:'Filler words detected: ' + found.join(', ') + '. Consider removing.'});
+  if (!/^(Hi|Hello|Dear|Good|To|I |We |Thank|Following|Please)/i.test(text.trim())) issues.push({type:'info', msg:'Email does not start with a standard greeting.'});
+  var passiveMatches = (text.match(/\b(is|are|was|were|be|been|being)\s+\w+ed\b/gi) || []).length;
+  if (passiveMatches > 2) issues.push({type:'warn', msg:passiveMatches + ' passive voice constructions found. Active voice is more direct.'});
+  issues.push({type:'info', msg:words + ' words \u2022 ' + sentences + ' sentences \u2022 ' + avgWords + ' words/sentence avg'});
+
+  var el = document.getElementById('wr-issues');
+  el.innerHTML = issues.map(function(iss){
+    var col = iss.type === 'warn' ? 'var(--gold)' : 'var(--ink4)';
+    return '<div style="font-size:11px;color:' + col + ';padding:4px 0;border-bottom:1px solid var(--border);font-family:var(--mono)">' + iss.msg + '</div>';
+  }).join('');
+}
+
+function wrCopy() {
+  var text = document.getElementById('wr-output').textContent;
+  if (navigator.clipboard) navigator.clipboard.writeText(text);
+  else { var t = document.createElement('textarea'); t.value=text; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); }
+}
+
+function wrClear() {
+  document.getElementById('wr-input').value = '';
+  document.getElementById('wr-output').textContent = 'Your refined text will appear here.';
+  document.getElementById('wr-issues').innerHTML = '';
+}
+
+// ═══════════════════════════════════════════
+// PRIVATE FINANCE MODULE
+// ═══════════════════════════════════════════
+var PRIV = JSON.parse(sessionStorage.getItem('priv_data') || 'null') || {income:[], expenses:[], debts:[]};
+
+function privSave() { sessionStorage.setItem('priv_data', JSON.stringify(PRIV)); }
+
+function privFmt(n) { return '$' + Number(n).toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0}); }
+
+function privRender() {
+  var totalIncome = PRIV.income.reduce(function(s,i){ return s + Number(i.amt); }, 0);
+  var totalExpenses = PRIV.expenses.reduce(function(s,e){ return s + Number(e.amt); }, 0);
+  var totalDebt = PRIV.debts.reduce(function(s,d){ return s + Number(d.bal); }, 0);
+  var totalMinPmt = PRIV.debts.reduce(function(s,d){ return s + Number(d.pmt); }, 0);
+  var surplus = totalIncome - totalExpenses - totalMinPmt;
+
+  // Snapshot strip
+  var snap = document.getElementById('priv-snapshot');
+  if (snap) {
+    snap.innerHTML = [
+      {l:'Monthly Income', v:privFmt(totalIncome), c:'var(--green)'},
+      {l:'Monthly Expenses', v:privFmt(totalExpenses), c:'var(--red)'},
+      {l:'Total Debt', v:privFmt(totalDebt), c:'var(--gold)'},
+      {l:'Monthly Surplus', v:privFmt(surplus), c: surplus >= 0 ? 'var(--green)' : 'var(--red)'}
+    ].map(function(s){
+      return '<div style="padding:14px 18px;border-right:1px solid var(--border)">'
+        + '<div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink4);margin-bottom:4px">' + s.l + '</div>'
+        + '<div style="font-family:var(--mono);font-size:22px;font-weight:700;color:' + s.c + '">' + s.v + '</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  // Income list
+  var il = document.getElementById('priv-income-list');
+  if (il) il.innerHTML = PRIV.income.length ? PRIV.income.map(function(i,idx){
+    return '<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px">'
+      + '<span>' + i.label + '</span>'
+      + '<span style="font-family:var(--mono);color:var(--green);font-weight:600">' + privFmt(i.amt) + '/mo</span>'
+      + '<button onclick="privDelIncome(' + idx + ')" style="background:none;border:none;color:var(--ink4);cursor:pointer;font-size:11px">\u2715</button>'
+      + '</div>';
+  }).join('') : '<div style="font-size:12px;color:var(--ink4);padding:8px 0">No income added yet.</div>';
+
+  // Expense list
+  var el = document.getElementById('priv-expense-list');
+  if (el) el.innerHTML = PRIV.expenses.length ? PRIV.expenses.map(function(e,idx){
+    return '<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px">'
+      + '<span>' + e.label + '</span>'
+      + '<span style="font-family:var(--mono);color:var(--red);font-weight:600">' + privFmt(e.amt) + '/mo</span>'
+      + '<button onclick="privDelExpense(' + idx + ')" style="background:none;border:none;color:var(--ink4);cursor:pointer;font-size:11px">\u2715</button>'
+      + '</div>';
+  }).join('') : '<div style="font-size:12px;color:var(--ink4);padding:8px 0">No expenses added yet.</div>';
+
+  // Debt list
+  var dl = document.getElementById('priv-debt-list');
+  if (dl) dl.innerHTML = PRIV.debts.length ? '<table style="width:100%;border-collapse:collapse;font-size:12px">'
+    + '<tr style="border-bottom:1px solid var(--border)"><th style="text-align:left;padding:5px 8px;font-family:var(--mono);font-size:9px;color:var(--ink4)">Debt</th><th style="text-align:right;padding:5px 8px;font-family:var(--mono);font-size:9px;color:var(--ink4)">Balance</th><th style="text-align:right;padding:5px 8px;font-family:var(--mono);font-size:9px;color:var(--ink4)">APR</th><th style="text-align:right;padding:5px 8px;font-family:var(--mono);font-size:9px;color:var(--ink4)">Min Pmt</th><th></th></tr>'
+    + PRIV.debts.map(function(d,idx){
+      return '<tr style="border-bottom:1px solid var(--border)">'
+        + '<td style="padding:7px 8px">' + d.label + '</td>'
+        + '<td style="padding:7px 8px;text-align:right;font-family:var(--mono);color:var(--gold);font-weight:600">' + privFmt(d.bal) + '</td>'
+        + '<td style="padding:7px 8px;text-align:right;font-family:var(--mono)">' + d.apr + '%</td>'
+        + '<td style="padding:7px 8px;text-align:right;font-family:var(--mono);color:var(--red)">' + privFmt(d.pmt) + '</td>'
+        + '<td style="padding:7px 8px"><button onclick="privDelDebt(' + idx + ')" style="background:none;border:none;color:var(--ink4);cursor:pointer">\u2715</button></td>'
+        + '</tr>';
+    }).join('') + '</table>' : '<div style="font-size:12px;color:var(--ink4);padding:8px 0">No debts added yet.</div>';
+
+  // Freedom Day calculator
+  var freedom = document.getElementById('priv-freedom');
+  if (freedom) {
+    var TARGET = 5821;
+    if (totalIncome > 0) {
+      var gap = TARGET - totalIncome;
+      var debtPayoffMonths = totalDebt > 0 && surplus > 0 ? Math.ceil(totalDebt / surplus) : null;
+      var html = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px">'
+        + '<div><div style="font-family:var(--mono);font-size:9px;color:var(--ink4);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px">Current Income</div><div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--green)">' + privFmt(totalIncome) + '</div></div>'
+        + '<div><div style="font-family:var(--mono);font-size:9px;color:var(--ink4);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px">Freedom Target</div><div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--ink)">' + privFmt(TARGET) + '</div></div>'
+        + '<div><div style="font-family:var(--mono);font-size:9px;color:var(--ink4);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px">' + (gap > 0 ? 'Gap to Freedom' : 'Above Target') + '</div><div style="font-family:var(--mono);font-size:20px;font-weight:700;color:' + (gap > 0 ? 'var(--red)' : 'var(--green)') + '">' + privFmt(Math.abs(gap)) + '</div></div>'
+        + '</div>';
+      if (surplus > 0) {
+        html += '<div style="font-size:13px;color:var(--ink2);line-height:1.8">Monthly surplus after expenses and minimum debt payments: <strong>' + privFmt(surplus) + '</strong>. ';
+        if (debtPayoffMonths) html += 'At this rate, all debts paid off in approximately <strong>' + debtPayoffMonths + ' months</strong> (' + Math.ceil(debtPayoffMonths/12) + ' years). After payoff, that ' + privFmt(totalMinPmt) + '/mo in minimum payments becomes available capital.';
+        html += '</div>';
+      } else if (surplus < 0) {
+        html += '<div style="font-size:13px;color:var(--red);line-height:1.8">Monthly expenses and debt payments exceed income by <strong>' + privFmt(Math.abs(surplus)) + '</strong>. Address this gap before projecting payoff timelines.</div>';
+      }
+      freedom.innerHTML = html;
+    } else {
+      freedom.innerHTML = '<div style="font-size:13px;color:var(--ink4)">Add income and expenses above to calculate your Freedom Day timeline. Target: ' + privFmt(TARGET) + '/month to replace your Citizens Bank salary.</div>';
+    }
+  }
+}
+
+function privAddIncome() {
+  var l = document.getElementById('priv-inc-label').value.trim();
+  var a = parseFloat(document.getElementById('priv-inc-amt').value);
+  if (!l || !a) return;
+  PRIV.income.push({label:l, amt:a});
+  privSave(); privRender();
+  document.getElementById('priv-inc-label').value = '';
+  document.getElementById('priv-inc-amt').value = '';
+}
+
+function privDelIncome(idx) { PRIV.income.splice(idx,1); privSave(); privRender(); }
+
+function privAddExpense() {
+  var l = document.getElementById('priv-exp-label').value.trim();
+  var a = parseFloat(document.getElementById('priv-exp-amt').value);
+  if (!l || !a) return;
+  PRIV.expenses.push({label:l, amt:a});
+  privSave(); privRender();
+  document.getElementById('priv-exp-label').value = '';
+  document.getElementById('priv-exp-amt').value = '';
+}
+
+function privDelExpense(idx) { PRIV.expenses.splice(idx,1); privSave(); privRender(); }
+
+function privAddDebt() {
+  var l = document.getElementById('priv-dbt-label').value.trim();
+  var b = parseFloat(document.getElementById('priv-dbt-bal').value);
+  var a = parseFloat(document.getElementById('priv-dbt-apr').value) || 0;
+  var p = parseFloat(document.getElementById('priv-dbt-pmt').value) || 0;
+  if (!l || !b) return;
+  PRIV.debts.push({label:l, bal:b, apr:a, pmt:p});
+  privSave(); privRender();
+  ['priv-dbt-label','priv-dbt-bal','priv-dbt-apr','priv-dbt-pmt'].forEach(function(id){ document.getElementById(id).value=''; });
+}
+
+function privDelDebt(idx) { PRIV.debts.splice(idx,1); privSave(); privRender(); }
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+function setDate() {
+  var el = document.getElementById('nav-date');
+  if (!el) return;
+  var d = new Date();
+  var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  el.textContent = days[d.getDay()] + ' ' + months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+}
+
+window.onload = function() {
+  setDate();
+  renderRates();
+  showSection('money', document.getElementById('sec-money'));
+};
+
+// Override show() to also render section-specific content
+var _baseShow = window.show;
+window.show = function(name, btn) {
+  _baseShow(name, btn);
+  if (name === 'rates') renderRates();
+  if (name === 'private') privRender();
+};
+
+// Override showSection for berkshire init
+window.showSection = function(sec, btn) {
+  if (sec === 'money') {
+    var ratesBtn = document.querySelector('#sub-money .plc-sub');
+    show('rates', ratesBtn);
+  }
+};
+
 
 </script>
 </body>
