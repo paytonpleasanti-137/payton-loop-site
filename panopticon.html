@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Financial Panopticon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; background: #000; overflow: hidden; }
+  body { font-family: 'Share Tech Mono', 'Courier New', monospace; }
+  #c { display: block; width: 100vw; height: 100vh; }
+
+  /* ── HUD top bar ── */
+  #hud-top {
+    position: fixed; top: 0; left: 0; right: 0; height: 44px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.85), transparent);
+    pointer-events: none; z-index: 20;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  #hud-title {
+    font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+    color: rgba(255,255,255,0.7);
+  }
+  #hud-title em { color: rgba(255,255,255,0.25); font-style: normal; }
+  #hud-clock {
+    font-size: 10px; letter-spacing: 2px; color: rgba(255,255,255,0.3);
+  }
+  #hud-status {
+    font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+    color: rgba(255,255,255,0.22);
+  }
+
+  /* ── Node tooltip ── */
+  #tooltip {
+    position: fixed; bottom: 80px; left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none; z-index: 20;
+    text-align: center;
+  }
+  #tooltip-name {
+    font-size: 18px; letter-spacing: 3px; text-transform: uppercase;
+    color: #fff; font-weight: 400;
+  }
+  #tooltip-detail {
+    font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+    color: rgba(255,255,255,0.35); margin-top: 4px;
+  }
+
+  /* ── Bottom control strip ── */
+  #controls-bar {
+    position: fixed; bottom: 0; left: 0; right: 0; height: 48px;
+    display: flex; align-items: center; justify-content: center; gap: 2px;
+    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+    z-index: 20;
+  }
+  .mode-btn {
+    padding: 7px 18px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.28);
+    font-family: 'Share Tech Mono', 'Courier New', monospace;
+    font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .mode-btn:hover { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.6); }
+  .mode-btn.active {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.35);
+    color: #fff;
+  }
+
+  /* ── Slider panel (right side) ── */
+  #slider-panel {
+    position: fixed; right: 20px; top: 50%;
+    transform: translateY(-50%);
+    width: 200px; z-index: 20;
+    background: rgba(2,2,2,0.88);
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 16px 14px;
+  }
+  #slider-panel-title {
+    font-size: 8px; letter-spacing: 2px; text-transform: uppercase;
+    color: rgba(255,255,255,0.22); margin-bottom: 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px;
+  }
+  .sl-row { margin-bottom: 12px; }
+  .sl-label {
+    font-size: 8px; letter-spacing: 1px; text-transform: uppercase;
+    color: rgba(255,255,255,0.22);
+    display: flex; justify-content: space-between; margin-bottom: 5px;
+  }
+  .sl-label span { color: rgba(255,255,255,0.45); }
+  input[type=range] {
+    width: 100%; height: 2px; -webkit-appearance: none; appearance: none;
+    background: rgba(255,255,255,0.1); outline: none; cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 8px; height: 8px;
+    background: rgba(255,255,255,0.7); border-radius: 0; cursor: pointer;
+  }
+
+  /* ── Data feed indicator ── */
+  #feed-indicator {
+    position: fixed; top: 52px; right: 20px;
+    font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase;
+    color: rgba(255,255,255,0.18); z-index: 20; pointer-events: none;
+    line-height: 2;
+  }
+  .feed-dot {
+    display: inline-block; width: 5px; height: 5px;
+    border-radius: 50%; margin-right: 6px; vertical-align: middle;
+  }
+  .feed-live { background: rgba(80,220,100,0.9); }
+  .feed-sim  { background: rgba(220,180,60,0.7); }
+
+  /* ── Scanline overlay (always on, subtle) ── */
+  #scanlines {
+    position: fixed; inset: 0; pointer-events: none; z-index: 5;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 3px,
+      rgba(0,0,0,0.06) 3px,
+      rgba(0,0,0,0.06) 4px
+    );
+  }
+
+  /* ── Legend ── */
+  #legend {
+    position: fixed; left: 20px; bottom: 60px;
+    font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase;
+    color: rgba(255,255,255,0.18); z-index: 20; pointer-events: none;
+    line-height: 2.2;
+  }
+  .leg-dot {
+    display: inline-block; width: 7px; height: 7px;
+    margin-right: 7px; vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="scanlines"></div>
+
+<!-- HUD -->
+<div id="hud-top">
+  <div id="hud-title">&#9670; Financial <em>Panopticon</em></div>
+  <div id="hud-clock"></div>
+  <div id="hud-status" id="hud-status">Initializing streams&hellip;</div>
+</div>
+
+<!-- Node tooltip -->
+<div id="tooltip">
+  <div id="tooltip-name"></div>
+  <div id="tooltip-detail"></div>
+</div>
+
+<!-- Mode buttons -->
+<div id="controls-bar">
+  <button class="mode-btn active" id="btn-raw"     onclick="setMode('raw')">Raw</button>
+  <button class="mode-btn"        id="btn-thermal" onclick="setMode('thermal')">Thermal Volatility</button>
+  <button class="mode-btn"        id="btn-crt"     onclick="setMode('crt')">Institutional CRT</button>
+  <button class="mode-btn"        id="btn-bloom"   onclick="setMode('bloom')">Liquidity Bloom</button>
+</div>
+
+<!-- Slider panel -->
+<div id="slider-panel">
+  <div id="slider-panel-title">Shader Parameters</div>
+  <div id="slider-body"></div>
+</div>
+
+<!-- Feed status -->
+<div id="feed-indicator">
+  <div><span class="feed-dot feed-live" id="dot-binance"></span><span id="lbl-binance">Binance: connecting</span></div>
+  <div><span class="feed-dot feed-sim"  id="dot-equity"></span><span id="lbl-equity">Equity: simulated</span></div>
+</div>
+
+<!-- Legend -->
+<div id="legend">
+  <div><span class="leg-dot" style="background:rgba(255,210,90,0.7)"></span>Capital flow</div>
+  <div><span class="leg-dot" style="background:rgba(100,195,255,0.7)"></span>Liquidity</div>
+  <div><span class="leg-dot" style="background:rgba(255,110,80,0.7)"></span>Settlement</div>
+  <div><span class="leg-dot" style="background:rgba(90,255,150,0.7)"></span>Crypto routing</div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════════════════
+// 1. RENDERER + SCENE INIT
+// ════════════════════════════════════════════════════════════════════════════
+var W = window.innerWidth, H = window.innerHeight;
+
+var renderer = new THREE.WebGLRenderer({
+  canvas: document.getElementById('c'),
+  antialias: true,
+  alpha: false
+});
+renderer.setSize(W, H);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.9;
+
+var scene = new THREE.Scene();
+scene.background = new THREE.Color(0x020202);
+scene.fog = new THREE.FogExp2(0x020202, 0.014);
+
+var camera = new THREE.PerspectiveCamera(52, W / H, 0.1, 1000);
+camera.position.set(0, 32, 55);
+camera.lookAt(0, 0, 0);
+
+// ════════════════════════════════════════════════════════════════════════════
+// 2. LIGHTING
+// ════════════════════════════════════════════════════════════════════════════
+scene.add(new THREE.AmbientLight(0x0a0e14, 0.7));
+
+var keyLight = new THREE.DirectionalLight(0xa0b8c8, 1.4);
+keyLight.position.set(25, 70, 25);
+keyLight.castShadow = true;
+keyLight.shadow.mapSize.set(2048, 2048);
+keyLight.shadow.camera.left   = -100;
+keyLight.shadow.camera.right  =  100;
+keyLight.shadow.camera.top    =  100;
+keyLight.shadow.camera.bottom = -100;
+keyLight.shadow.camera.far    = 250;
+scene.add(keyLight);
+
+var fillLight = new THREE.DirectionalLight(0xc09060, 0.35);
+fillLight.position.set(-35, 12, -25);
+scene.add(fillLight);
+
+scene.add(new THREE.HemisphereLight(0x0c1420, 0x060608, 0.55));
+
+// ════════════════════════════════════════════════════════════════════════════
+// 3. GROUND + GRID
+// ════════════════════════════════════════════════════════════════════════════
+var ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(300, 300),
+  new THREE.MeshStandardMaterial({ color: 0x080806, roughness: 0.98, metalness: 0.05 })
+);
+ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+scene.add(new THREE.GridHelper(300, 100, 0x111110, 0x0c0c0a));
+
+// ════════════════════════════════════════════════════════════════════════════
+// 4. NODE DATA
+// ════════════════════════════════════════════════════════════════════════════
+var NODES = [
+  // Central Banks — tallest, back row
+  { id:'FED',      label:'Federal Reserve',  type:'cube',     cap:99000, sector:'CentralBank', x:-4,   z:-22 },
+  { id:'ECB',      label:'ECB',              type:'cube',     cap:72000, sector:'CentralBank', x: 6,   z:-22 },
+  { id:'BOJ',      label:'Bank of Japan',    type:'cube',     cap:68000, sector:'CentralBank', x:-14,  z:-20 },
+  { id:'PBOC',     label:'PBOC',             type:'cube',     cap:61000, sector:'CentralBank', x:-22,  z:-16 },
+  { id:'BOE',      label:'Bank of England',  type:'cube',     cap:48000, sector:'CentralBank', x: 16,  z:-20 },
+  // Clearing / Infra — mid back
+  { id:'DTC',      label:'DTCC',             type:'cube',     cap:18000, sector:'Infra',        x:-10,  z:-12 },
+  { id:'SWIFT',    label:'SWIFT',            type:'cube',     cap:14000, sector:'Infra',        x:  0,  z:-14 },
+  { id:'VISA',     label:'Visa',             type:'cylinder', cap: 5600, sector:'Infra',        x: 10,  z:-12 },
+  { id:'MC',       label:'Mastercard',       type:'cylinder', cap: 4700, sector:'Infra',        x: 18,  z:-14 },
+  { id:'FIS',      label:'FIS',              type:'cylinder', cap: 4100, sector:'Infra',        x: 14,  z:-10 },
+  // Major Exchanges — center cluster
+  { id:'NYSE',     label:'NYSE',             type:'cube',     cap:25400, sector:'Exchange',     x:  0,  z:  0 },
+  { id:'NASDAQ',   label:'NASDAQ',           type:'cube',     cap:22100, sector:'Exchange',     x:  9,  z:  1 },
+  { id:'TSE',      label:'Tokyo Stock Ex',   type:'cube',     cap: 9200, sector:'Exchange',     x:-16,  z: -4 },
+  { id:'CME',      label:'CME Group',        type:'cube',     cap: 7800, sector:'Exchange',     x: -9,  z:  1 },
+  { id:'LSE',      label:'London Stock Ex',  type:'cube',     cap: 5800, sector:'Exchange',     x: 16,  z: -4 },
+  { id:'ICE',      label:'ICE',              type:'cube',     cap: 6900, sector:'Exchange',     x: -4,  z:  6 },
+  { id:'HKEX',     label:'Hong Kong Ex',     type:'cube',     cap: 6100, sector:'Exchange',     x: 13,  z:  8 },
+  { id:'CBOE',     label:'CBOE',             type:'cube',     cap: 4200, sector:'Exchange',     x:  5,  z: -7 },
+  // Asset Managers — left flank
+  { id:'BLK',      label:'BlackRock',        type:'cylinder', cap:12000, sector:'AssetMgr',    x:-20,  z:  4 },
+  { id:'VANG',     label:'Vanguard',         type:'cylinder', cap: 8000, sector:'AssetMgr',    x:-20,  z: 10 },
+  { id:'FIDO',     label:'Fidelity',         type:'cylinder', cap: 5500, sector:'AssetMgr',    x:-24,  z:  0 },
+  { id:'BRK',      label:'Berkshire',        type:'cylinder', cap: 9800, sector:'AssetMgr',    x:-20,  z: 16 },
+  { id:'SSGA',     label:'State Street',     type:'cylinder', cap: 4200, sector:'AssetMgr',    x:-24,  z:  8 },
+  // Banks — right flank
+  { id:'JPM',      label:'JPMorgan',         type:'cube',     cap: 5800, sector:'Bank',         x: 20,  z:  4 },
+  { id:'BAC',      label:'Bank of America',  type:'cube',     cap: 3200, sector:'Bank',         x: 20,  z: 10 },
+  { id:'GS',       label:'Goldman Sachs',    type:'cube',     cap: 1800, sector:'Bank',         x: 24,  z:  0 },
+  { id:'MS',       label:'Morgan Stanley',   type:'cube',     cap: 1600, sector:'Bank',         x: 24,  z:  6 },
+  { id:'HSBC',     label:'HSBC',             type:'cube',     cap: 1700, sector:'Bank',         x: 24,  z: 12 },
+  { id:'C',        label:'Citigroup',        type:'cube',     cap: 1200, sector:'Bank',         x: 28,  z:  4 },
+  // Crypto — front cluster
+  { id:'BINANCE',  label:'Binance',          type:'cylinder', cap: 3200, sector:'Crypto',       x:  6,  z: 14 },
+  { id:'COINBASE', label:'Coinbase',         type:'cylinder', cap: 1800, sector:'Crypto',       x: -6,  z: 14 },
+  { id:'KRAKEN',   label:'Kraken',           type:'cylinder', cap:  900, sector:'Crypto',       x:  0,  z: 18 },
+];
+
+var SECTOR_CFG = {
+  CentralBank: { base: 0x1a1a36, emissive: 0x000010, edgeColor: 0x1a1a2a },
+  Infra:       { base: 0x1a0a28, emissive: 0x0c0010, edgeColor: 0x180a22 },
+  Exchange:    { base: 0x2a1010, emissive: 0x100000, edgeColor: 0x220c0c },
+  AssetMgr:    { base: 0x1e1a08, emissive: 0x0e0c00, edgeColor: 0x1a1606 },
+  Bank:        { base: 0x081a22, emissive: 0x000e14, edgeColor: 0x061418 },
+  Crypto:      { base: 0x081e10, emissive: 0x00100a, edgeColor: 0x061408 },
+};
+
+function capToH(cap) {
+  var t = Math.pow((cap - 900) / (99000 - 900), 0.42);
+  return 1.0 + t * 26;
+}
+function capToW(cap) {
+  var t = Math.pow((cap - 900) / (99000 - 900), 0.28);
+  return 0.7 + t * 2.2;
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// 5. BUILD MONOLITHS
+// ════════════════════════════════════════════════════════════════════════════
+var meshes   = [];
+var capMeshes = {};
+var NODE_POS  = {};
+var SCALE_X   = 2.4;
+
+NODES.forEach(function(node) {
+  var h  = capToH(node.cap);
+  var w  = capToW(node.cap);
+  var cfg = SECTOR_CFG[node.sector] || SECTOR_CFG.Bank;
+
+  // Main body
+  var geo = node.type === 'cylinder'
+    ? new THREE.CylinderGeometry(w * 0.44, w * 0.5, h, 14, 1)
+    : new THREE.BoxGeometry(w, h, w);
+
+  var mat = new THREE.MeshStandardMaterial({
+    color:    cfg.base,
+    emissive: cfg.emissive,
+    roughness: 0.32,
+    metalness: 0.88,
+  });
+
+  var mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set(node.x * SCALE_X, h / 2, node.z * SCALE_X);
+  mesh.castShadow   = true;
+  mesh.receiveShadow = true;
+  mesh.userData     = node;
+  mesh._baseEm      = new THREE.Color(cfg.emissive);
+  mesh._baseH       = h;
+  mesh._baseScaleY  = 1.0;
+  scene.add(mesh);
+  meshes.push(mesh);
+
+  // Edge lines (cubes only)
+  if (node.type === 'cube') {
+    var edges = new THREE.LineSegments(
+      new THREE.EdgesGeometry(geo),
+      new THREE.LineBasicMaterial({ color: cfg.edgeColor, transparent: true, opacity: 0.5 })
+    );
+    edges.position.copy(mesh.position);
+    scene.add(edges);
+  }
+
+  // Cap plate
+  var capH   = Math.max(0.05, h * 0.02);
+  var capGeo = node.type === 'cylinder'
+    ? new THREE.CylinderGeometry(w * 0.46, w * 0.46, capH, 14)
+    : new THREE.BoxGeometry(w * 1.04, capH, w * 1.04);
+  var capMesh = new THREE.Mesh(capGeo, new THREE.MeshStandardMaterial({
+    color: 0x282820,
+    emissive: cfg.emissive,
+    emissiveIntensity: 2.5,
+    roughness: 0.15,
+    metalness: 0.95,
+  }));
+  capMesh.position.set(node.x * SCALE_X, h + capH / 2, node.z * SCALE_X);
+  scene.add(capMesh);
+  capMeshes[node.id] = capMesh;
+
+  // World-space top position for arcs
+  NODE_POS[node.id] = new THREE.Vector3(node.x * SCALE_X, h, node.z * SCALE_X);
+});
+
+// Sector centroid lines
+var sGroups = {};
+NODES.forEach(function(n) { (sGroups[n.sector] = sGroups[n.sector] || []).push(n); });
+var lineMat = new THREE.LineBasicMaterial({ color: 0x141410, transparent: true, opacity: 0.18 });
+Object.keys(sGroups).forEach(function(s) {
+  var g = sGroups[s];
+  if (g.length < 2) return;
+  var cx = g.reduce(function(a, n) { return a + n.x; }, 0) / g.length;
+  var cz = g.reduce(function(a, n) { return a + n.z; }, 0) / g.length;
+  g.forEach(function(n) {
+    scene.add(new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(cx * SCALE_X, 0.5, cz * SCALE_X),
+        new THREE.Vector3(n.x * SCALE_X, 0.5, n.z * SCALE_X)
+      ]),
+      lineMat
+    ));
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// 6. FLOW CHANNELS
+// ════════════════════════════════════════════════════════════════════════════
+var FLOW_CHANNELS = [
+  { a:'FED',     b:'NYSE',     vol:0.96, liq:0.92, type:'settlement' },
+  { a:'FED',     b:'NASDAQ',   vol:0.90, liq:0.86, type:'settlement' },
+  { a:'FED',     b:'SWIFT',    vol:0.98, liq:0.96, type:'settlement' },
+  { a:'FED',     b:'DTC',      vol:0.94, liq:0.90, type:'settlement' },
+  { a:'ECB',     b:'LSE',      vol:0.84, liq:0.80, type:'settlement' },
+  { a:'BOJ',     b:'TSE',      vol:0.80, liq:0.76, type:'settlement' },
+  { a:'PBOC',    b:'HKEX',     vol:0.76, liq:0.73, type:'settlement' },
+  { a:'BOE',     b:'LSE',      vol:0.72, liq:0.70, type:'settlement' },
+  { a:'NYSE',    b:'DTC',      vol:0.94, liq:0.90, type:'capital' },
+  { a:'NASDAQ',  b:'DTC',      vol:0.90, liq:0.87, type:'capital' },
+  { a:'CME',     b:'DTC',      vol:0.78, liq:0.75, type:'capital' },
+  { a:'CBOE',    b:'DTC',      vol:0.66, liq:0.63, type:'capital' },
+  { a:'LSE',     b:'SWIFT',    vol:0.72, liq:0.68, type:'capital' },
+  { a:'HKEX',    b:'SWIFT',    vol:0.69, liq:0.65, type:'capital' },
+  { a:'NYSE',    b:'LSE',      vol:0.62, liq:0.58, type:'capital' },
+  { a:'NASDAQ',  b:'TSE',      vol:0.55, liq:0.52, type:'capital' },
+  { a:'JPM',     b:'NYSE',     vol:0.86, liq:0.83, type:'capital' },
+  { a:'GS',      b:'NYSE',     vol:0.80, liq:0.77, type:'capital' },
+  { a:'MS',      b:'NASDAQ',   vol:0.76, liq:0.73, type:'capital' },
+  { a:'BAC',     b:'NYSE',     vol:0.73, liq:0.70, type:'capital' },
+  { a:'JPM',     b:'SWIFT',    vol:0.79, liq:0.82, type:'capital' },
+  { a:'HSBC',    b:'LSE',      vol:0.71, liq:0.69, type:'capital' },
+  { a:'C',       b:'NYSE',     vol:0.68, liq:0.65, type:'capital' },
+  { a:'BLK',     b:'NYSE',     vol:0.89, liq:0.86, type:'liquidity' },
+  { a:'VANG',    b:'NASDAQ',   vol:0.86, liq:0.83, type:'liquidity' },
+  { a:'FIDO',    b:'NYSE',     vol:0.80, liq:0.78, type:'liquidity' },
+  { a:'BRK',     b:'NYSE',     vol:0.75, liq:0.73, type:'liquidity' },
+  { a:'SSGA',    b:'NYSE',     vol:0.72, liq:0.70, type:'liquidity' },
+  { a:'VISA',    b:'NYSE',     vol:0.88, liq:0.86, type:'capital' },
+  { a:'MC',      b:'NYSE',     vol:0.85, liq:0.83, type:'capital' },
+  { a:'VISA',    b:'JPM',      vol:0.80, liq:0.78, type:'capital' },
+  { a:'MC',      b:'BAC',      vol:0.75, liq:0.73, type:'capital' },
+  { a:'FIS',     b:'DTC',      vol:0.72, liq:0.70, type:'capital' },
+  { a:'BINANCE', b:'COINBASE', vol:0.84, liq:0.80, type:'crypto' },
+  { a:'KRAKEN',  b:'COINBASE', vol:0.62, liq:0.58, type:'crypto' },
+  { a:'BINANCE', b:'NASDAQ',   vol:0.46, liq:0.43, type:'crypto' },
+  { a:'COINBASE',b:'NYSE',     vol:0.40, liq:0.38, type:'crypto' },
+];
+
+var FLOW_COLORS = {
+  capital:    new THREE.Color(0.92, 0.80, 0.26),
+  liquidity:  new THREE.Color(0.26, 0.76, 1.00),
+  settlement: new THREE.Color(1.00, 0.38, 0.24),
+  crypto:     new THREE.Color(0.38, 1.00, 0.50),
+};
+var FLOW_SPEED = { capital:1.3, liquidity:1.9, settlement:2.5, crypto:3.1 };
+
+// Build bezier arcs
+var CH_COUNT = FLOW_CHANNELS.length;
+var chCtrl   = [];
+var chSpd    = [];
+var chWgt    = [];
+
+(function buildArcs() {
+  var total = 0;
+  for (var i = 0; i < CH_COUNT; i++) {
+    var ch = FLOW_CHANNELS[i];
+    var a  = NODE_POS[ch.a], b = NODE_POS[ch.b];
+    if (!a || !b) { chCtrl.push(null); chSpd.push(0); chWgt.push(0); continue; }
+    var mid = new THREE.Vector3((a.x + b.x) / 2, (a.y + b.y) / 2, (a.z + b.z) / 2);
+    mid.y  += a.distanceTo(b) * (0.36 + ch.vol * 0.52);
+    chCtrl.push([a.clone(), mid, b.clone()]);
+    chSpd.push(FLOW_SPEED[ch.type] * (0.55 + ch.vol * 0.88));
+    var w = ch.vol * ch.liq; chWgt.push(w); total += w;
+  }
+  var cum = 0;
+  for (var i = 0; i < CH_COUNT; i++) {
+    chWgt[i] = chWgt[i] / total + cum; cum = chWgt[i];
+  }
+})();
+
+function pickCh() {
+  var r = Math.random();
+  for (var i = 0; i < CH_COUNT; i++) { if (r <= chWgt[i]) return i; }
+  return CH_COUNT - 1;
+}
+
+function bez(p0, c, p1, t, o) {
+  var m = 1 - t;
+  o.x = m*m*p0.x + 2*m*t*c.x + t*t*p1.x;
+  o.y = m*m*p0.y + 2*m*t*c.y + t*t*p1.y;
+  o.z = m*m*p0.z + 2*m*t*c.z + t*t*p1.z;
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// 7. PARTICLE SYSTEM — 100,000 GPU particles
+// ════════════════════════════════════════════════════════════════════════════
+var TOTAL  = 100000;
+var CHUNK  = 10000;
+var NC     = TOTAL / CHUNK;
+var TYPES  = ['capital','liquidity','settlement','crypto'];
+
+var pChan  = new Uint16Array(TOTAL);
+var pProg  = new Float32Array(TOTAL);
+var pSpd   = new Float32Array(TOTAL);
+var pJit   = new Float32Array(TOTAL);
+
+for (var pi = 0; pi < TOTAL; pi++) {
+  var ch = pickCh(); pChan[pi] = ch;
+  pProg[pi] = Math.random();
+  pSpd[pi]  = chSpd[ch] * (0.6 + Math.random() * 0.8);
+  pJit[pi]  = (Math.random() - 0.5) * 0.18;
+}
+
+function typeOf(i) {
+  var ch = FLOW_CHANNELS[pChan[i]]; return ch ? ch.type : 'capital';
+}
+
+var tCount = { capital:0, liquidity:0, settlement:0, crypto:0 };
+for (var i = 0; i < TOTAL; i++) tCount[typeOf(i)]++;
+
+var ptGeo = {}, ptPos = {}, ptSys = {}, ptLocal = new Int32Array(TOTAL), ptType = [];
+var tCur  = { capital:0, liquidity:0, settlement:0, crypto:0 };
+
+TYPES.forEach(function(t) {
+  var n   = tCount[t];
+  var geo = new THREE.BufferGeometry();
+  var pos = new Float32Array(n * 3);
+  var col = new Float32Array(n * 3);
+  var siz = new Float32Array(n);
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('color',    new THREE.BufferAttribute(col, 3));
+  geo.setAttribute('size',     new THREE.BufferAttribute(siz, 1));
+  var sys = new THREE.Points(geo, new THREE.PointsMaterial({
+    size: ({ capital:1.4, liquidity:1.6, settlement:2.0, crypto:2.3 })[t],
+    vertexColors: true, transparent: true,
+    opacity: ({ capital:0.82, liquidity:0.84, settlement:0.93, crypto:0.96 })[t],
+    sizeAttenuation: true, blending: THREE.AdditiveBlending, depthWrite: false
+  }));
+  sys.frustumCulled = false;
+  scene.add(sys);
+  ptGeo[t] = geo; ptPos[t] = pos; ptSys[t] = sys;
+});
+
+for (var i = 0; i < TOTAL; i++) {
+  var t = typeOf(i), li = tCur[t]++;
+  ptType[i] = t; ptLocal[i] = li;
+  var c = FLOW_COLORS[t], v = 0.75 + Math.random() * 0.5;
+  var colArr = ptGeo[t].attributes.color.array;
+  colArr[li*3]   = Math.min(1, c.r * v);
+  colArr[li*3+1] = Math.min(1, c.g * v);
+  colArr[li*3+2] = Math.min(1, c.b * v);
+  ptGeo[t].attributes.size.array[li] = 0.3 + Math.random() * 1.5;
+}
+TYPES.forEach(function(t) {
+  ptGeo[t].attributes.color.needsUpdate = true;
+  ptGeo[t].attributes.size.needsUpdate  = true;
+});
+
+// Sequential loader
+var loaded = 0, loadOK = false;
+var lFill  = null, lLabel = null;
+var lTick  = 0;
+var _bt = new THREE.Vector3();
+
+function initChunk(ci) {
+  var s = ci * CHUNK, e = Math.min(s + CHUNK, TOTAL);
+  for (var i = s; i < e; i++) {
+    var ch = pChan[i]; if (!chCtrl[ch]) continue;
+    var arc = chCtrl[ch]; bez(arc[0], arc[1], arc[2], pProg[i], _bt);
+    var t = ptType[i], li = ptLocal[i], pa = ptPos[t];
+    pa[li*3] = _bt.x + pJit[i]; pa[li*3+1] = _bt.y; pa[li*3+2] = _bt.z + pJit[i];
+  }
+  TYPES.forEach(function(t) { ptGeo[t].attributes.position.needsUpdate = true; });
+}
+
+function advLoader() {
+  if (loadOK) return; lTick++;
+  if (lTick % 2 !== 0) return;
+  initChunk(loaded); loaded++;
+  var pct = loaded / NC;
+  if (!lFill)  lFill  = document.getElementById('loader-fill');
+  if (!lLabel) lLabel = document.getElementById('loader-label');
+  if (lFill)  lFill.style.width  = (pct * 100).toFixed(0) + '%';
+  if (lLabel) lLabel.textContent = (loaded * CHUNK).toLocaleString() + ' / ' + TOTAL.toLocaleString() + ' streams';
+  if (loaded >= NC) { loadOK = true; }
+}
+
+// Particle update — 6k per frame rolling cursor
+var pCursor = 0, PBATCH = 6000;
+var GVOL = 1.0, GLIQ = 1.0;
+var _pt = new THREE.Vector3();
+
+function updateParticles(dt) {
+  advLoader();
+  if (!loadOK) return;
+  var end = Math.min(pCursor + PBATCH, TOTAL);
+  for (var i = pCursor; i < end; i++) {
+    var ch = pChan[i]; if (!chCtrl[ch]) continue;
+    pProg[i] += pSpd[i] * dt * 0.044 * GVOL;
+    if (pProg[i] > 1.0) {
+      pProg[i] -= 1.0;
+      if (Math.random() < 0.018) {
+        var nc = pickCh(); pChan[i] = nc; pSpd[i] = chSpd[nc] * (0.6 + Math.random() * 0.8);
+      }
+    }
+    var arc = chCtrl[pChan[i]]; if (!arc) continue;
+    bez(arc[0], arc[1], arc[2], pProg[i], _pt);
+    var t = ptType[i], li = ptLocal[i], pa = ptPos[t];
+    pa[li*3] = _pt.x + pJit[i]; pa[li*3+1] = _pt.y; pa[li*3+2] = _pt.z + pJit[i];
+  }
+  pCursor = (end >= TOTAL) ? 0 : end;
+  TYPES.forEach(function(t) { ptGeo[t].attributes.position.needsUpdate = true; });
+  TYPES.forEach(function(t) {
+    var base = { capital:0.82, liquidity:0.84, settlement:0.93, crypto:0.96 };
+    ptSys[t].material.opacity = Math.max(0.2, Math.min(1.0, base[t] * GLIQ));
+  });
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// 8. POST-PROCESSING — Render target + 3 GLSL shader passes
+// ════════════════════════════════════════════════════════════════════════════
+var rt = new THREE.WebGLRenderTarget(W, H, {
+  minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter,
+  format: THREE.RGBAFormat, type: THREE.UnsignedByteType
+});
+
+var ppScene  = new THREE.Scene();
+var ppCam    = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+var ppQuad   = new THREE.Mesh(new THREE.PlaneGeometry(2, 2));
+ppScene.add(ppQuad);
+
+var VPASS = 'varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position.xy,0.0,1.0); }';
+
+// — Thermal Volatility
+var FTHERMAL = [
+  'uniform sampler2D tD; uniform float uInt,uThr,uCon; varying vec2 vUv;',
+  'vec3 flir(float t){',
+  '  t=clamp(t,0.0,1.0); vec3 c;',
+  '  if(t<0.20) c=mix(vec3(0.0,0.0,0.32),vec3(0.0,0.0,1.0),t/0.20);',
+  '  else if(t<0.40) c=mix(vec3(0.0,0.0,1.0),vec3(0.0,0.85,0.85),(t-0.20)/0.20);',
+  '  else if(t<0.58) c=mix(vec3(0.0,0.85,0.85),vec3(0.0,0.9,0.0),(t-0.40)/0.18);',
+  '  else if(t<0.76) c=mix(vec3(0.0,0.9,0.0),vec3(1.0,0.85,0.0),(t-0.58)/0.18);',
+  '  else if(t<0.90) c=mix(vec3(1.0,0.85,0.0),vec3(1.0,0.12,0.0),(t-0.76)/0.14);',
+  '  else c=mix(vec3(1.0,0.12,0.0),vec3(1.0,1.0,1.0),(t-0.90)/0.10);',
+  '  return c; }',
+  'void main(){',
+  '  vec4 col=texture2D(tD,vUv);',
+  '  float lum=dot(col.rgb,vec3(0.299,0.587,0.114));',
+  '  float heat=pow(lum,1.0/max(0.05,uCon));',
+  '  float b=smoothstep(uThr,uThr+0.3,heat)*uInt;',
+  '  float sc=1.0-0.05*mod(floor(vUv.y*480.0),2.0);',
+  '  gl_FragColor=vec4(flir(clamp(b,0.0,1.0))*sc,1.0);',
+  '}'
+].join('\n');
+
+// — Institutional CRT
+var FCRT = [
+  'uniform sampler2D tD; uniform float uTime,uScan,uPix,uFlick,uCurv; varying vec2 vUv;',
+  'float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }',
+  'vec2 barrel(vec2 uv,float a){ vec2 c=uv-0.5; return 0.5+c*(1.0+a*dot(c,c)); }',
+  'void main(){',
+  '  vec2 uv=barrel(vUv,uCurv*0.28);',
+  '  float px=max(1.0,uPix); vec2 res=vec2(1280.0,800.0)/px;',
+  '  uv=floor(uv*res)/res;',
+  '  vec4 col=texture2D(tD,uv);',
+  '  float lum=dot(col.rgb,vec3(0.299,0.587,0.114));',
+  '  vec3 ph=lum*vec3(0.05,1.0,0.18)+lum*0.25*vec3(0.0,1.0,0.08);',
+  '  float sc=1.0-uScan*(0.5-0.5*sin(vUv.y*800.0*3.14159));',
+  '  float fn=hash(vec2(floor(vUv.y*110.0),floor(uTime*7.0)));',
+  '  float fl=1.0-uFlick*step(0.95,fn)*0.65;',
+  '  vec2 vi=uv*(1.0-uv.yx); float vig=pow(vi.x*vi.y*15.0,0.32);',
+  '  float gr=hash(vUv+fract(uTime))*0.045;',
+  '  ph+=gr*vec3(0.0,1.0,0.15);',
+  '  gl_FragColor=vec4(ph*sc*fl*vig,1.0);',
+  '}'
+].join('\n');
+
+// — Liquidity Bloom
+var FBLOOM = [
+  'uniform sampler2D tD; uniform float uStr,uRad,uThr,uBoost; varying vec2 vUv;',
+  'vec3 blur(sampler2D tex,vec2 uv,float r,vec2 ts){',
+  '  vec3 a=vec3(0.0); float tot=0.0;',
+  '  float off[5]; off[0]=-2.0;off[1]=-1.0;off[2]=0.0;off[3]=1.0;off[4]=2.0;',
+  '  float wt[5];  wt[0]=0.10;wt[1]=0.22;wt[2]=0.36;wt[3]=0.22;wt[4]=0.10;',
+  '  for(int i=0;i<5;i++){ for(int j=0;j<5;j++){',
+  '    vec2 o=vec2(off[i],off[j])*ts*r;',
+  '    a+=texture2D(tex,uv+o).rgb*wt[i]*wt[j]; tot+=wt[i]*wt[j];',
+  '  }} return a/tot; }',
+  'void main(){',
+  '  vec4 base=texture2D(tD,vUv);',
+  '  vec2 ts=vec2(1.0/1280.0,1.0/800.0);',
+  '  float lum=dot(base.rgb,vec3(0.299,0.587,0.114));',
+  '  float br=smoothstep(uThr,uThr+0.22,lum);',
+  '  vec3 bl=blur(tD,vUv,uRad*br+0.4,ts);',
+  '  vec3 bc=bl*br*uStr;',
+  '  float ii=length(bc);',
+  '  vec3 tint=mix(vec3(1.0,0.80,0.22),vec3(1.0,1.0,1.0),clamp(ii*1.4,0.0,1.0));',
+  '  bc*=tint;',
+  '  vec3 em=base.rgb*(1.0+uBoost*br*2.2);',
+  '  vec3 f=em+bc; f=f/(f+vec3(1.0)); f=pow(f,vec3(0.88));',
+  '  gl_FragColor=vec4(f,1.0);',
+  '}'
+].join('\n');
+
+var matRaw = new THREE.MeshBasicMaterial({ map: rt.texture });
+
+var matThermal = new THREE.ShaderMaterial({
+  vertexShader: VPASS, fragmentShader: FTHERMAL,
+  uniforms: { tD:{value:rt.texture}, uInt:{value:1.5}, uThr:{value:0.04}, uCon:{value:0.52} }
+});
+
+var matCRT = new THREE.ShaderMaterial({
+  vertexShader: VPASS, fragmentShader: FCRT,
+  uniforms: {
+    tD:{value:rt.texture}, uTime:{value:0.0},
+    uScan:{value:0.72}, uPix:{value:1.0}, uFlick:{value:0.5}, uCurv:{value:0.6}
+  }
+});
+
+var matBloom = new THREE.ShaderMaterial({
+  vertexShader: VPASS, fragmentShader: FBLOOM,
+  uniforms: {
+    tD:{value:rt.texture}, uStr:{value:2.6},
+    uRad:{value:2.4}, uThr:{value:0.10}, uBoost:{value:2.0}
+  }
+});
+
+ppQuad.material = matRaw;
+
+// ════════════════════════════════════════════════════════════════════════════
+// 9. SHADER MODE SWITCHER + SLIDER BUILDER
+// ════════════════════════════════════════════════════════════════════════════
+var CURRENT_MODE = 'raw';
+
+var SLIDER_CFG = {
+  raw: [],
+  thermal: [
+    { id:'uInt',  label:'Heat Intensity', min:0.4, max:3.5, step:0.05, mat:matThermal },
+    { id:'uThr',  label:'Cold Threshold', min:0.0, max:0.5, step:0.01, mat:matThermal },
+    { id:'uCon',  label:'Contrast',       min:0.1, max:1.5, step:0.05, mat:matThermal }
+  ],
+  crt: [
+    { id:'uScan',  label:'Scanline Depth',  min:0.0, max:1.0, step:0.02, mat:matCRT },
+    { id:'uPix',   label:'Pixelation',      min:1.0, max:9.0, step:0.5,  mat:matCRT },
+    { id:'uFlick', label:'Row Flicker',     min:0.0, max:1.0, step:0.05, mat:matCRT },
+    { id:'uCurv',  label:'CRT Curvature',   min:0.0, max:1.5, step:0.05, mat:matCRT }
+  ],
+  bloom: [
+    { id:'uStr',   label:'Bloom Strength',  min:0.0, max:6.0, step:0.1,  mat:matBloom },
+    { id:'uRad',   label:'Bloom Radius',    min:0.5, max:6.0, step:0.1,  mat:matBloom },
+    { id:'uThr',   label:'Threshold',       min:0.0, max:0.5, step:0.01, mat:matBloom },
+    { id:'uBoost', label:'Emissive Boost',  min:0.0, max:5.0, step:0.1,  mat:matBloom }
+  ]
+};
+
+function buildSliders(mode) {
+  var body = document.getElementById('slider-body');
+  if (!body) return;
+  var cfg = SLIDER_CFG[mode];
+  if (!cfg || cfg.length === 0) {
+    body.innerHTML = '<div style="font-size:8px;color:rgba(255,255,255,0.15);letter-spacing:1px">No parameters for this mode</div>';
+    return;
+  }
+  var html = '';
+  cfg.forEach(function(s) {
+    var val = s.mat.uniforms[s.id].value;
+    html += '<div class="sl-row">'
+      + '<div class="sl-label">' + s.label + '<span id="v-' + s.id + '">' + val.toFixed(2) + '</span></div>'
+      + '<input type="range" id="s-' + s.id + '" min="' + s.min + '" max="' + s.max + '" step="' + s.step + '" value="' + val + '">'
+      + '</div>';
+  });
+  body.innerHTML = html;
+  cfg.forEach(function(s) {
+    var el = document.getElementById('s-' + s.id);
+    var ve = document.getElementById('v-' + s.id);
+    if (!el) return;
+    el.addEventListener('input', function() {
+      var v = parseFloat(el.value);
+      s.mat.uniforms[s.id].value = v;
+      if (ve) ve.textContent = v.toFixed(2);
+    });
+  });
+}
+
+function setMode(mode) {
+  CURRENT_MODE = mode;
+  var mats = { raw:matRaw, thermal:matThermal, crt:matCRT, bloom:matBloom };
+  ppQuad.material = mats[mode] || matRaw;
+  ['raw','thermal','crt','bloom'].forEach(function(m) {
+    var b = document.getElementById('btn-' + m);
+    if (b) b.className = 'mode-btn' + (m === mode ? ' active' : '');
+  });
+  buildSliders(mode);
+}
+
+setTimeout(function() { buildSliders('raw'); }, 80);
+
+// ════════════════════════════════════════════════════════════════════════════
+// 10. ORBIT CONTROLS
+// ════════════════════════════════════════════════════════════════════════════
+var oc = (function() {
+  var el = renderer.domElement;
+  var s = {
+    orb:false, pan:false, lx:0, ly:0,
+    theta:-0.25, phi:0.82, r:72,
+    tgt: new THREE.Vector3(0, 5, 0),
+    pof: new THREE.Vector3()
+  };
+  function upd() {
+    var x = s.r * Math.sin(s.phi) * Math.sin(s.theta);
+    var y = s.r * Math.cos(s.phi);
+    var z = s.r * Math.sin(s.phi) * Math.cos(s.theta);
+    camera.position.set(
+      s.tgt.x + x + s.pof.x,
+      s.tgt.y + y + s.pof.y,
+      s.tgt.z + z + s.pof.z
+    );
+    camera.lookAt(s.tgt.x + s.pof.x, s.tgt.y + s.pof.y, s.tgt.z + s.pof.z);
+  }
+  el.addEventListener('mousedown', function(e) {
+    if (e.button === 0) s.orb = true;
+    if (e.button === 2) s.pan = true;
+    s.lx = e.clientX; s.ly = e.clientY;
+  });
+  window.addEventListener('mouseup', function() { s.orb = false; s.pan = false; });
+  window.addEventListener('mousemove', function(e) {
+    var dx = e.clientX - s.lx, dy = e.clientY - s.ly;
+    s.lx = e.clientX; s.ly = e.clientY;
+    if (s.orb) {
+      s.theta -= dx * 0.007;
+      s.phi = Math.max(0.05, Math.min(1.52, s.phi + dy * 0.006));
+      upd();
+    }
+    if (s.pan) {
+      var sp = s.r * 0.001;
+      var rv = new THREE.Vector3();
+      rv.crossVectors(camera.getWorldDirection(new THREE.Vector3()), camera.up).normalize();
+      s.pof.addScaledVector(rv, -dx * sp).addScaledVector(camera.up, dy * sp);
+      upd();
+    }
+    mouse.x = (e.clientX / W) * 2 - 1;
+    mouse.y = -(e.clientY / H) * 2 + 1;
+  });
+  el.addEventListener('wheel', function(e) {
+    s.r = Math.max(8, Math.min(180, s.r + e.deltaY * 0.08));
+    upd(); e.preventDefault();
+  }, { passive:false });
+  el.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+  var ltd = 0;
+  el.addEventListener('touchstart', function(e) {
+    if (e.touches.length === 1) { s.orb = true; s.lx = e.touches[0].clientX; s.ly = e.touches[0].clientY; }
+    else { s.orb = false; var dx=e.touches[0].clientX-e.touches[1].clientX; var dy=e.touches[0].clientY-e.touches[1].clientY; ltd=Math.sqrt(dx*dx+dy*dy); }
+  }, { passive:true });
+  el.addEventListener('touchmove', function(e) {
+    if (e.touches.length === 1 && s.orb) {
+      var dx=e.touches[0].clientX-s.lx, dy=e.touches[0].clientY-s.ly;
+      s.lx=e.touches[0].clientX; s.ly=e.touches[0].clientY;
+      s.theta-=dx*0.01; s.phi=Math.max(0.05,Math.min(1.52,s.phi+dy*0.01)); upd();
+    } else if (e.touches.length === 2) {
+      var dx=e.touches[0].clientX-e.touches[1].clientX; var dy=e.touches[0].clientY-e.touches[1].clientY;
+      var d=Math.sqrt(dx*dx+dy*dy); s.r=Math.max(8,Math.min(180,s.r-(d-ltd)*0.14)); ltd=d; upd();
+    }
+  }, { passive:true });
+  el.addEventListener('touchend', function() { s.orb=false; }, { passive:true });
+  // Cinematic intro: pull back, orbit in
+  s.theta = -1.9; s.phi = 1.28; s.r = 130; upd();
+  return { upd:upd, s:s };
+})();
+
+// ════════════════════════════════════════════════════════════════════════════
+// 11. HOVER / RAYCASTER
+// ════════════════════════════════════════════════════════════════════════════
+var mouse = new THREE.Vector2(-999, -999);
+var ray   = new THREE.Raycaster();
+var hovered = null;
+var tipName   = document.getElementById('tooltip-name');
+var tipDetail = document.getElementById('tooltip-detail');
+
+function fmtCap(c) {
+  return c >= 10000 ? '$' + (c/1000).toFixed(0) + 'T' :
+         c >= 1000  ? '$' + (c/1000).toFixed(1) + 'T' : '$' + c + 'B';
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// 12. LIVE DATA — Binance WebSocket + Simulation fallback
+// ════════════════════════════════════════════════════════════════════════════
+var LIVE = {};
+NODES.forEach(function(n) {
+  LIVE[n.id] = { smoothed: n.cap / 99000, accVol: 0, lastUpdate: 0, baseH: capToH(n.cap) };
+});
+
+// Node → Binance symbol map
+var SYM_MAP = {
+  BINANCE:  ['btcusdt','ethusdt','bnbusdt'],
+  COINBASE: ['solusdt','adausdt'],
+  KRAKEN:   ['xrpusdt','dogeusdt'],
+};
+var RSYM = {};
+Object.keys(SYM_MAP).forEach(function(nid) {
+  SYM_MAP[nid].forEach(function(s) { RSYM[s] = nid; });
+});
+
+var wsStatus = 'connecting';
+
+function connectBinance() {
+  var streams = [];
+  Object.keys(SYM_MAP).forEach(function(nid) {
+    SYM_MAP[nid].forEach(function(s) { streams.push(s + '@aggTrade'); });
+  });
+  var ws;
+  try { ws = new WebSocket('wss://stream.binance.com:9443/stream?streams=' + streams.join('/')); }
+  catch(e) { wsStatus = 'blocked'; startSim(); return; }
+  var timeout = setTimeout(function() { if (ws.readyState !== 1) { ws.close(); wsStatus='timeout'; startSim(); } }, 7000);
+  ws.onopen  = function() { clearTimeout(timeout); wsStatus = 'live'; updateFeedUI(); };
+  ws.onmessage = function(ev) {
+    try {
+      var w = JSON.parse(ev.data), d = w.data || w;
+      var sym = (w.stream || '').split('@')[0];
+      var nid = RSYM[sym]; if (!nid) return;
+      var notional = parseFloat(d.p||0) * parseFloat(d.q||0);
+      LIVE[nid].accVol    += notional;
+      LIVE[nid].lastUpdate = Date.now();
+    } catch(e) {}
+  };
+  ws.onerror = function() { clearTimeout(timeout); wsStatus = 'error'; startSim(); };
+  ws.onclose = function() { clearTimeout(timeout); if (wsStatus === 'live') wsStatus = 'reconnecting'; setTimeout(connectBinance, 3500); };
+}
+
+// Simulation for all nodes (realistic intraday cycle)
+var simT = Math.random() * 200;
+function startSim() {
+  wsStatus = 'simulated';
+  updateFeedUI();
+}
+function tickSim() {
+  sim
+T += 0.06 + Math.random() * 0.05;
+  var intra = 0.5 + 0.65 * Math.abs(Math.sin(simT * 0.038)) + 0.25 * Math.abs(Math.sin(simT * 0.11));
+  NODES.forEach(function(n) {
+    var rec = LIVE[n.id]; if (!rec) return;
+    var spike = (Math.random() < 0.035) ? (1.8 + Math.random() * 2.2) : 1.0;
+    rec.accVol += rec.baseH / 22 * intra * spike * (0.6 + Math.random() * 0.8) * 60;
+    rec.lastUpdate = Date.now();
+  });
+}
+
+function updateFeedUI() {
+  var dot = document.getElementById('dot-binance');
+  var lbl = document.getElementById('lbl-binance');
+  if (dot) dot.style.background = wsStatus === 'live' ? 'rgba(80,220,100,0.9)' : 'rgba(220,180,60,0.7)';
+  if (lbl) lbl.textContent = 'Binance: ' + wsStatus.toUpperCase();
+}
+
+// Vol ring buffers for adaptive normalization
+var VOL_BUF_LEN = 60;
+var volBufs = {}, volIdx = {};
+NODES.forEach(function(n) {
+  volBufs[n.id] = new Float32Array(VOL_BUF_LEN);
+  volBufs[n.id].fill(n.cap / 99000);
+  volIdx[n.id] = 0;
+});
+
+function normalize() {
+  NODES.forEach(function(n) {
+    var rec = LIVE[n.id]; if (!rec) return;
+    var buf = volBufs[n.id]; var idx = volIdx[n.id];
+    buf[idx] = rec.accVol; volIdx[n.id] = (idx + 1) % VOL_BUF_LEN;
+    var mx = 0;
+    for (var i = 0; i < VOL_BUF_LEN; i++) if (buf[i] > mx) mx = buf[i];
+    var raw  = mx > 0 ? rec.accVol / mx : rec.baseH / 22;
+    var base = rec.baseH / 26;
+    var stale = (Date.now() - rec.lastUpdate) > 8000;
+    var norm = stale ? base : (raw * 0.72 + base * 0.28);
+    norm = Math.max(0.04, Math.min(1.0, norm));
+    rec.smoothed = rec.smoothed * 0.87 + norm * 0.13;
+    rec.accVol = 0;
+  });
+}
+
+function applyGravity() {
+  var totS = 0, maxS = 0, cnt = 0;
+  NODES.forEach(function(n) {
+    var rec = LIVE[n.id]; if (!rec) return;
+    totS += rec.smoothed; cnt++;
+    if (rec.smoothed > maxS) maxS = rec.smoothed;
+  });
+  meshes.forEach(function(mesh) {
+    var nid = mesh.userData.id; if (!nid) return;
+    var rec = LIVE[nid]; if (!rec) return;
+    var tgt  = 0.32 + rec.smoothed * 1.38;
+    var cur  = mesh.scale.y || 1.0;
+    var next = cur + (tgt - cur) * 0.038;
+    mesh.scale.y   = next;
+    mesh.position.y = (rec.baseH * next) / 2;
+    var cap = capMeshes[nid];
+    if (cap) {
+      cap.position.y = rec.baseH * next + 0.06;
+      cap.material.emissiveIntensity = 1.4 + rec.smoothed * 6.0;
+    }
+    if (mesh._baseEm) {
+      var b = rec.smoothed * 0.85;
+      mesh.material.emissive.setRGB(
+        Math.min(0.28, mesh._baseEm.r + b * 0.20),
+        Math.min(0.28, mesh._baseEm.g + b * 0.14),
+        Math.min(0.25, mesh._baseEm.b + b * 0.12)
+      );
+    }
+    NODE_POS[nid].y = rec.baseH * next;
+  });
+  // Rebuild arc control points
+  for (var i = 0; i < CH_COUNT; i++) {
+    var ch = FLOW_CHANNELS[i];
+    var a = NODE_POS[ch.a], b = NODE_POS[ch.b];
+    if (!a || !b || !chCtrl[i]) continue;
+    chCtrl[i][0].copy(a); chCtrl[i][2].copy(b);
+    chCtrl[i][1].set((a.x+b.x)/2, (a.y+b.y)/2 + a.distanceTo(b)*(0.36+ch.vol*0.52), (a.z+b.z)/2);
+  }
+  if (cnt > 0) {
+    GVOL = 0.38 + (totS / cnt) * 1.62;
+    GLIQ = 0.32 + maxS * 0.92;
+  }
+}
+
+// Master 1-second tick
+var masterTicks = 0;
+function masterTick() {
+  masterTicks++;
+  if (wsStatus !== 'live') tickSim();
+  normalize();
+  applyGravity();
+  var ss = document.getElementById('hud-status');
+  if (ss) ss.textContent =
+    (wsStatus === 'live' ? 'Binance LIVE' : 'SIM') +
+    '  \u2022  Vol ' + (GVOL * 100).toFixed(0) + '%' +
+    '  \u2022  Liq ' + (GLIQ * 100).toFixed(0) + '%' +
+    '  \u2022  T+' + masterTicks + 's';
+  setTimeout(masterTick, 1000);
+}
+
+// HUD clock
+function tickClock() {
+  var el = document.getElementById('hud-clock'); if (!el) return;
+  var d = new Date();
+  var h = d.getHours(), m = d.getMinutes(), s = d.getSeconds();
+  el.textContent =
+    (h < 10 ? '0'+h : h) + ':' +
+    (m < 10 ? '0'+m : m) + ':' +
+    (s < 10 ? '0'+s : s) + '  ' +
+    ['SUN','MON','TUE','WED','THU','FRI','SAT'][d.getDay()];
+}
+setInterval(tickClock, 1000); tickClock();
+
+// ════════════════════════════════════════════════════════════════════════════
+// 13. MAIN ANIMATION LOOP
+// ════════════════════════════════════════════════════════════════════════════
+var clock    = new THREE.Clock();
+var introT   = 0, introOK = false;
+var INTRO_DUR = 4.0;
+
+function animate() {
+  requestAnimationFrame(animate);
+  var dt = clock.getDelta(), elapsed = clock.getElapsedTime();
+
+  // Cinematic intro orbit
+  if (!introOK) {
+    introT += dt;
+    var p = Math.min(introT / INTRO_DUR, 1.0);
+    var e = 1.0 - Math.pow(1.0 - p, 3.0);
+    oc.s.theta = -1.9 + e * 1.65;
+    oc.s.phi   = 1.28 - e * 0.42;
+    oc.s.r     = 130  - e * 58;
+    oc.upd();
+    if (p >= 1.0) introOK = true;
+  }
+
+  // Gentle ambient drift
+  if (introOK) {
+    oc.s.phi += Math.sin(elapsed * 0.055) * 0.00010;
+    oc.upd();
+  }
+
+  // Particles
+  updateParticles(dt);
+
+  // CRT time uniform
+  matCRT.uniforms.uTime.value = elapsed;
+
+  // Hover raycasting
+  ray.setFromCamera(mouse, camera);
+  var hits = ray.intersectObjects(meshes);
+  if (hits.length > 0) {
+    var hit = hits[0].object;
+    if (hit !== hovered) {
+      if (hovered) { hovered.material.emissiveIntensity = 1.0; }
+      hovered = hit;
+      hovered.material.emissiveIntensity = 3.2;
+      var nd = hit.userData;
+      if (tipName)   tipName.textContent   = nd.label || nd.id;
+      if (tipDetail) tipDetail.textContent = nd.sector + '  \u2022  ' + fmtCap(nd.cap) + ' est. cap / AUM';
+    }
+  } else {
+    if (hovered) { hovered.material.emissiveIntensity = 1.0; hovered = null; }
+    if (tipName)   tipName.textContent   = '';
+    if (tipDetail) tipDetail.textContent = '';
+  }
+
+  // Cap plate pulse
+  var pulse = 0.82 + Math.sin(elapsed * 1.6) * 0.12;
+  Object.keys(capMeshes).forEach(function(nid) {
+    var rec = LIVE[nid];
+    if (rec && rec.smoothed > 0.5) {
+      capMeshes[nid].material.emissiveIntensity = (1.4 + rec.smoothed * 6.0) * pulse;
+    }
+  });
+
+  // Render
+  if (CURRENT_MODE === 'raw') {
+    renderer.setRenderTarget(null);
+    renderer.render(scene, camera);
+  } else {
+    renderer.setRenderTarget(rt);
+    renderer.render(scene, camera);
+    renderer.setRenderTarget(null);
+    renderer.render(ppScene, ppCam);
+  }
+}
+
+window.addEventListener('resize', function() {
+  W = window.innerWidth; H = window.innerHeight;
+  camera.aspect = W / H; camera.updateProjectionMatrix();
+  renderer.setSize(W, H);
+  rt.setSize(W, H);
+});
+
+// Launch
+setTimeout(function() { connectBinance(); masterTick(); }, 800);
+animate();
+</script>
+</body>
+</html>
