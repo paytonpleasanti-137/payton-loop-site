@@ -344,6 +344,79 @@ textarea.brk-input{resize:vertical;min-height:72px}
 .calc-result-val.highlight{color:var(--red)}
 .calc-verdict{margin-top:16px;padding:12px 16px;background:var(--bg3);border-left:3px solid var(--gold);font-size:13px;color:var(--ink2);line-height:1.7}
 
+
+/* ===== FOUR FILTERS ===== */
+.brk-label{display:block;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink4);margin-bottom:5px}
+.brk-input{width:100%;padding:8px 12px;border:1px solid var(--border);font-family:var(--sans);font-size:13px;color:var(--ink);background:var(--bg2);outline:none}
+.brk-input:focus{border-color:var(--ink)}
+textarea.brk-input{resize:vertical;min-height:60px}
+
+.ff-card{border:1px solid var(--border);margin-bottom:2px;background:var(--bg)}
+.ff-card-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 22px;cursor:pointer;transition:background 0.12s;
+  user-select:none;
+}
+.ff-card-header:hover{background:var(--bg2)}
+.ff-num{
+  font-family:var(--mono);font-size:11px;font-weight:700;
+  color:var(--ink4);letter-spacing:1px;width:28px;
+}
+.ff-card-title{font-family:var(--serif);font-size:18px;font-weight:600;color:var(--ink);line-height:1.2}
+.ff-card-sub{font-size:12px;color:var(--ink3);margin-top:2px}
+.ff-verdict{
+  font-family:var(--mono);font-size:11px;font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;
+  padding:4px 14px;border-radius:100px;
+}
+.ff-verdict-pass{background:#f0fdf4;color:var(--green);border:1px solid rgba(42,122,58,0.25)}
+.ff-verdict-fail{background:#fef2f2;color:var(--red);border:1px solid rgba(200,32,26,0.25)}
+.ff-verdict-caution{background:#fffbf0;color:var(--gold);border:1px solid rgba(184,134,11,0.25)}
+.ff-verdict-pending{background:var(--bg3);color:var(--ink4);border:1px solid var(--border)}
+.ff-chevron{font-size:10px;color:var(--ink4);transition:transform 0.2s}
+.ff-chevron.open{transform:rotate(180deg)}
+
+.ff-card-body{border-top:1px solid var(--border);padding:24px 22px}
+
+.ff-trivium-strip{
+  display:grid;grid-template-columns:1fr 1fr 1fr;
+  gap:0;margin-bottom:20px;
+}
+.ff-triv-col{padding:16px 20px;border-right:1px solid var(--border)}
+.ff-triv-col:last-child{border-right:none}
+.ff-grammar{border-top:3px solid var(--blue)}
+.ff-logic{border-top:3px solid var(--gold)}
+.ff-rhetoric{border-top:3px solid var(--red)}
+.ff-triv-label{
+  font-family:var(--mono);font-size:8px;font-weight:700;
+  letter-spacing:2px;text-transform:uppercase;
+  margin-bottom:10px;
+}
+.ff-grammar .ff-triv-label{color:var(--blue)}
+.ff-logic .ff-triv-label{color:var(--gold)}
+.ff-rhetoric .ff-triv-label{color:var(--red)}
+.ff-triv-text{font-size:12px;color:var(--ink2);line-height:1.7}
+.ff-triv-text strong{color:var(--ink);font-weight:600}
+.ff-triv-text em{font-style:italic;color:var(--ink)}
+
+.ff-calc-row{
+  background:var(--bg2);border:1px solid var(--border);
+  padding:16px 20px;
+}
+.ff-result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px}
+.ff-result-item{}
+.ff-result-label{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink4);margin-bottom:4px}
+.ff-result-val{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--ink)}
+.ff-result-val.pass{color:var(--green)}
+.ff-result-val.fail{color:var(--red)}
+.ff-result-val.caution{color:var(--gold)}
+.ff-result-note{font-size:12px;color:var(--ink3);margin-top:4px;line-height:1.5}
+
+@media(max-width:800px){
+  .ff-trivium-strip{grid-template-columns:1fr}
+  .ff-triv-col{border-right:none;border-bottom:1px solid var(--border)}
+}
+
 </style>
 </head>
 <body>
@@ -708,270 +781,473 @@ window.onload = function() {
 
 </script>
 
-<!-- ========= BERKSHIRE VIEW ========= -->
+<!-- ========= BERKSHIRE VIEW v2 — MUNGER FOUR FILTERS ========= -->
 <div class="view" id="v-berkshire">
-  <div style="max-width:1100px;margin:0 auto">
-    <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid var(--ink)">
-      <div>
-        <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin-bottom:6px">Consilience &bull; 60-Year Study</div>
-        <div style="font-family:var(--serif);font-size:32px;font-weight:600;color:var(--ink);line-height:1">Berkshire Hathaway</div>
-        <div style="font-size:13px;color:var(--ink3);margin-top:6px">Live calculations &bull; Historical database &bull; Book companion</div>
-      </div>
-      <div style="display:flex;gap:8px">
-        <button onclick="brkShowTab('timeline',this)" class="brk-tab active" id="brk-t-timeline">Timeline</button>
-        <button onclick="brkShowTab('calculator',this)" class="brk-tab" id="brk-t-calculator">Calculator</button>
-        <button onclick="brkShowTab('add',this)" class="brk-tab" id="brk-t-add">+ Add Entry</button>
-      </div>
-    </div>
-    <div id="brk-summary" style="display:grid;grid-template-columns:repeat(5,1fr);gap:0;border:1px solid var(--border);margin-bottom:24px"></div>
-    <div id="brk-panel-timeline" class="brk-panel">
-      <div style="margin-bottom:20px">
-        <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin-bottom:8px">Net Worth Progression &mdash; Red = total, Gold = key position &bull; Click any bar to inspect</div>
-        <div style="position:relative;height:200px;border-bottom:1px solid var(--border);border-left:1px solid var(--border);overflow:hidden" id="brk-chart"></div>
-        <div id="brk-chart-labels" style="display:flex;margin-top:4px;padding-left:40px"></div>
-      </div>
-      <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin-bottom:8px">Entry Log</div>
-      <table style="width:100%;border-collapse:collapse" id="brk-table">
-        <thead><tr style="border-bottom:2px solid var(--ink)">
-          <th style="text-align:left;padding:8px 12px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink4)">Year</th>
-          <th style="text-align:right;padding:8px 12px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink4)">Net Worth</th>
-          <th style="text-align:right;padding:8px 12px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink4)">BV/Share</th>
-          <th style="text-align:right;padding:8px 12px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink4)">Key Position</th>
-          <th style="text-align:right;padding:8px 12px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink4)">Concentration</th>
-          <th style="text-align:left;padding:8px 12px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink4)">Note</th>
-          <th style="padding:8px 12px"></th>
-        </tr></thead>
-        <tbody id="brk-tbody"></tbody>
-      </table>
-    </div>
-    <div id="brk-panel-calculator" class="brk-panel" style="display:none">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
-        <div>
-          <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin-bottom:16px">Position Analysis Calculator</div>
-          <div class="brk-field-group"><label class="brk-label">Total Portfolio / Net Worth ($)</label><input class="brk-input" id="calc-networth" type="number" placeholder="e.g. 5300000000" oninput="brkCalc()"></div>
-          <div class="brk-field-group"><label class="brk-label">Position Size ($)</label><input class="brk-input" id="calc-position" type="number" placeholder="e.g. 700000000" oninput="brkCalc()"></div>
-          <div class="brk-field-group"><label class="brk-label">Position Type</label>
-            <select class="brk-input" id="calc-type" onchange="brkCalc()">
-              <option value="preferred">Preferred Stock</option>
-              <option value="common">Common Stock</option>
-              <option value="bond">Bond / Fixed Income</option>
-              <option value="whole">Wholly Owned Business</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-          <div class="brk-field-group"><label class="brk-label">Annual Yield / Dividend Rate (%)</label><input class="brk-input" id="calc-yield" type="number" placeholder="e.g. 9" step="0.1" oninput="brkCalc()"></div>
-          <div class="brk-field-group"><label class="brk-label">Year</label><input class="brk-input" id="calc-year" type="number" placeholder="e.g. 1991" oninput="brkCalc()"></div>
-          <button onclick="brkLoadSalomon()" style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:8px 16px;background:var(--bg3);border:1px solid var(--border);color:var(--ink3);cursor:pointer;margin-top:4px">Load Salomon Example (p.16)</button>
-        </div>
-        <div id="calc-output" style="background:var(--bg2);border:1px solid var(--border);padding:24px;min-height:300px">
-          <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin-bottom:16px">Analysis</div>
-          <div style="font-size:13px;color:var(--ink4)">Enter values to calculate.</div>
-        </div>
-      </div>
-    </div>
-    <div id="brk-panel-add" class="brk-panel" style="display:none">
-      <div style="max-width:560px">
-        <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin-bottom:16px">Add Book Entry</div>
-        <div style="font-size:12px;color:var(--ink3);margin-bottom:20px;line-height:1.6">Enter data as you read. Each entry becomes a point on the timeline. Page number optional but useful for reference.</div>
-        <div class="brk-field-group"><label class="brk-label">Year *</label><input class="brk-input" id="add-year" type="number" placeholder="1991"></div>
-        <div class="brk-field-group"><label class="brk-label">Berkshire Net Worth / Book Value ($B)</label><input class="brk-input" id="add-networth" type="number" step="0.01" placeholder="5.3"><span class="brk-hint">In billions &mdash; e.g. 5.3 = $5.3B</span></div>
-        <div class="brk-field-group"><label class="brk-label">Book Value Per Share ($)</label><input class="brk-input" id="add-bvps" type="number" step="0.01" placeholder="e.g. 6437"></div>
-        <div class="brk-field-group"><label class="brk-label">Key Position Name</label><input class="brk-input" id="add-pos-name" type="text" placeholder="e.g. Salomon Inc."></div>
-        <div class="brk-field-group"><label class="brk-label">Key Position Value ($B)</label><input class="brk-input" id="add-pos-val" type="number" step="0.01" placeholder="0.7"></div>
-        <div class="brk-field-group"><label class="brk-label">Note / Quote from Book</label><textarea class="brk-input" id="add-note" rows="3" placeholder="e.g. Salomon was a giant firm on Wall Street..."></textarea></div>
-        <div class="brk-field-group"><label class="brk-label">Page Reference</label><input class="brk-input" id="add-page" type="number" placeholder="16"></div>
-        <button onclick="brkAddEntry()" style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:10px 24px;background:var(--ink);color:#fff;border:none;cursor:pointer;margin-top:8px">Add to Database</button>
-        <div id="add-confirm" style="margin-top:12px;font-family:var(--mono);font-size:10px;color:var(--green);display:none">&#10003; Entry added.</div>
-      </div>
-    </div>
+<div style="max-width:1060px;margin:0 auto">
+
+  <!-- HEADER -->
+  <div style="padding-bottom:20px;margin-bottom:28px;border-bottom:2px solid var(--ink)">
+    <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin-bottom:8px">Consilience &bull; Munger Framework</div>
+    <div style="font-family:var(--serif);font-size:34px;font-weight:600;color:var(--ink);line-height:1.1;margin-bottom:6px">The Four Filters</div>
+    <div style="font-size:13px;color:var(--ink3);line-height:1.6;max-width:640px">Charlie Munger's screening system. A business either passes all four or it doesn't get considered. Enter any company — or a Berkshire holding from the book — and run it through the filters in sequence.</div>
   </div>
+
+  <!-- COMPANY INPUT ROW -->
+  <div style="display:flex;gap:12px;align-items:flex-end;margin-bottom:32px;flex-wrap:wrap">
+    <div style="flex:1;min-width:200px">
+      <div class="brk-label">Company Name</div>
+      <input class="brk-input" id="ff-company" type="text" placeholder="e.g. Salomon Inc., Coca-Cola, See's Candies">
+    </div>
+    <div style="width:100px">
+      <div class="brk-label">Year</div>
+      <input class="brk-input" id="ff-year" type="number" placeholder="1991">
+    </div>
+    <div style="width:130px">
+      <div class="brk-label">ROIC (%)</div>
+      <input class="brk-input" id="ff-roic" type="number" step="0.1" placeholder="e.g. 22.4" oninput="ffUpdate()">
+    </div>
+    <div style="width:130px">
+      <div class="brk-label">Net Income ($M)</div>
+      <input class="brk-input" id="ff-netincome" type="number" step="1" placeholder="e.g. 488" oninput="ffUpdate()">
+    </div>
+    <div style="width:130px">
+      <div class="brk-label">D&amp;A ($M)</div>
+      <input class="brk-input" id="ff-da" type="number" step="1" placeholder="e.g. 45" oninput="ffUpdate()">
+    </div>
+    <div style="width:130px">
+      <div class="brk-label">Maint. CapEx ($M)</div>
+      <input class="brk-input" id="ff-capex" type="number" step="1" placeholder="e.g. 28" oninput="ffUpdate()">
+    </div>
+    <div style="width:130px">
+      <div class="brk-label">Total Debt ($M)</div>
+      <input class="brk-input" id="ff-debt" type="number" step="1" placeholder="e.g. 190" oninput="ffUpdate()">
+    </div>
+    <div style="width:130px">
+      <div class="brk-label">Total Equity ($M)</div>
+      <input class="brk-input" id="ff-equity" type="number" step="1" placeholder="e.g. 2100" oninput="ffUpdate()">
+    </div>
+    <button onclick="ffLoadCoke()" style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:8px 14px;background:var(--bg3);border:1px solid var(--border);color:var(--ink3);cursor:pointer;white-space:nowrap">Load Coca-Cola 1988</button>
+  </div>
+
+  <!-- FILTER CARDS — one per filter -->
+  <div id="ff-cards" style="display:flex;flex-direction:column;gap:2px">
+
+    <!-- FILTER 1: ROIC -->
+    <div class="ff-card" id="ff-card-1">
+      <div class="ff-card-header" onclick="ffToggle(1)">
+        <div style="display:flex;align-items:center;gap:16px">
+          <div class="ff-num">01</div>
+          <div>
+            <div class="ff-card-title">Return on Invested Capital</div>
+            <div class="ff-card-sub">The ultimate engine of wealth creation</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px">
+          <div class="ff-verdict" id="ff-v1">—</div>
+          <div class="ff-chevron" id="ff-ch1">&#9660;</div>
+        </div>
+      </div>
+      <div class="ff-card-body" id="ff-body-1">
+        <div class="ff-trivium-strip">
+          <div class="ff-triv-col ff-grammar">
+            <div class="ff-triv-label">Grammar &mdash; What it is</div>
+            <div class="ff-triv-text">ROIC is the percentage of cash profit generated for every dollar tied up in operations. Formula: <strong>NOPAT &divide; Invested Capital</strong>. Invested capital = total debt + total equity &minus; excess cash. It measures how efficiently the business converts capital into profit &mdash; independent of how that capital was financed.</div>
+          </div>
+          <div class="ff-triv-col ff-logic">
+            <div class="ff-triv-label">Logic &mdash; Why it matters</div>
+            <div class="ff-triv-text">Over decades, a stock's return mirrors the business's ROIC. Growth without high ROIC destroys value &mdash; it consumes cash to expand a low-return operation. Munger demanded 15&ndash;20%+ sustained ROIC. At 20% ROIC, $1 of reinvested capital becomes $6.19 in 10 years. At 8% ROIC, that same dollar becomes $2.16. The difference is not a rounding error. It is the entire game.</div>
+          </div>
+          <div class="ff-triv-col ff-rhetoric">
+            <div class="ff-triv-label">Rhetoric &mdash; The Filter</div>
+            <div class="ff-triv-text">Munger's threshold: <strong>15% minimum, 20%+ preferred</strong>. Below 15%: the business is destroying real economic value even if it reports accounting profits. Ask: is this ROIC durable (moat-protected) or cyclical (temporary pricing power)? A company with 25% ROIC for one year is interesting. The same company with 20%+ ROIC for a decade is extraordinary.</div>
+          </div>
+        </div>
+        <div class="ff-calc-row" id="ff-calc-1">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--ink4)">Enter ROIC above to evaluate</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILTER 2: OWNER'S EARNINGS -->
+    <div class="ff-card" id="ff-card-2">
+      <div class="ff-card-header" onclick="ffToggle(2)">
+        <div style="display:flex;align-items:center;gap:16px">
+          <div class="ff-num">02</div>
+          <div>
+            <div class="ff-card-title">Owner's Earnings</div>
+            <div class="ff-card-sub">True free cash flow &mdash; what survives the meat grinder of reality</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px">
+          <div class="ff-verdict" id="ff-v2">—</div>
+          <div class="ff-chevron" id="ff-ch2">&#9660;</div>
+        </div>
+      </div>
+      <div class="ff-card-body" id="ff-body-2" style="display:none">
+        <div class="ff-trivium-strip">
+          <div class="ff-triv-col ff-grammar">
+            <div class="ff-triv-label">Grammar &mdash; What it is</div>
+            <div class="ff-triv-text">Owner's Earnings = <strong>Net Income + D&amp;A &minus; Maintenance CapEx</strong>. This is the actual cash you could extract from the business without degrading its operations or competitive position. Maintenance CapEx is the mandatory spend just to hold position &mdash; not growth investment. The distinction is critical and companies rarely disclose it explicitly.</div>
+          </div>
+          <div class="ff-triv-col ff-logic">
+            <div class="ff-triv-label">Logic &mdash; Why it matters</div>
+            <div class="ff-triv-text">Munger called EBITDA "bullshit earnings." Standard accounting spreads asset costs over time on paper, so Wall Street uses EBITDA to measure profitability while ignoring real cash outflows. Physical machines break and technology becomes obsolete. That replacement cash <em>leaves the bank account</em>. It cannot be paid to owners. Owner's Earnings strips the accounting fiction to reveal what actually survives.</div>
+          </div>
+          <div class="ff-triv-col ff-rhetoric">
+            <div class="ff-triv-label">Rhetoric &mdash; The Filter</div>
+            <div class="ff-triv-text">Compare Owner's Earnings to reported Net Income. <strong>If OE &lt; 60% of Net Income</strong>, the business is a capital-consumption machine disguised as a profitable company. Great businesses (See's Candies, Coca-Cola) have OE that <em>exceeds</em> Net Income in good years because D&amp;A overstates real maintenance requirements. That gap is the tell.</div>
+          </div>
+        </div>
+        <div class="ff-calc-row" id="ff-calc-2">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--ink4)">Enter Net Income, D&amp;A, and CapEx above to evaluate</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILTER 3: MARGIN OF SAFETY -->
+    <div class="ff-card" id="ff-card-3">
+      <div class="ff-card-header" onclick="ffToggle(3)">
+        <div style="display:flex;align-items:center;gap:16px">
+          <div class="ff-num">03</div>
+          <div>
+            <div class="ff-card-title">Margin of Safety</div>
+            <div class="ff-card-sub">Buying a dollar for 60 cents</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px">
+          <div class="ff-verdict" id="ff-v3">—</div>
+          <div class="ff-chevron" id="ff-ch3">&#9660;</div>
+        </div>
+      </div>
+      <div class="ff-card-body" id="ff-body-3" style="display:none">
+        <div class="ff-trivium-strip">
+          <div class="ff-triv-col ff-grammar">
+            <div class="ff-triv-label">Grammar &mdash; What it is</div>
+            <div class="ff-triv-text">Intrinsic Value = Owner's Earnings &divide; (Discount Rate &minus; Growth Rate). This is the present value of all future Owner's Earnings discounted back to today. Margin of Safety = the gap between intrinsic value and what the market is asking you to pay. Graham's rule: demand at least a 30% discount. Munger: in extraordinary businesses, a 15&ndash;20% discount is sufficient because the moat reduces estimation error.</div>
+          </div>
+          <div class="ff-triv-col ff-logic">
+            <div class="ff-triv-label">Logic &mdash; Why it matters</div>
+            <div class="ff-triv-text">Human beings are structurally bad at forecasting. Munger knew he would be wrong about management, the industry, the economy. The margin of safety is the mathematical buffer that absorbs error. Markets are driven by fear and greed. Panic periodically detaches price from value. That gap is not a problem &mdash; it is the entire opportunity. The margin of safety exists precisely because crowd psychology creates temporary mispricings in permanent businesses.</div>
+          </div>
+          <div class="ff-triv-col ff-rhetoric">
+            <div class="ff-triv-label">Rhetoric &mdash; The Filter</div>
+            <div class="ff-triv-text">Enter the market price and calculate implied Owner's Earnings yield. If the market is paying 40x Owner's Earnings for a 10% grower, there is zero margin of safety &mdash; the price already embeds the optimistic scenario. The filter: <strong>only act when the market has handed you a structurally protected entry price</strong>. Do not negotiate with yourself about whether the business is good enough to overpay for.</div>
+          </div>
+        </div>
+        <div class="ff-calc-row" id="ff-calc-3">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:8px">
+            <div><div class="brk-label">Market Price per Share ($)</div><input class="brk-input" id="ff-price" type="number" step="0.01" placeholder="e.g. 5.22" oninput="ffUpdate()"></div>
+            <div><div class="brk-label">Shares Outstanding (M)</div><input class="brk-input" id="ff-shares" type="number" step="0.1" placeholder="e.g. 671" oninput="ffUpdate()"></div>
+            <div><div class="brk-label">Long-term Growth Rate (%)</div><input class="brk-input" id="ff-growth" type="number" step="0.1" placeholder="e.g. 8" oninput="ffUpdate()"></div>
+          </div>
+          <div id="ff-calc-3-result" style="margin-top:12px;font-family:var(--mono);font-size:10px;color:var(--ink4)">Enter price, shares, and growth rate above</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILTER 4: DEBT -->
+    <div class="ff-card" id="ff-card-4">
+      <div class="ff-card-header" onclick="ffToggle(4)">
+        <div style="display:flex;align-items:center;gap:16px">
+          <div class="ff-num">04</div>
+          <div>
+            <div class="ff-card-title">Debt-to-Equity Hard Limit</div>
+            <div class="ff-card-sub">Leverage makes a good business risky and a mediocre one lethal</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px">
+          <div class="ff-verdict" id="ff-v4">—</div>
+          <div class="ff-chevron" id="ff-ch4">&#9660;</div>
+        </div>
+      </div>
+      <div class="ff-card-body" id="ff-body-4" style="display:none">
+        <div class="ff-trivium-strip">
+          <div class="ff-triv-col ff-grammar">
+            <div class="ff-triv-label">Grammar &mdash; What it is</div>
+            <div class="ff-triv-text">Debt-to-Equity = Total Long-Term Debt &divide; Total Shareholders' Equity. Munger's binary rule: <strong>D/E below 0.5 passes, above 1.0 fails immediately</strong>. No exceptions, no industry adjustments, no "but the cash flows cover it." Debt introduces the mathematical possibility of a zero. Munger refused to allow a zero into his equations regardless of the underlying business quality.</div>
+          </div>
+          <div class="ff-triv-col ff-logic">
+            <div class="ff-triv-label">Logic &mdash; Why it matters</div>
+            <div class="ff-triv-text">Management borrows to artificially boost short-term ROE and trigger bonuses. Debt creates fixed, unavoidable interest payments that raise the break-even permanently. Recessions are not optional &mdash; revenue eventually drops. Revenue drops while debt payments do not. The business defaults and shareholders are zeroed. Munger's entire framework assumed he would hold through recessions. Leverage made that impossible.</div>
+          </div>
+          <div class="ff-triv-col ff-rhetoric">
+            <div class="ff-triv-label">Rhetoric &mdash; The Filter</div>
+            <div class="ff-triv-text"><strong>D/E &lt; 0.5:</strong> Pass. The business funds itself from earnings. <strong>D/E 0.5&ndash;1.0:</strong> Caution. Understand the debt maturity schedule and covenant structure before proceeding. <strong>D/E &gt; 1.0:</strong> Stop. Do not rationalize. Munger did not rationalize. The filter is binary because the failure mode is binary: you either survive the downturn or you don't.</div>
+          </div>
+        </div>
+        <div class="ff-calc-row" id="ff-calc-4">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--ink4)">Enter Total Debt and Total Equity above to evaluate</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- VERDICT PANEL -->
+  <div id="ff-overall" style="margin-top:24px;padding:24px;border:2px solid var(--border);display:none">
+    <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin-bottom:12px">Munger Verdict</div>
+    <div id="ff-overall-text" style="font-family:var(--serif);font-size:20px;font-weight:600;color:var(--ink);line-height:1.4"></div>
+    <div id="ff-overall-sub" style="font-size:13px;color:var(--ink3);margin-top:8px;line-height:1.7"></div>
+  </div>
+
+  <!-- BOOK ENTRIES -->
+  <div style="margin-top:40px;padding-top:24px;border-top:1px solid var(--border)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4)">Book Entries &mdash; Berkshire Holdings Log</div>
+      <button onclick="ffShowAddEntry()" style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:5px 14px;background:var(--ink);color:#fff;border:none;cursor:pointer">+ Add from Book</button>
+    </div>
+    <div id="ff-add-form" style="display:none;background:var(--bg2);border:1px solid var(--border);padding:20px;margin-bottom:16px">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px">
+        <div><div class="brk-label">Year *</div><input class="brk-input" id="be-year" type="number" placeholder="1988"></div>
+        <div><div class="brk-label">Company *</div><input class="brk-input" id="be-company" type="text" placeholder="Coca-Cola"></div>
+        <div><div class="brk-label">Position ($B)</div><input class="brk-input" id="be-pos" type="number" step="0.01" placeholder="0.59"></div>
+        <div><div class="brk-label">BRK Net Worth ($B)</div><input class="brk-input" id="be-nw" type="number" step="0.01" placeholder="3.4"></div>
+      </div>
+      <div style="margin-bottom:12px"><div class="brk-label">Quote or Note from Book</div><textarea class="brk-input" id="be-note" rows="2" placeholder="Quote or insight from the page..."></textarea></div>
+      <div style="display:flex;gap:12px;align-items:center">
+        <div style="width:120px"><div class="brk-label">Page</div><input class="brk-input" id="be-page" type="number" placeholder="16"></div>
+        <button onclick="ffAddEntry()" style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:8px 20px;background:var(--ink);color:#fff;border:none;cursor:pointer;margin-top:16px">Save Entry</button>
+        <span id="be-confirm" style="font-family:var(--mono);font-size:10px;color:var(--green);display:none">&#10003; Saved</span>
+      </div>
+    </div>
+    <table style="width:100%;border-collapse:collapse" id="ff-entries-table">
+      <thead><tr style="border-bottom:2px solid var(--ink)">
+        <th style="text-align:left;padding:8px 10px;font-family:var(--mono);font-size:9px;color:var(--ink4);font-weight:700;letter-spacing:1px;text-transform:uppercase">Year</th>
+        <th style="text-align:left;padding:8px 10px;font-family:var(--mono);font-size:9px;color:var(--ink4);font-weight:700;letter-spacing:1px;text-transform:uppercase">Company</th>
+        <th style="text-align:right;padding:8px 10px;font-family:var(--mono);font-size:9px;color:var(--ink4);font-weight:700;letter-spacing:1px;text-transform:uppercase">Position</th>
+        <th style="text-align:right;padding:8px 10px;font-family:var(--mono);font-size:9px;color:var(--ink4);font-weight:700;letter-spacing:1px;text-transform:uppercase">Conc.</th>
+        <th style="text-align:left;padding:8px 10px;font-family:var(--mono);font-size:9px;color:var(--ink4);font-weight:700;letter-spacing:1px;text-transform:uppercase">Note</th>
+        <th style="padding:8px 10px"></th>
+      </tr></thead>
+      <tbody id="ff-entries-body"></tbody>
+    </table>
+  </div>
+
 </div>
+</div>
+
 
 <script>
 
-// ========= BERKSHIRE MODULE =========
-var BRK_DATA = JSON.parse(localStorage.getItem('brk_data') || 'null');
-if (!BRK_DATA) {
-  BRK_DATA = [{year:1991,netWorth:5.3,bvps:null,posName:'Salomon Inc.',posVal:0.7,note:'Salomon was a giant firm on Wall Street and its short-term borrowings were exceeded by only one public company in the United States.',page:16}];
-  localStorage.setItem('brk_data', JSON.stringify(BRK_DATA));
+// ========= FOUR FILTERS MODULE =========
+var FF_ENTRIES = JSON.parse(localStorage.getItem('ff_entries') || 'null');
+if (!FF_ENTRIES) {
+  FF_ENTRIES = [{year:1991,company:'Salomon Inc.',pos:0.7,nw:5.3,note:'Salomon was a giant firm on Wall Street and its short-term borrowings were exceeded by only one public company in the United States.',page:16}];
+  localStorage.setItem('ff_entries', JSON.stringify(FF_ENTRIES));
 }
 
-function brkSave() { localStorage.setItem('brk_data', JSON.stringify(BRK_DATA)); }
+function ffSave() { localStorage.setItem('ff_entries', JSON.stringify(FF_ENTRIES)); }
 
-function brkShowTab(tab, btn) {
-  document.querySelectorAll('.brk-panel').forEach(function(p){ p.style.display='none'; });
-  document.querySelectorAll('.brk-tab').forEach(function(b){ b.classList.remove('active'); });
-  document.getElementById('brk-panel-' + tab).style.display = 'block';
-  if (btn) btn.classList.add('active');
-  if (tab === 'timeline') brkRender();
+var FF_OPEN = [true, false, false, false];
+
+function ffToggle(n) {
+  var body = document.getElementById('ff-body-' + n);
+  var ch = document.getElementById('ff-ch' + n);
+  var isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  ch.classList.toggle('open', !isOpen);
+  FF_OPEN[n-1] = !isOpen;
 }
 
-function brkFmtB(val) {
-  if (val === null || val === undefined) return '\u2014';
-  if (val >= 1000) return '$' + val.toFixed(0) + 'B';
-  if (val >= 1) return '$' + val.toFixed(1) + 'B';
-  return '$' + (val * 1000).toFixed(0) + 'M';
+function ffLoadCoke() {
+  document.getElementById('ff-company').value = 'Coca-Cola';
+  document.getElementById('ff-year').value = '1988';
+  document.getElementById('ff-roic').value = '31.2';
+  document.getElementById('ff-netincome').value = '1045';
+  document.getElementById('ff-da').value = '168';
+  document.getElementById('ff-capex').value = '72';
+  document.getElementById('ff-debt').value = '1820';
+  document.getElementById('ff-equity').value = '3345';
+  document.getElementById('ff-price').value = '5.22';
+  document.getElementById('ff-shares').value = '671';
+  document.getElementById('ff-growth').value = '12';
+  ffUpdate();
 }
 
-function brkRender() {
-  var data = BRK_DATA.slice().sort(function(a,b){ return a.year - b.year; });
-  var latest = data[data.length - 1] || {};
-  var earliest = data[0] || {};
-  var maxNW = Math.max.apply(null, data.map(function(d){ return d.netWorth || 0; })) || 1;
-  var concArr = data.filter(function(d){ return d.posVal && d.netWorth; });
-  var avgConc = concArr.length ? (concArr.reduce(function(s,d){ return s + d.posVal/d.netWorth; }, 0) / concArr.length * 100).toFixed(1) : '\u2014';
-
-  document.getElementById('brk-summary').innerHTML = [
-    {label:'Entries', val: data.length},
-    {label:'Year Range', val: data.length > 1 ? earliest.year + '\u2013' + latest.year : (earliest.year || '\u2014')},
-    {label:'Peak Net Worth', val: brkFmtB(maxNW)},
-    {label:'Latest Net Worth', val: brkFmtB(latest.netWorth)},
-    {label:'Avg Concentration', val: avgConc + '%'}
-  ].map(function(s){
-    return '<div style="padding:14px 18px;border-right:1px solid var(--border)">'
-      + '<div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink4);margin-bottom:4px">' + s.label + '</div>'
-      + '<div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--ink)">' + s.val + '</div></div>';
-  }).join('');
-
-  var chart = document.getElementById('brk-chart');
-  var W = chart.offsetWidth || 900;
-  var barW = Math.max(18, Math.min(56, Math.floor((W - 44) / Math.max(data.length,1)) - 4));
-  var chartH = 188;
-  var barsHtml = data.map(function(d,i){
-    if (!d.netWorth) return '';
-    var h = Math.max(4, Math.round((d.netWorth / maxNW) * chartH));
-    var left = 40 + i * (barW + 4);
-    var posH = (d.posVal && d.netWorth) ? Math.round((d.posVal / d.netWorth) * h) : 0;
-    var tip = d.year + ': ' + brkFmtB(d.netWorth) + (d.posName ? ' | ' + d.posName + ' ' + brkFmtB(d.posVal) : '');
-    return '<div class="brk-bar" style="left:' + left + 'px;width:' + barW + 'px;height:' + h + 'px" title="' + tip + '" onclick="brkInspect(' + i + ')">'
-      + (posH ? '<div style="position:absolute;bottom:0;left:0;right:0;height:' + posH + 'px;background:var(--gold);opacity:0.8"></div>' : '')
-      + '</div>';
-  }).join('');
-  var yHtml = '<div style="position:absolute;left:0;top:0;height:100%;display:flex;flex-direction:column;justify-content:space-between">'
-    + '<span style="font-family:var(--mono);font-size:8px;color:var(--ink4)">' + brkFmtB(maxNW) + '</span>'
-    + '<span style="font-family:var(--mono);font-size:8px;color:var(--ink4)">$0</span></div>';
-  chart.innerHTML = yHtml + barsHtml;
-  document.getElementById('brk-chart-labels').innerHTML = data.map(function(d){
-    return '<span style="font-family:var(--mono);font-size:9px;color:var(--ink4);width:' + (barW+4) + 'px;text-align:center;display:inline-block">' + d.year + '</span>';
-  }).join('');
-
-  document.getElementById('brk-tbody').innerHTML = data.length ? data.map(function(d,i){
-    var conc = (d.posVal && d.netWorth) ? ((d.posVal/d.netWorth)*100).toFixed(1) + '%' : '\u2014';
-    var cc = (d.posVal && d.netWorth && (d.posVal/d.netWorth) > 0.1) ? 'var(--red)' : 'var(--ink)';
-    return '<tr style="border-bottom:1px solid var(--border);cursor:pointer" onclick="brkInspect(' + i + ')">'
-      + '<td style="padding:10px 12px;font-family:var(--mono);font-size:12px;font-weight:700">' + d.year + '</td>'
-      + '<td style="padding:10px 12px;font-family:var(--mono);font-size:12px;text-align:right">' + (d.netWorth ? brkFmtB(d.netWorth) : '\u2014') + '</td>'
-      + '<td style="padding:10px 12px;font-family:var(--mono);font-size:12px;text-align:right">' + (d.bvps ? '$' + Number(d.bvps).toFixed(0) : '\u2014') + '</td>'
-      + '<td style="padding:10px 12px;font-size:12px;text-align:right;color:var(--ink2)">' + (d.posName || '\u2014') + '</td>'
-      + '<td style="padding:10px 12px;font-family:var(--mono);font-size:13px;font-weight:700;text-align:right;color:' + cc + '">' + conc + '</td>'
-      + '<td style="padding:10px 12px;font-size:11px;color:var(--ink3);max-width:300px">'
-        + (d.page ? '<span style="font-family:var(--mono);font-size:9px;background:var(--bg3);padding:1px 6px;margin-right:6px">p.' + d.page + '</span>' : '')
-        + (d.note ? d.note.substring(0,80) + (d.note.length > 80 ? '...' : '') : '') + '</td>'
-      + '<td style="padding:10px 12px"><button onclick="event.stopPropagation();brkDelete(' + i + ')" style="font-family:var(--mono);font-size:8px;color:var(--ink4);background:none;border:none;cursor:pointer">\u2715</button></td>'
-      + '</tr>';
-  }).join('') : '<tr><td colspan="7" style="padding:40px;text-align:center;font-family:var(--mono);font-size:10px;color:var(--ink4)">No entries yet. Add data from the book using the + Add Entry tab.</td></tr>';
+function ffSetVerdict(n, status, label) {
+  var el = document.getElementById('ff-v' + n);
+  el.textContent = label;
+  el.className = 'ff-verdict ff-verdict-' + status;
 }
 
-function brkInspect(idx) {
-  var data = BRK_DATA.slice().sort(function(a,b){ return a.year - b.year; });
-  var d = data[idx]; if (!d) return;
-  document.getElementById('calc-year').value = d.year;
-  document.getElementById('calc-networth').value = d.netWorth ? (d.netWorth * 1e9) : '';
-  document.getElementById('calc-position').value = d.posVal ? (d.posVal * 1e9) : '';
-  brkCalc();
-  brkShowTab('calculator', document.getElementById('brk-t-calculator'));
+function ffUpdate() {
+  var roic = parseFloat(document.getElementById('ff-roic').value) || null;
+  var ni = parseFloat(document.getElementById('ff-netincome').value) || null;
+  var da = parseFloat(document.getElementById('ff-da').value) || null;
+  var capex = parseFloat(document.getElementById('ff-capex').value) || null;
+  var debt = parseFloat(document.getElementById('ff-debt').value) || null;
+  var equity = parseFloat(document.getElementById('ff-equity').value) || null;
+  var price = parseFloat(document.getElementById('ff-price').value) || null;
+  var shares = parseFloat(document.getElementById('ff-shares').value) || null;
+  var growth = parseFloat(document.getElementById('ff-growth').value) || null;
+
+  var results = {pass:0, fail:0, caution:0, pending:0};
+
+  // FILTER 1: ROIC
+  if (roic !== null) {
+    var r1status, r1label, r1note;
+    if (roic >= 20) { r1status='pass'; r1label='Pass'; r1note='Exceptional. ' + roic.toFixed(1) + '% ROIC places this in the top decile of public companies. At this rate, $1 reinvested becomes $' + Math.pow(1+roic/100,10).toFixed(2) + ' in 10 years. Munger\'s preferred range.'; results.pass++; }
+    else if (roic >= 15) { r1status='pass'; r1label='Pass'; r1note='Solid. ' + roic.toFixed(1) + '% meets Munger\'s minimum threshold. Good business, verify moat durability over a full cycle.'; results.pass++; }
+    else if (roic >= 10) { r1status='caution'; r1label='Caution'; r1note=roic.toFixed(1) + '% ROIC is below Munger\'s 15% minimum. The business is generating some return above its cost of capital but not compounding at a rate worth holding for decades. Pass unless price is extraordinary.'; results.caution++; }
+    else { r1status='fail'; r1label='Fail'; r1note=roic.toFixed(1) + '% ROIC means the business is likely destroying economic value. Even at a low purchase price, compounding at this rate produces mediocre outcomes over 10+ years. Munger would not proceed.'; results.fail++; }
+    document.getElementById('ff-calc-1').innerHTML = '<div class="ff-result-grid">'
+      + '<div class="ff-result-item"><div class="ff-result-label">ROIC</div><div class="ff-result-val ' + r1status + '">' + roic.toFixed(1) + '%</div><div class="ff-result-note">Munger threshold: 15% min / 20%+ preferred</div></div>'
+      + '<div class="ff-result-item"><div class="ff-result-label">$1 reinvested &rarr; 10yr</div><div class="ff-result-val">' + (roic > 0 ? '$' + Math.pow(1+roic/100,10).toFixed(2) : '\u2014') + '</div><div class="ff-result-note">The compounding engine at this rate</div></div>'
+      + '<div class="ff-result-item"><div class="ff-result-label">vs 8% alternative</div><div class="ff-result-val">' + (roic > 0 ? '$' + (Math.pow(1+roic/100,10) - Math.pow(1.08,10)).toFixed(2) + ' advantage' : '\u2014') + '</div><div class="ff-result-note">Per dollar vs S&P baseline return</div></div>'
+      + '</div><div style="margin-top:12px;padding:12px 16px;border-left:3px solid var(--' + (r1status==='pass'?'green':r1status==='caution'?'gold':'red') + ');background:var(--bg3);font-size:12px;color:var(--ink2);line-height:1.6">' + r1note + '</div>';
+    ffSetVerdict(1, r1status, r1label);
+  } else { ffSetVerdict(1,'pending','\u2014'); results.pending++; }
+
+  // FILTER 2: OWNER'S EARNINGS
+  if (ni !== null && da !== null && capex !== null) {
+    var oe = ni + da - capex;
+    var oeRatio = oe / ni;
+    var r2status, r2label, r2note;
+    if (oeRatio >= 1.0) { r2status='pass'; r2label='Pass'; r2note='Owner\'s Earnings exceed Net Income. D&A overstates real maintenance requirements, meaning accounting understates the cash generation. This is the signature of a truly capital-light business. Munger\'s ideal.'; results.pass++; }
+    else if (oeRatio >= 0.75) { r2status='pass'; r2label='Pass'; r2note='Owner\'s Earnings are ' + (oeRatio*100).toFixed(0) + '% of Net Income. Healthy. The business consumes modest capital to maintain position. Proceed.'; results.pass++; }
+    else if (oeRatio >= 0.60) { r2status='caution'; r2label='Caution'; r2note='Owner\'s Earnings are ' + (oeRatio*100).toFixed(0) + '% of Net Income. The business is consuming meaningful capital just to hold position. Understand whether CapEx is truly maintenance or contains growth investment.'; results.caution++; }
+    else { r2status='fail'; r2label='Fail'; r2note='Owner\'s Earnings are only ' + (oeRatio*100).toFixed(0) + '% of Net Income. This business is a capital consumption machine. Reported profits are an accounting fiction. Munger would call this "bullshit earnings" territory.'; results.fail++; }
+    document.getElementById('ff-calc-2').innerHTML = '<div class="ff-result-grid">'
+      + '<div class="ff-result-item"><div class="ff-result-label">Net Income</div><div class="ff-result-val">$' + ni.toFixed(0) + 'M</div></div>'
+      + '<div class="ff-result-item"><div class="ff-result-label">+ D&amp;A</div><div class="ff-result-val">+$' + da.toFixed(0) + 'M</div></div>'
+      + '<div class="ff-result-item"><div class="ff-result-label">- Maint. CapEx</div><div class="ff-result-val ' + (capex/ni > 0.5 ? 'fail':'') + '">\u2212$' + capex.toFixed(0) + 'M</div></div>'
+      + '<div class="ff-result-item"><div class="ff-result-label">Owner\'s Earnings</div><div class="ff-result-val ' + r2status + '">$' + oe.toFixed(0) + 'M</div><div class="ff-result-note">' + (oeRatio*100).toFixed(0) + '% of Net Income</div></div>'
+      + '</div><div style="margin-top:12px;padding:12px 16px;border-left:3px solid var(--' + (r2status==='pass'?'green':r2status==='caution'?'gold':'red') + ');background:var(--bg3);font-size:12px;color:var(--ink2);line-height:1.6">' + r2note + '</div>';
+    ffSetVerdict(2, r2status, r2label);
+    // Store OE for filter 3
+    window._ff_oe = oe;
+  } else { ffSetVerdict(2,'pending','\u2014'); window._ff_oe = null; results.pending++; }
+
+  // FILTER 3: MARGIN OF SAFETY
+  var oe3 = window._ff_oe;
+  if (oe3 && price && shares && growth !== null) {
+    var discountRate = 0.10; // Munger used ~10% as hurdle
+    var growthR = growth / 100;
+    var iv = oe3 / ((discountRate - growthR) * 1000); // IV per share in $B / shares-in-M = $ per share
+    // Simpler: IV per share = (OE per share) / (discount - growth)
+    var oePerShare = oe3 / shares; // $ per share
+    var ivPerShare = growthR < discountRate ? oePerShare / (discountRate - growthR) : null;
+    var r3status, r3label, r3note;
+    if (ivPerShare) {
+      var mos = ((ivPerShare - price) / ivPerShare) * 100;
+      if (mos >= 30) { r3status='pass'; r3label='Pass'; r3note='Margin of safety: ' + mos.toFixed(1) + '%. The market is pricing this at a significant discount to intrinsic value. Graham\'s 30% threshold is met. Munger\'s buffer is in place.'; results.pass++; }
+      else if (mos >= 15) { r3status='caution'; r3label='Caution'; r3note='Margin of safety: ' + mos.toFixed(1) + '%. Thin but not zero. Munger accepted narrower margins on extraordinary businesses with durable moats. Requires high confidence in the moat assessment.'; results.caution++; }
+      else if (mos >= 0) { r3status='caution'; r3label='Thin'; r3note='Margin of safety: ' + mos.toFixed(1) + '%. Essentially no safety buffer. The market is already pricing in a significant portion of the intrinsic value. Any adverse development eliminates the return.'; results.caution++; }
+      else { r3status='fail'; r3label='Fail'; r3note='Price exceeds estimated intrinsic value by ' + Math.abs(mos).toFixed(1) + '%. You are paying a premium to fair value. No margin of safety. Munger would wait.'; results.fail++; }
+      document.getElementById('ff-calc-3-result').innerHTML = '<div class="ff-result-grid">'
+        + '<div class="ff-result-item"><div class="ff-result-label">OE / Share</div><div class="ff-result-val">$' + oePerShare.toFixed(2) + '</div></div>'
+        + '<div class="ff-result-item"><div class="ff-result-label">Intrinsic Value / Share</div><div class="ff-result-val">$' + ivPerShare.toFixed(2) + '</div><div class="ff-result-note">At ' + growth + '% growth, 10% hurdle rate</div></div>'
+        + '<div class="ff-result-item"><div class="ff-result-label">Market Price</div><div class="ff-result-val">$' + price.toFixed(2) + '</div></div>'
+        + '<div class="ff-result-item"><div class="ff-result-label">Margin of Safety</div><div class="ff-result-val ' + r3status + '">' + mos.toFixed(1) + '%</div><div class="ff-result-note">Graham minimum: 30%</div></div>'
+        + '</div><div style="margin-top:12px;padding:12px 16px;border-left:3px solid var(--' + (r3status==='pass'?'green':r3status==='caution'?'gold':'red') + ');background:var(--bg3);font-size:12px;color:var(--ink2);line-height:1.6">' + r3note + '</div>';
+    } else {
+      document.getElementById('ff-calc-3-result').innerHTML = '<div style="color:var(--red);font-size:12px">Growth rate must be below discount rate (10%). Lower the growth assumption.</div>';
+      r3status='fail'; r3label='Error'; results.fail++;
+    }
+    ffSetVerdict(3, r3status, r3label);
+  } else { ffSetVerdict(3,'pending','\u2014'); results.pending++; }
+
+  // FILTER 4: DEBT
+  if (debt !== null && equity !== null && equity > 0) {
+    var de = debt / equity;
+    var r4status, r4label, r4note;
+    if (de < 0.5) { r4status='pass'; r4label='Pass'; r4note='D/E: ' + de.toFixed(2) + '. The business funds itself from earnings. Recessions are survivable. Munger passes immediately.'; results.pass++; }
+    else if (de < 1.0) { r4status='caution'; r4label='Caution'; r4note='D/E: ' + de.toFixed(2) + '. Elevated leverage. Understand debt maturity schedule and covenant structure. This business can survive a moderate downturn, but not a severe one without consequences.'; results.caution++; }
+    else { r4status='fail'; r4label='Fail'; r4note='D/E: ' + de.toFixed(2) + '. Above 1.0. Munger stops here. This leverage level introduces the mathematical possibility of a zero. No business quality compensates for a zero. Pass.'; results.fail++; }
+    document.getElementById('ff-calc-4').innerHTML = '<div class="ff-result-grid">'
+      + '<div class="ff-result-item"><div class="ff-result-label">Total Debt</div><div class="ff-result-val">$' + debt.toFixed(0) + 'M</div></div>'
+      + '<div class="ff-result-item"><div class="ff-result-label">Total Equity</div><div class="ff-result-val">$' + equity.toFixed(0) + 'M</div></div>'
+      + '<div class="ff-result-item"><div class="ff-result-label">Debt-to-Equity</div><div class="ff-result-val ' + r4status + '">' + de.toFixed(2) + 'x</div><div class="ff-result-note">Munger limit: &lt;0.5 pass / &gt;1.0 fail</div></div>'
+      + '</div><div style="margin-top:12px;padding:12px 16px;border-left:3px solid var(--' + (r4status==='pass'?'green':r4status==='caution'?'gold':'red') + ');background:var(--bg3);font-size:12px;color:var(--ink2);line-height:1.6">' + r4note + '</div>';
+    ffSetVerdict(4, r4status, r4label);
+  } else { ffSetVerdict(4,'pending','\u2014'); results.pending++; }
+
+  // OVERALL VERDICT
+  var overall = document.getElementById('ff-overall');
+  var company = document.getElementById('ff-company').value.trim() || 'This company';
+  if (results.pending < 4) {
+    overall.style.display = 'block';
+    var oText, oSub, oBorder;
+    if (results.fail > 0) {
+      oText = company + ' fails the Munger screen.';
+      oSub = results.fail + ' of 4 filters failed. Munger\'s system is binary on the hard filters. A single fail on Debt (Filter 4) is an immediate stop. Review the specific failure before considering any position. The filter exists to protect you from your own optimism.';
+      oBorder = 'var(--red)';
+    } else if (results.caution > 0) {
+      oText = company + ' passes with conditions.';
+      oSub = results.pass + ' filters passed, ' + results.caution + ' require additional scrutiny. Munger would want to understand the caution points deeply before proceeding. Caution is not a pass \u2014 it is an invitation to do more work.';
+      oBorder = 'var(--gold)';
+    } else if (results.pass === 4) {
+      oText = company + ' passes all four filters.';
+      oSub = 'All 4 filters passed. This is the kind of business Munger described as a "wonderful company." The remaining question is price. If Filter 3 passed with a margin of safety \u226530%, Munger would proceed. If it passed narrowly, he would wait for a better entry.';
+      oBorder = 'var(--green)';
+    } else {
+      oText = 'Partial data \u2014 continue entering values.';
+      oSub = results.pass + ' filters evaluated so far.';
+      oBorder = 'var(--border)';
+    }
+    overall.style.borderColor = oBorder;
+    document.getElementById('ff-overall-text').textContent = oText;
+    document.getElementById('ff-overall-sub').textContent = oSub;
+  } else {
+    overall.style.display = 'none';
+  }
 }
 
-function brkDelete(idx) {
-  var data = BRK_DATA.slice().sort(function(a,b){ return a.year - b.year; });
-  var entry = data[idx];
-  var ri = BRK_DATA.findIndex(function(d){ return d.year === entry.year && d.note === entry.note; });
-  if (ri >= 0) { BRK_DATA.splice(ri,1); brkSave(); brkRender(); }
+function ffShowAddEntry() {
+  var f = document.getElementById('ff-add-form');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
 }
 
-function brkAddEntry() {
-  var year = parseInt(document.getElementById('add-year').value);
-  if (!year) { alert('Year is required.'); return; }
-  BRK_DATA.push({
+function ffAddEntry() {
+  var year = parseInt(document.getElementById('be-year').value);
+  var company = document.getElementById('be-company').value.trim();
+  if (!year || !company) { alert('Year and company required.'); return; }
+  FF_ENTRIES.push({
     year: year,
-    netWorth: parseFloat(document.getElementById('add-networth').value) || null,
-    bvps: parseFloat(document.getElementById('add-bvps').value) || null,
-    posName: document.getElementById('add-pos-name').value.trim() || null,
-    posVal: parseFloat(document.getElementById('add-pos-val').value) || null,
-    note: document.getElementById('add-note').value.trim() || null,
-    page: parseInt(document.getElementById('add-page').value) || null
+    company: company,
+    pos: parseFloat(document.getElementById('be-pos').value) || null,
+    nw: parseFloat(document.getElementById('be-nw').value) || null,
+    note: document.getElementById('be-note').value.trim() || null,
+    page: parseInt(document.getElementById('be-page').value) || null
   });
-  brkSave(); brkRender();
-  ['add-year','add-networth','add-bvps','add-pos-name','add-pos-val','add-note','add-page'].forEach(function(id){ document.getElementById(id).value=''; });
-  var c = document.getElementById('add-confirm');
-  c.style.display='block';
-  setTimeout(function(){ c.style.display='none'; }, 2000);
-  brkShowTab('timeline', document.getElementById('brk-t-timeline'));
+  ffSave();
+  ffRenderEntries();
+  ['be-year','be-company','be-pos','be-nw','be-note','be-page'].forEach(function(id){ document.getElementById(id).value=''; });
+  var c = document.getElementById('be-confirm');
+  c.style.display='inline';
+  setTimeout(function(){ c.style.display='none'; },2000);
 }
 
-function brkLoadSalomon() {
-  document.getElementById('calc-networth').value = 5300000000;
-  document.getElementById('calc-position').value = 700000000;
-  document.getElementById('calc-yield').value = 9;
-  document.getElementById('calc-year').value = 1991;
-  document.getElementById('calc-type').value = 'preferred';
-  brkCalc();
+function ffDeleteEntry(idx) {
+  FF_ENTRIES.splice(idx,1);
+  ffSave();
+  ffRenderEntries();
 }
 
-function brkCalc() {
-  var nw = parseFloat(document.getElementById('calc-networth').value) || 0;
-  var pos = parseFloat(document.getElementById('calc-position').value) || 0;
-  var yld = parseFloat(document.getElementById('calc-yield').value) || 0;
-  var year = document.getElementById('calc-year').value || '';
-  var type = document.getElementById('calc-type').value;
-  var out = document.getElementById('calc-output');
-  if (!nw || !pos) {
-    out.innerHTML = '<div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin-bottom:16px">Analysis</div><div style="font-size:13px;color:var(--ink4)">Enter portfolio value and position size to calculate.</div>';
-    return;
-  }
-  var conc = (pos / nw) * 100;
-  var annualIncome = yld > 0 ? pos * (yld / 100) : null;
-  var incomeOnNW = annualIncome ? (annualIncome / nw) * 100 : null;
-  var concColor = conc > 10 ? 'var(--red)' : (conc > 5 ? 'var(--gold)' : 'var(--green)');
-  var concVerdict = conc > 20
-    ? 'Highly concentrated. Berkshire-level conviction required. One position at ' + conc.toFixed(1) + '% of net worth means the company\'s fate is deeply tied to this single holding. Buffett only went this heavy when he had near-certainty about the economics and the people running it.'
-    : conc > 10
-    ? 'Significant concentration. A meaningful bet at ' + conc.toFixed(1) + '%. A 50% decline in this position would reduce total net worth by ' + (conc * 0.5).toFixed(1) + '%. This is Buffett\'s high-conviction, well-understood territory.'
-    : conc > 5
-    ? 'Notable position at ' + conc.toFixed(1) + '%. Above typical institutional weight but within conviction-investor range. A 50% decline costs ' + (conc * 0.5).toFixed(1) + '% of total net worth.'
-    : 'Moderate position at ' + conc.toFixed(1) + '%. Below 5% concentration. Manageable risk even in an adverse scenario.';
-  var typeNote = type === 'preferred'
-    ? 'Preferred stock provides fixed dividends with priority over common equity in liquidation. Buffett favored preferred in distressed situations \u2014 bond-like downside protection with equity-like upside via conversion rights.'
-    : type === 'common' ? 'Common stock. Full equity participation \u2014 upside and downside both uncapped.'
-    : type === 'bond' ? 'Fixed income. Income-certain, principal contingent on issuer solvency at maturity.'
-    : type === 'whole' ? 'Wholly owned operating business. Generates owner earnings directly. Valued on earning power, not market price.'
-    : 'Other security type.';
-  var rows = [
-    {l:'Portfolio / Net Worth', v: '$' + (nw/1e9).toFixed(2) + 'B', h: false},
-    {l:'Position Size', v: pos >= 1e9 ? '$' + (pos/1e9).toFixed(2) + 'B' : '$' + (pos/1e6).toFixed(0) + 'M', h: false},
-    {l:'Concentration', v: conc.toFixed(2) + '%', h: conc > 10},
-    {l:'Remainder of Portfolio', v: '$' + ((nw-pos)/1e9).toFixed(2) + 'B', h: false}
-  ];
-  if (annualIncome) {
-    rows.push({l:'Annual Income from Position', v: '$' + (annualIncome/1e6).toFixed(1) + 'M', h: false});
-    rows.push({l:'Income Yield on Net Worth', v: incomeOnNW.toFixed(2) + '%', h: false});
-    rows.push({l:'Years to Recover via Income', v: (100 / incomeOnNW).toFixed(1) + ' years', h: false});
-  }
-  var rowsHtml = rows.map(function(r){
-    return '<div class="calc-result-row"><span class="calc-result-label">' + r.l + '</span><span class="calc-result-val' + (r.h ? ' highlight' : '') + '">' + r.v + '</span></div>';
-  }).join('');
-  out.innerHTML = '<div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin-bottom:12px">Analysis' + (year ? ' \u2014 ' + year : '') + '</div>'
-    + rowsHtml
-    + '<div class="calc-verdict"><strong style="font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:6px;color:var(--gold)">Verdict</strong>' + concVerdict + '</div>'
-    + '<div style="margin-top:12px;padding:12px 16px;background:var(--bg3);border-left:3px solid var(--blue);font-size:12px;color:var(--ink3);line-height:1.65"><strong style="font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:5px;color:var(--blue)">Position Type Note</strong>' + typeNote + '</div>';
+function ffRenderEntries() {
+  var sorted = FF_ENTRIES.slice().sort(function(a,b){ return a.year-b.year; });
+  var tbody = document.getElementById('ff-entries-body');
+  if (!tbody) return;
+  tbody.innerHTML = sorted.length ? sorted.map(function(e,i){
+    var conc = (e.pos && e.nw) ? ((e.pos/e.nw)*100).toFixed(1)+'%' : '\u2014';
+    var cc = (e.pos && e.nw && e.pos/e.nw > 0.1) ? 'color:var(--red);font-weight:700' : '';
+    return '<tr style="border-bottom:1px solid var(--border)">'
+      + '<td style="padding:9px 10px;font-family:var(--mono);font-size:12px;font-weight:700">' + e.year + '</td>'
+      + '<td style="padding:9px 10px;font-size:13px;font-weight:500">' + e.company + '</td>'
+      + '<td style="padding:9px 10px;font-family:var(--mono);font-size:12px;text-align:right">' + (e.pos ? '$' + (e.pos>=1?e.pos.toFixed(1)+'B':(e.pos*1000).toFixed(0)+'M') : '\u2014') + '</td>'
+      + '<td style="padding:9px 10px;font-family:var(--mono);font-size:12px;text-align:right;' + cc + '">' + conc + '</td>'
+      + '<td style="padding:9px 10px;font-size:11px;color:var(--ink3);max-width:360px">' + (e.page ? '<span style="font-family:var(--mono);font-size:9px;background:var(--bg3);padding:1px 6px;margin-right:6px">p.'+e.page+'</span>' : '') + (e.note || '') + '</td>'
+      + '<td style="padding:9px 10px"><button onclick="ffDeleteEntry(' + i + ')" style="font-family:var(--mono);font-size:8px;color:var(--ink4);background:none;border:none;cursor:pointer">\u2715</button></td>'
+      + '</tr>';
+  }).join('') : '<tr><td colspan="6" style="padding:32px;text-align:center;font-family:var(--mono);font-size:10px;color:var(--ink4)">No entries yet. Add holdings from the book above.</td></tr>';
 }
 
-// Auto-render when Berkshire tab is first opened
-var _brkInit = false;
-var _origShow = window.show;
+// Auto-init entries when Berkshire tab opens
+var _ffInit = false;
+var _origShow2 = window.show;
 window.show = function(name, btn) {
-  _origShow(name, btn);
-  if (name === 'berkshire' && !_brkInit) { _brkInit = true; brkRender(); }
+  _origShow2(name, btn);
+  if (name === 'berkshire' && !_ffInit) { _ffInit = true; ffRenderEntries(); }
 };
 
 </script>
