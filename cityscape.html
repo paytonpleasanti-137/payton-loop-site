@@ -24,6 +24,52 @@ body{background:#000;overflow:hidden;font-family:'Courier New',monospace}
 #loader-label{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);font-family:'Courier New',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.2);z-index:20;white-space:nowrap;text-align:center}
 #flow-legend{position:fixed;bottom:56px;right:20px;font-family:'Courier New',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.2);z-index:10;line-height:2;text-align:right;pointer-events:none}
 #stats-bar{position:fixed;top:0;left:50%;transform:translateX(-50%);font-family:'Courier New',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.22);z-index:10;padding:10px 0;pointer-events:none}
+
+/* ── SHADER PANEL ─────────────────────────────── */
+#shader-panel{
+  position:fixed;top:50%;left:20px;transform:translateY(-50%);
+  width:220px;z-index:30;pointer-events:all;
+  border:1px solid rgba(255,255,255,0.12);
+  background:rgba(4,4,3,0.92);
+  font-family:'Courier New',monospace;
+}
+#shader-panel-title{
+  padding:10px 14px 8px;
+  font-size:8px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;
+  color:rgba(255,255,255,0.35);border-bottom:1px solid rgba(255,255,255,0.08);
+  display:flex;justify-content:space-between;align-items:center;cursor:pointer;
+}
+#shader-panel-title span{color:rgba(255,255,255,0.18);font-size:10px}
+.sh-mode-btn{
+  display:block;width:100%;padding:9px 14px;
+  font-family:'Courier New',monospace;font-size:9px;font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;text-align:left;
+  border:none;border-bottom:1px solid rgba(255,255,255,0.05);
+  background:transparent;color:rgba(255,255,255,0.28);cursor:pointer;
+  transition:background 0.1s,color 0.1s;
+}
+.sh-mode-btn:hover{background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.55)}
+.sh-mode-btn.active{color:#fff;background:rgba(255,255,255,0.06)}
+.sh-mode-btn.active .sh-dot{background:currentColor}
+.sh-dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.2);margin-right:9px;vertical-align:middle;transition:background 0.1s}
+#shader-sliders{padding:12px 14px;border-top:1px solid rgba(255,255,255,0.06)}
+.sh-slider-row{margin-bottom:10px}
+.sh-slider-label{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.28);display:flex;justify-content:space-between;margin-bottom:5px}
+.sh-slider-label span{color:rgba(255,255,255,0.5);font-variant-numeric:tabular-nums}
+input[type=range].sh-range{
+  width:100%;height:2px;-webkit-appearance:none;appearance:none;
+  background:rgba(255,255,255,0.12);outline:none;cursor:pointer;
+}
+input[type=range].sh-range::-webkit-slider-thumb{
+  -webkit-appearance:none;width:10px;height:10px;
+  background:#fff;border-radius:0;cursor:pointer;
+}
+#shader-mode-indicator{
+  position:fixed;bottom:20px;right:20px;
+  font-family:'Courier New',monospace;font-size:8px;letter-spacing:2px;
+  text-transform:uppercase;color:rgba(255,255,255,0.25);z-index:10;
+  pointer-events:none;
+}
 </style>
 </head>
 <body>
@@ -641,7 +687,7 @@ function animate() {
     hudNode.textContent=''; hudDetail.textContent='';
   }
 
-  renderer.render(scene, camera);
+  window.doRender(clock.getElapsedTime());
 }
 
 window.addEventListener('resize', function(){
@@ -650,7 +696,396 @@ window.addEventListener('resize', function(){
   renderer.setSize(W,H);
 });
 
-animate();
+
+
+
+
+// ════════════════════════════════════════════════════════
+// POST-PROCESSING PIPELINE
+// Render targets + GLSL fragment shaders + UI panel
+// ════════════════════════════════════════════════════════
+
+// ── RENDER TARGET ────────────────────────────────────────
+var RT_W = W, RT_H = H;
+var renderTarget = new THREE.WebGLRenderTarget(RT_W, RT_H, {
+  minFilter: THREE.LinearFilter,
+  magFilter: THREE.LinearFilter,
+  format:    THREE.RGBAFormat,
+  type:      THREE.UnsignedByteType
+});
+
+// Post-processing scene: full-screen quad
+var ppScene  = new THREE.Scene();
+var ppCamera = new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+var ppQuad   = new THREE.Mesh(new THREE.PlaneGeometry(2,2));
+ppScene.add(ppQuad);
+
+// ── SHADER DEFS ──────────────────────────────────────────
+
+// Shared vertex shader (passthrough)
+var VERT_PASS = [
+  'varying vec2 vUv;',
+  'void main(){',
+  '  vUv = uv;',
+  '  gl_Position = vec4(position.xy, 0.0, 1.0);',
+  '}'
+].join('\n');
+
+// ─── 1. THERMAL VOLATILITY ────────────────────────────────
+// FLIR palette: 0→blue, 0.33→cyan, 0.5→green, 0.67→yellow, 1→white
+var FRAG_THERMAL = [
+  'uniform sampler2D tDiffuse;',
+  'uniform float uIntensity;',
+  'uniform float uThreshold;',
+  'uniform float uContrast;',
+  'varying vec2 vUv;',
+
+  'vec3 flirPalette(float t) {',
+  '  t = clamp(t, 0.0, 1.0);',
+  '  vec3 c;',
+  '  if (t < 0.2) {',
+  '    c = mix(vec3(0.0,0.0,0.35), vec3(0.0,0.0,1.0), t/0.2);',
+  '  } else if (t < 0.4) {',
+  '    c = mix(vec3(0.0,0.0,1.0), vec3(0.0,0.85,0.85), (t-0.2)/0.2);',
+  '  } else if (t < 0.58) {',
+  '    c = mix(vec3(0.0,0.85,0.85), vec3(0.0,0.9,0.0), (t-0.4)/0.18);',
+  '  } else if (t < 0.76) {',
+  '    c = mix(vec3(0.0,0.9,0.0), vec3(1.0,0.85,0.0), (t-0.58)/0.18);',
+  '  } else if (t < 0.90) {',
+  '    c = mix(vec3(1.0,0.85,0.0), vec3(1.0,0.15,0.0), (t-0.76)/0.14);',
+  '  } else {',
+  '    c = mix(vec3(1.0,0.15,0.0), vec3(1.0,1.0,1.0), (t-0.90)/0.10);',
+  '  }',
+  '  return c;',
+  '}',
+
+  'void main(){',
+  '  vec4 col = texture2D(tDiffuse, vUv);',
+  // Luminance as heat proxy — boost contrast
+  '  float lum = dot(col.rgb, vec3(0.299,0.587,0.114));',
+  '  float heat = pow(lum, 1.0 / max(0.1, uContrast));',
+  // Apply threshold: anything below stays "cold"
+  '  float boosted = smoothstep(uThreshold, uThreshold + 0.35, heat);',
+  '  boosted = clamp(boosted * uIntensity, 0.0, 1.0);',
+  // Scanline overlay (subtle)
+  '  float scan = 1.0 - 0.04 * mod(floor(vUv.y * float(480)), 2.0);',
+  '  vec3 thermal = flirPalette(boosted) * scan;',
+  '  gl_FragColor = vec4(thermal, 1.0);',
+  '}'
+].join('\n');
+
+// ─── 2. INSTITUTIONAL CRT ─────────────────────────────────
+// Phosphor green, scanlines, barrel distortion, pixelation, noise
+var FRAG_CRT = [
+  'uniform sampler2D tDiffuse;',
+  'uniform float uTime;',
+  'uniform float uScanlineInt;',   // scanline intensity  0..1
+  'uniform float uPixelation;',    // pixel block size    1..8
+  'uniform float uFlicker;',       // random flicker amount
+  'uniform float uCurvature;',     // barrel curve        0..1
+  'varying vec2 vUv;',
+
+  // Barrel distortion
+  'vec2 barrel(vec2 uv, float amt){',
+  '  vec2 c = uv - 0.5;',
+  '  float r2 = dot(c,c);',
+  '  return 0.5 + c*(1.0 + amt*r2);',
+  '}',
+
+  // Simple hash noise
+  'float hash(vec2 p){',
+  '  return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);',
+  '}',
+
+  'void main(){',
+  // Barrel distort
+  '  vec2 uv = barrel(vUv, uCurvature * 0.3);',
+  // Pixelation
+  '  float px = max(1.0, uPixelation);',
+  '  vec2 res = vec2(1280.0, 800.0) / px;',
+  '  uv = floor(uv * res) / res;',
+  // Edge vignette (screen edge darkness)
+  '  vec2 vig = uv * (1.0 - uv.yx);',
+  '  float vignette = pow(vig.x*vig.y*18.0, 0.35);',
+  // Sample
+  '  vec4 col = texture2D(tDiffuse, uv);',
+  // Convert to phosphor green with luminance
+  '  float lum = dot(col.rgb, vec3(0.299,0.587,0.114));',
+  // Phosphor color: classic P1 green
+  '  vec3 phosphor = lum * vec3(0.08, 1.0, 0.22);',
+  // Scanlines
+  '  float scanY = sin(vUv.y * 800.0 * 3.14159);',
+  '  float scanline = 1.0 - uScanlineInt * (0.5 - 0.5*scanY);',
+  // Random row flicker
+  '  float rowNoise = hash(vec2(floor(vUv.y*120.0), floor(uTime*8.0)));',
+  '  float flick = 1.0 - uFlicker * step(0.96, rowNoise) * 0.6;',
+  // Phosphor persistence glow (bloom on luminance)
+  '  float glow = lum * 0.3;',
+  '  phosphor += vec3(0.0, glow, 0.05);',
+  // Noise grain
+  '  float grain = hash(vUv + fract(uTime)) * 0.04;',
+  '  phosphor += grain * vec3(0.0, 1.0, 0.2);',
+  '  phosphor *= scanline * flick * vignette;',
+  '  gl_FragColor = vec4(phosphor, 1.0);',
+  '}'
+].join('\n');
+
+// ─── 3. LIQUIDITY BLOOM ───────────────────────────────────
+// Multi-pass bloom: downsample luminance → gaussian blur → additive composite
+// Implemented single-pass with large kernel approximation
+var FRAG_BLOOM = [
+  'uniform sampler2D tDiffuse;',
+  'uniform float uBloomStrength;',
+  'uniform float uBloomRadius;',
+  'uniform float uBloomThreshold;',
+  'uniform float uEmissiveBoost;',
+  'varying vec2 vUv;',
+
+  'vec3 sampleBlur(sampler2D tex, vec2 uv, float radius, vec2 texelSize){',
+  '  vec3 acc = vec3(0.0);',
+  '  float total = 0.0;',
+  // 13-tap Gaussian approximation
+  '  float offsets[7];',
+  '  offsets[0] = -3.0; offsets[1] = -2.0; offsets[2] = -1.0;',
+  '  offsets[3] =  0.0;',
+  '  offsets[4] =  1.0; offsets[5] =  2.0; offsets[6] =  3.0;',
+  '  float weights[7];',
+  '  weights[0]=0.06; weights[1]=0.12; weights[2]=0.20;',
+  '  weights[3]=0.24;',
+  '  weights[4]=0.20; weights[5]=0.12; weights[6]=0.06;',
+  '  for(int i=0;i<7;i++){',
+  '    for(int j=0;j<7;j++){',
+  '      vec2 off = vec2(offsets[i], offsets[j]) * texelSize * radius;',
+  '      vec3 s = texture2D(tex, uv + off).rgb;',
+  '      float w = weights[i] * weights[j];',
+  '      acc += s * w;',
+  '      total += w;',
+  '    }',
+  '  }',
+  '  return acc / total;',
+  '}',
+
+  'void main(){',
+  '  vec4 base = texture2D(tDiffuse, vUv);',
+  '  vec2 texel = vec2(1.0/1280.0, 1.0/800.0);',
+
+  // Extract bright regions (threshold)
+  '  float lum = dot(base.rgb, vec3(0.299,0.587,0.114));',
+  '  float bright = smoothstep(uBloomThreshold, uBloomThreshold + 0.25, lum);',
+
+  // Blur the bright regions
+  '  vec3 blurred = sampleBlur(tDiffuse, vUv, uBloomRadius * bright + 0.5, texel);',
+
+  // Only blur the bright parts
+  '  vec3 bloomColor = blurred * bright * uBloomStrength;',
+
+  // Capital-color tint: gold-to-white based on intensity
+  '  float intensity = length(bloomColor);',
+  '  vec3 goldTint = mix(vec3(1.0,0.82,0.28), vec3(1.0,1.0,1.0), clamp(intensity*1.5,0.0,1.0));',
+  '  bloomColor *= goldTint;',
+
+  // Emissive boost on original dark structures
+  '  vec3 emBoost = base.rgb * (1.0 + uEmissiveBoost * bright * 2.0);',
+
+  // Additive composite
+  '  vec3 finalColor = emBoost + bloomColor;',
+  // Tone-map (Reinhard)
+  '  finalColor = finalColor / (finalColor + vec3(1.0));',
+  '  finalColor = pow(finalColor, vec3(0.9));',
+  '  gl_FragColor = vec4(finalColor, 1.0);',
+  '}'
+].join('\n');
+
+// ── MATERIAL INSTANCES ───────────────────────────────────
+var matRaw = new THREE.MeshBasicMaterial({map: renderTarget.texture});
+
+var matThermal = new THREE.ShaderMaterial({
+  vertexShader:   VERT_PASS,
+  fragmentShader: FRAG_THERMAL,
+  uniforms: {
+    tDiffuse:   {value: renderTarget.texture},
+    uIntensity: {value: 1.4},
+    uThreshold: {value: 0.05},
+    uContrast:  {value: 0.55}
+  }
+});
+
+var matCRT = new THREE.ShaderMaterial({
+  vertexShader:   VERT_PASS,
+  fragmentShader: FRAG_CRT,
+  uniforms: {
+    tDiffuse:     {value: renderTarget.texture},
+    uTime:        {value: 0.0},
+    uScanlineInt: {value: 0.72},
+    uPixelation:  {value: 1.0},
+    uFlicker:     {value: 0.5},
+    uCurvature:   {value: 0.6}
+  }
+});
+
+var matBloom = new THREE.ShaderMaterial({
+  vertexShader:   VERT_PASS,
+  fragmentShader: FRAG_BLOOM,
+  uniforms: {
+    tDiffuse:        {value: renderTarget.texture},
+    uBloomStrength:  {value: 2.4},
+    uBloomRadius:    {value: 2.2},
+    uBloomThreshold: {value: 0.12},
+    uEmissiveBoost:  {value: 1.8}
+  }
+});
+
+// ── ACTIVE MODE STATE ─────────────────────────────────────
+var CURRENT_MODE = 'raw';
+ppQuad.material = matRaw;
+
+// ── UI: SLIDER CONFIG PER MODE ────────────────────────────
+var SLIDER_CONFIG = {
+  raw: [],
+  thermal: [
+    {id:'uIntensity',  label:'Heat Intensity',  min:0.5,  max:3.0,  step:0.05, mat:matThermal},
+    {id:'uThreshold',  label:'Cold Threshold',  min:0.0,  max:0.5,  step:0.01, mat:matThermal},
+    {id:'uContrast',   label:'Contrast Gamma',  min:0.1,  max:1.5,  step:0.05, mat:matThermal}
+  ],
+  crt: [
+    {id:'uScanlineInt',label:'Scanline Depth',  min:0.0,  max:1.0,  step:0.02, mat:matCRT},
+    {id:'uPixelation', label:'Pixelation',       min:1.0,  max:8.0,  step:0.5,  mat:matCRT},
+    {id:'uFlicker',    label:'Row Flicker',      min:0.0,  max:1.0,  step:0.05, mat:matCRT},
+    {id:'uCurvature',  label:'CRT Curvature',    min:0.0,  max:1.5,  step:0.05, mat:matCRT}
+  ],
+  bloom: [
+    {id:'uBloomStrength',  label:'Bloom Strength',  min:0.0, max:5.0, step:0.1,  mat:matBloom},
+    {id:'uBloomRadius',    label:'Bloom Radius',    min:0.5, max:6.0, step:0.1,  mat:matBloom},
+    {id:'uBloomThreshold', label:'Threshold',       min:0.0, max:0.5, step:0.01, mat:matBloom},
+    {id:'uEmissiveBoost',  label:'Emissive Boost',  min:0.0, max:4.0, step:0.1,  mat:matBloom}
+  ]
+};
+
+var MODE_LABELS = {
+  raw:     'Raw Scene',
+  thermal: 'Thermal Volatility',
+  crt:     'Institutional CRT',
+  bloom:   'Liquidity Bloom'
+};
+
+function buildSliders(mode) {
+  var container = document.getElementById('shader-sliders');
+  var cfg = SLIDER_CONFIG[mode];
+  if (!cfg || cfg.length === 0) {
+    container.innerHTML = '<div style="font-size:8px;color:rgba(255,255,255,0.18);letter-spacing:1px">No controls for this mode</div>';
+    return;
+  }
+  var html = '';
+  cfg.forEach(function(s) {
+    var val = s.mat.uniforms[s.id].value;
+    html += '<div class="sh-slider-row">'
+      + '<div class="sh-slider-label"><span>' + s.label + '</span><span id="val-' + s.id + '">' + val.toFixed(2) + '</span></div>'
+      + '<input type="range" class="sh-range" id="sl-' + s.id + '" min="' + s.min + '" max="' + s.max + '" step="' + s.step + '" value="' + val + '">'
+      + '</div>';
+  });
+  container.innerHTML = html;
+
+  cfg.forEach(function(s) {
+    var el = document.getElementById('sl-' + s.id);
+    var valEl = document.getElementById('val-' + s.id);
+    el.addEventListener('input', function() {
+      var v = parseFloat(el.value);
+      s.mat.uniforms[s.id].value = v;
+      valEl.textContent = v.toFixed(2);
+    });
+  });
+}
+
+function setMode(mode) {
+  CURRENT_MODE = mode;
+  var mats = {raw:matRaw, thermal:matThermal, crt:matCRT, bloom:matBloom};
+  ppQuad.material = mats[mode];
+
+  // Update button states
+  ['raw','thermal','crt','bloom'].forEach(function(m) {
+    var btn = document.getElementById('btn-' + m);
+    if (btn) btn.className = 'sh-mode-btn' + (m === mode ? ' active' : '');
+  });
+
+  // Update mode indicator
+  var ind = document.getElementById('shader-mode-indicator');
+  if (ind) ind.textContent = 'Mode: ' + MODE_LABELS[mode];
+
+  // Rebuild sliders for this mode
+  buildSliders(mode);
+}
+
+function toggleShaderPanel() {
+  var sliders = document.getElementById('shader-sliders');
+  var toggle  = document.getElementById('sp-toggle');
+  var btns    = document.querySelectorAll('.sh-mode-btn');
+  var hidden  = sliders.style.display === 'none';
+  sliders.style.display = hidden ? 'block' : 'none';
+  for (var i = 0; i < btns.length; i++) btns[i].style.display = hidden ? 'block' : 'none';
+  toggle.innerHTML = hidden ? '&#9650;' : '&#9660;';
+}
+
+// Init sliders for default mode — defer to ensure DOM ready
+setTimeout(function(){ buildSliders('raw'); }, 100);
+
+// ── OVERRIDE RENDER LOOP ──────────────────────────────────
+// Replace renderer.render() at bottom of animate() with two-pass render
+var _origAnimate = animate;
+
+// Patch the existing animate function to use render target
+// We override window.doRender which is called at the tail of animate()
+window.doRender = function(elapsedTime) {
+  // Update CRT time uniform
+  matCRT.uniforms.uTime.value = elapsedTime;
+
+  if (CURRENT_MODE === 'raw') {
+    // Direct render — no post-processing overhead
+    renderer.setRenderTarget(null);
+    renderer.render(scene, camera);
+  } else {
+    // Pass 1: render scene to render target
+    renderer.setRenderTarget(renderTarget);
+    renderer.render(scene, camera);
+    renderer.setRenderTarget(null);
+    // Pass 2: fullscreen quad with shader
+    renderer.render(ppScene, ppCamera);
+  }
+};
+
+// Resize render target on window resize
+var _origResize = window.onresize;
+window.addEventListener('resize', function() {
+  renderTarget.setSize(window.innerWidth, window.innerHeight);
+});
+
+animate(); // start loop after all setup complete
 </script>
+
+
+<!-- SHADER PANEL -->
+<div id="shader-panel">
+  <div id="shader-panel-title" onclick="toggleShaderPanel()">
+    Visual Mode <span id="sp-toggle">&#9650;</span>
+  </div>
+  <button class="sh-mode-btn active" id="btn-raw"      onclick="setMode('raw')">
+    <span class="sh-dot"></span>Raw Scene
+  </button>
+  <button class="sh-mode-btn"        id="btn-thermal"  onclick="setMode('thermal')">
+    <span class="sh-dot"></span>Thermal Volatility
+  </button>
+  <button class="sh-mode-btn"        id="btn-crt"      onclick="setMode('crt')">
+    <span class="sh-dot"></span>Institutional CRT
+  </button>
+  <button class="sh-mode-btn"        id="btn-bloom"    onclick="setMode('bloom')">
+    <span class="sh-dot"></span>Liquidity Bloom
+  </button>
+  <div id="shader-sliders">
+    <!-- Sliders injected by JS per mode -->
+  </div>
+</div>
+<div id="shader-mode-indicator">Mode: Raw</div>
+<!-- Off-screen canvas for post-processing -->
+<canvas id="pp-canvas" style="display:none"></canvas>
+
 </body>
 </html>
