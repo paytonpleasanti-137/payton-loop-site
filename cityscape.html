@@ -1058,6 +1058,570 @@ window.addEventListener('resize', function() {
   renderTarget.setSize(window.innerWidth, window.innerHeight);
 });
 
+
+// ════════════════════════════════════════════════════════════════════════
+// REAL-TIME DATA INTEGRATION
+// WebSocket feeds → normalizer → particle + monolith visual gravity
+// Sources: Binance WSS (crypto, free/no auth), Polygon.io REST fallback,
+//          simulated equity feed when markets are closed
+// ════════════════════════════════════════════════════════════════════════
+
+// ── NODE → EXCHANGE MAPPING ──────────────────────────────────────────────
+// Maps our 3D node IDs to live data identifiers
+var DATA_MAP = {
+  // Crypto — Binance WS (always open)
+  BINANCE:  {exchange:'binance', symbols:['BTCUSDT','ETHUSDT','BNBUSDT'], type:'crypto'},
+  COINBASE: {exchange:'binance', symbols:['SOLUSDT','ADAUSDT'],           type:'crypto'},
+  KRAKEN:   {exchange:'binance', symbols:['XRPUSDT','DOGEUSDT'],          type:'crypto'},
+  // Equities — mapped to high-vol symbols as proxies
+  NYSE:     {exchange:'equity',  symbols:['SPY','BAC','GE'],    type:'equity'},
+  NASDAQ:   {exchange:'equity',  symbols:['QQQ','AAPL','NVDA'], type:'equity'},
+  CME:      {exchange:'equity',  symbols:['GLD','USO','VIX'],   type:'equity'},
+  CBOE:     {exchange:'equity',  symbols:['VXX','VIXY'],        type:'equity'},
+  // Asset managers — AUM proxy via ETFs
+  BLK:      {exchange:'equity',  symbols:['IVV','AGG'],         type:'equity'},
+  VANG:     {exchange:'equity',  symbols:['VOO','VTI'],         type:'equity'},
+  FIDO:     {exchange:'equity',  symbols:['FXAIX','FSKAX'],     type:'equity'},
+  // Banks
+  JPM:      {exchange:'equity',  symbols:['JPM'],               type:'equity'},
+  GS:       {exchange:'equity',  symbols:['GS'],                type:'equity'},
+  BAC:      {exchange:'equity',  symbols:['BAC'],               type:'equity'},
+  // Payment infra
+  VISA:     {exchange:'equity',  symbols:['V'],                 type:'equity'},
+  MC:       {exchange:'equity',  symbols:['MA'],                type:'equity'},
+};
+
+// ── LIVE DATA STATE ──────────────────────────────────────────────────────
+// One record per node: raw values + normalized [0..1] + smoothed
+var LIVE = {};
+(function initLive() {
+  NODES.forEach(function(n) {
+    LIVE[n.id] = {
+      raw_vol:   0,        // raw trade volume (units vary per source)
+      raw_price: 0,        // last price
+      raw_size:  0,        // last trade size
+      norm_vol:  n.cap / 99000,  // normalized 0..1 (seed from cap)
+      norm_price_chg: 0,   // normalized price change -1..1
+      smoothed:  n.cap / 99000,  // exponential moving avg
+      base_h:    capToHeight(n.cap),  // original height
+      live_h:    capToHeight(n.cap),  // live height (lerps to target)
+      mesh_idx:  -1,       // index into meshes[]
+      cap_idx:   -1,       // index into capMeshes[] — populated below
+      last_update: 0       // timestamp
+    };
+  });
+  // Map mesh indices
+  meshes.forEach(function(m, i) {
+    var id = m.userData && m.userData.id;
+    if (id && LIVE[id]) LIVE[id].mesh_idx = i;
+  });
+})();
+
+// Store cap meshes separately for height tracking
+var capMeshes = [];
+var capMeshMap = {};  // nodeId → capMesh
+// Rebuild cap reference list from scene (they're added right after each main mesh)
+(function buildCapMap() {
+  var nodeIdx = 0;
+  scene.children.forEach(function(obj) {
+    if (!obj.isMesh) return;
+    // Cap meshes have emissiveIntensity:3.0 set in their material and no userData.id
+    if (obj.material && obj.material.emissiveIntensity === 3.0 && !obj.userData.id) {
+      if (nodeIdx < NODES.length) {
+        var nid = NODES[nodeIdx].id;
+        capMeshMap[nid] = obj;
+        capMeshes.push({nodeId:nid, mesh:obj});
+        nodeIdx++;
+      }
+    }
+  });
+  console.log('Cap meshes mapped:', Object.keys(capMeshMap).length);
+})();
+
+// ── VOLUME HISTORY (ring buffer for normalization) ───────────────────────
+var VOL_HISTORY_LEN = 60;
+var volHistory = {};
+NODES.forEach(function(n) {
+  volHistory[n.id] = new Float32Array(VOL_HISTORY_LEN);
+  volHistory[n.id].fill(n.cap / 99000);  // seed with cap-proportional baseline
+});
+var volHistIdx = {};
+NODES.forEach(function(n) { volHistIdx[n.id] = 0; });
+
+function pushVolHistory(nodeId, val) {
+  var h = volHistory[nodeId];
+  if (!h) return;
+  h[volHistIdx[nodeId]] = val;
+  volHistIdx[nodeId] = (volHistIdx[nodeId] + 1) % VOL_HISTORY_LEN;
+}
+
+function getVolMax(nodeId) {
+  var h = volHistory[nodeId];
+  if (!h) return 1;
+  var m = 0;
+  for (var i = 0; i < VOL_HISTORY_LEN; i++) if (h[i] > m) m = h[i];
+  return m || 1;
+}
+
+// ── NORMALIZER ───────────────────────────────────────────────────────────
+// Converts raw exchange data → normalized 0..1 per node
+// Uses adaptive normalization: rolling 60-second max as ceiling
+var lastQuoteVols = {};  // accumulate trade sizes between ticks
+var lastPrices    = {};
+NODES.forEach(function(n) { lastQuoteVols[n.id] = 0; lastPrices[n.id] = 0; });
+
+function parseBinanceTrade(nodeId, data) {
+  // Binance aggTrade: {p: price, q: quantity, T: timestamp}
+  var price = parseFloat(data.p || data.c || 0);
+  var qty   = parseFloat(data.q || data.Q || data.v || 0);
+  var vol   = price * qty;  // notional USD value
+
+  lastQuoteVols[nodeId] = (lastQuoteVols[nodeId] || 0) + vol;
+  lastPrices[nodeId]    = price || lastPrices[nodeId];
+
+  var rec = LIVE[nodeId];
+  if (!rec) return;
+  rec.raw_vol   = lastQuoteVols[nodeId];
+  rec.raw_price = price;
+  rec.raw_size  = qty;
+  rec.last_update = Date.now();
+}
+
+function normalizeAndApply() {
+  NODES.forEach(function(n) {
+    var rec = LIVE[n.id];
+    if (!rec) return;
+
+    // Push current vol to ring buffer
+    pushVolHistory(n.id, lastQuoteVols[n.id] || rec.raw_vol || rec.norm_vol);
+
+    // Normalize against rolling 60s max
+    var maxVol = getVolMax(n.id);
+    var rawNorm = maxVol > 0 ? (lastQuoteVols[n.id] || 0) / maxVol : rec.norm_vol;
+
+    // Blend with cap-based baseline — nodes with 0 live data fall back smoothly
+    var capBaseline = rec.base_h / 22;  // 0..1
+    var hasLiveData = (Date.now() - rec.last_update) < 8000;  // stale after 8s
+    var norm = hasLiveData
+      ? (rawNorm * 0.7 + capBaseline * 0.3)
+      : capBaseline;
+    norm = Math.max(0.04, Math.min(1.0, norm));
+
+    // Exponential smoothing (tau ≈ 1s at 60fps)
+    rec.smoothed = rec.smoothed * 0.88 + norm * 0.12;
+    rec.norm_vol = norm;
+
+    // Reset accumulator for next tick
+    lastQuoteVols[n.id] = 0;
+  });
+}
+
+// ── VISUAL GRAVITY ENGINE ────────────────────────────────────────────────
+// Applies normalized data to: monolith height scale, emissive intensity,
+// particle channel weights, and global GLOBAL_VOL / GLOBAL_LIQ
+var GRAVITY_LERP = 0.04;  // smooth height transitions
+
+function applyVisualGravity() {
+  var totalSmoothed = 0, count = 0;
+  var maxSmoothed = 0;
+
+  NODES.forEach(function(n) {
+    var rec = LIVE[n.id];
+    if (!rec || rec.mesh_idx < 0) return;
+
+    var mesh = meshes[rec.mesh_idx];
+    if (!mesh) return;
+
+    totalSmoothed += rec.smoothed;
+    count++;
+    if (rec.smoothed > maxSmoothed) maxSmoothed = rec.smoothed;
+
+    // Target height: live data drives scale on Y axis
+    // Scale range: 0.35x (dormant) to 1.65x (spike)
+    var targetScaleY = 0.35 + rec.smoothed * 1.3;
+
+    // Lerp current scale toward target
+    var currScaleY = mesh.scale.y || 1.0;
+    var newScaleY  = currScaleY + (targetScaleY - currScaleY) * GRAVITY_LERP;
+    mesh.scale.y   = newScaleY;
+
+    // Reposition mesh so base stays grounded
+    mesh.position.y = (rec.base_h * newScaleY) / 2;
+
+    // Update cap mesh position to track top of monolith
+    var capObj = capMeshMap[n.id];
+    if (capObj) {
+      capObj.position.y = rec.base_h * newScaleY + 0.06;
+      // Cap emissive intensity pulses with live volume
+      capObj.material.emissiveIntensity = 1.5 + rec.smoothed * 5.5;
+    }
+
+    // Monolith body emissive reacts to volume spikes
+    var emissiveBoost = rec.smoothed * 0.8;
+    var baseEm = mesh._baseEmissive;
+    if (baseEm) {
+      mesh.material.emissive.setRGB(
+        Math.min(0.25, baseEm.r + emissiveBoost * 0.18),
+        Math.min(0.25, baseEm.g + emissiveBoost * 0.12),
+        Math.min(0.22, baseEm.b + emissiveBoost * 0.10)
+      );
+    }
+
+    // Update NODE_POS for particle arc origins (top of live monolith)
+    NODE_POS[n.id].y = rec.base_h * newScaleY;
+  });
+
+  // Rebuild bezier control points for channels affected by height changes
+  rebuildArcs();
+
+  // Update global vol/liq from aggregate live data
+  if (count > 0) {
+    var avgSmoothed = totalSmoothed / count;
+    GLOBAL_VOL = 0.4 + avgSmoothed * 1.6;
+    GLOBAL_LIQ = 0.35 + maxSmoothed * 0.9;
+  }
+
+  // Update channel weights from live node data
+  updateChannelWeights();
+}
+
+function rebuildArcs() {
+  for (var i = 0; i < channelCount; i++) {
+    var ch = FLOW_CHANNELS[i];
+    var a = NODE_POS[ch.a], b = NODE_POS[ch.b];
+    if (!a || !b || !chCtrl[i]) continue;
+    // Only update the control point height, keep endpoints
+    chCtrl[i][0].copy(a);
+    chCtrl[i][2].copy(b);
+    var mid = chCtrl[i][1];
+    mid.x = (a.x + b.x) / 2;
+    mid.z = (a.z + b.z) / 2;
+    mid.y = (a.y + b.y) / 2 + a.distanceTo(b) * (0.38 + ch.vol * 0.48);
+  }
+}
+
+function updateChannelWeights() {
+  var total = 0;
+  var newWeights = new Float32Array(channelCount);
+  for (var i = 0; i < channelCount; i++) {
+    var ch = FLOW_CHANNELS[i];
+    var volA = LIVE[ch.a] ? LIVE[ch.a].smoothed : ch.vol;
+    var volB = LIVE[ch.b] ? LIVE[ch.b].smoothed : ch.liq;
+    var w = (volA * 0.6 + volB * 0.4) * ch.vol;
+    newWeights[i] = w;
+    total += w;
+  }
+  if (total === 0) return;
+  var cum = 0;
+  for (var i = 0; i < channelCount; i++) {
+    chWgt[i] = newWeights[i] / total + cum;
+    cum = chWgt[i];
+    // Also update particle speeds for this channel
+    chSpd[i] = FLOW_SPEEDS[FLOW_CHANNELS[i].type] * (0.55 + newWeights[i] / total * channelCount * 0.85);
+  }
+}
+
+// ── BINANCE WEBSOCKET ────────────────────────────────────────────────────
+// Binance aggTrade streams — free, no auth, CORS-friendly from browser
+var WS_STATUS = {binance: 'disconnected', polygon: 'disconnected'};
+var binanceWS = null;
+var binanceReconnectTimer = null;
+var BINANCE_RECONNECT_DELAY = 3000;
+
+// Symbol → nodeId reverse map
+var SYMBOL_TO_NODE = {};
+Object.keys(DATA_MAP).forEach(function(nodeId) {
+  var def = DATA_MAP[nodeId];
+  if (def.exchange === 'binance') {
+    def.symbols.forEach(function(sym) {
+      SYMBOL_TO_NODE[sym.toLowerCase()] = nodeId;
+    });
+  }
+});
+
+function connectBinance() {
+  // Multi-stream: combine all crypto symbols into one WS connection
+  var streams = [];
+  Object.keys(DATA_MAP).forEach(function(nodeId) {
+    var def = DATA_MAP[nodeId];
+    if (def.exchange === 'binance') {
+      def.symbols.forEach(function(sym) {
+        streams.push(sym.toLowerCase() + '@aggTrade');
+      });
+    }
+  });
+
+  var wsUrl = 'wss://stream.binance.com:9443/stream?streams=' + streams.join('/');
+  updateDataStatusUI('binance', 'connecting');
+
+  try {
+    binanceWS = new WebSocket(wsUrl);
+  } catch(e) {
+    updateDataStatusUI('binance', 'blocked');
+    scheduleSimulation('binance');
+    return;
+  }
+
+  var connTimeout = setTimeout(function() {
+    if (binanceWS && binanceWS.readyState !== WebSocket.OPEN) {
+      binanceWS.close();
+      updateDataStatusUI('binance', 'timeout');
+      scheduleSimulation('binance');
+    }
+  }, 6000);
+
+  binanceWS.onopen = function() {
+    clearTimeout(connTimeout);
+    WS_STATUS.binance = 'live';
+    updateDataStatusUI('binance', 'live');
+    console.log('[WS] Binance connected');
+  };
+
+  binanceWS.onmessage = function(evt) {
+    try {
+      var wrapper = JSON.parse(evt.data);
+      var data    = wrapper.data || wrapper;
+      var stream  = wrapper.stream || '';
+      // Extract symbol from stream name: "btcusdt@aggTrade" → "btcusdt"
+      var sym     = stream.split('@')[0];
+      var nodeId  = SYMBOL_TO_NODE[sym];
+      if (nodeId) parseBinanceTrade(nodeId, data);
+    } catch(e) { /* malformed frame — ignore */ }
+  };
+
+  binanceWS.onerror = function() {
+    clearTimeout(connTimeout);
+    WS_STATUS.binance = 'error';
+    updateDataStatusUI('binance', 'error');
+  };
+
+  binanceWS.onclose = function() {
+    clearTimeout(connTimeout);
+    if (WS_STATUS.binance !== 'error' && WS_STATUS.binance !== 'timeout') {
+      updateDataStatusUI('binance', 'reconnecting');
+    }
+    // Auto-reconnect
+    binanceReconnectTimer = setTimeout(function() {
+      if (WS_STATUS.binance !== 'live') connectBinance();
+    }, BINANCE_RECONNECT_DELAY);
+  };
+}
+
+// ── POLYGON.IO REST FALLBACK ─────────────────────────────────────────────
+// Free tier: 5 API calls/min. Used for equity nodes when markets are open.
+// No API key required for delayed data on free plan.
+var POLYGON_BASE = 'https://api.polygon.io/v2/last/trade/';
+// NOTE: Free Polygon tier requires API key. We use a public aggregates fallback.
+// For equities we poll the Yahoo Finance quote API (truly free, CORS varies).
+// YAHOO_BASE replaced by allorigins proxy in pollEquity()
+var lastEquityPoll = 0;
+var EQUITY_POLL_INTERVAL = 5000;  // poll every 5s (well within free limits)
+var equityPollQueue = [];
+
+// Build equity poll list: pick one symbol per equity node
+Object.keys(DATA_MAP).forEach(function(nodeId) {
+  var def = DATA_MAP[nodeId];
+  if (def.exchange === 'equity' && def.symbols.length > 0) {
+    equityPollQueue.push({nodeId: nodeId, symbol: def.symbols[0]});
+  }
+});
+
+var equityPollCursor = 0;
+
+function pollEquity() {
+  if (equityPollQueue.length === 0) return;
+  var item   = equityPollQueue[equityPollCursor % equityPollQueue.length];
+  equityPollCursor++;
+
+  var innerUrl = 'https://query1.finance.yahoo.com/v8/finance/chart/' + item.symbol + '?interval=1m&range=1d';
+  var url = 'https://api.allorigins.win/get?url=' + encodeURIComponent(innerUrl);
+
+  fetch(url, {method:'GET'})
+    .then(function(r) { return r.json(); })
+    .then(function(wrapper) {
+      var d;
+      try { d = JSON.parse(wrapper.contents || '{}'); } catch(e) { d = {}; }
+      try {
+        var result = d.chart && d.chart.result && d.chart.result[0];
+        if (!result) return;
+        var meta = result.meta;
+        var price = meta.regularMarketPrice || meta.previousClose || 0;
+        var vol   = meta.regularMarketVolume || 0;
+        var prevClose = meta.previousClose || price;
+        var priceChg  = prevClose > 0 ? (price - prevClose) / prevClose : 0;
+
+        var rec = LIVE[item.nodeId];
+        if (!rec) return;
+
+        // Scale volume: equity vol can be millions — normalize to 0-1M range
+        var normVol = Math.min(vol / 5000000, 1.0);
+        lastQuoteVols[item.nodeId] = (lastQuoteVols[item.nodeId] || 0) + normVol * 10;
+        lastPrices[item.nodeId]    = price;
+        rec.raw_price   = price;
+        rec.raw_vol     = vol;
+        rec.norm_price_chg = Math.max(-1, Math.min(1, priceChg * 20));
+        rec.last_update = Date.now();
+
+        updateDataStatusUI('polygon', 'live');
+      } catch(e) { /* parse error — skip */ }
+    })
+    .catch(function() {
+      updateDataStatusUI('polygon', 'blocked');
+      scheduleSimulation('equity');
+    });
+}
+
+// ── SIMULATION MODE ──────────────────────────────────────────────────────
+// Runs when live feeds are unavailable — realistic intraday pattern simulation
+var simRunning = {binance: false, equity: false};
+var simTimers  = {binance: null,  equity: null};
+
+function scheduleSimulation(source) {
+  if (simRunning[source]) return;
+  simRunning[source] = true;
+  updateDataStatusUI(source, 'simulated');
+
+  var TARGET_NODES = source === 'binance'
+    ? ['BINANCE','COINBASE','KRAKEN']
+    : Object.keys(DATA_MAP).filter(function(id){ return DATA_MAP[id].exchange === 'equity'; });
+
+  var simT = Math.random() * 100;
+
+  function simTick() {
+    simT += 0.08 + Math.random() * 0.04;
+    var intradayFactor = 0.5 + 0.6 * Math.abs(Math.sin(simT * 0.04))
+                       + 0.3 * Math.abs(Math.sin(simT * 0.13));
+
+    TARGET_NODES.forEach(function(nodeId) {
+      var rec = LIVE[nodeId];
+      if (!rec) return;
+      var baseVol = rec.base_h / 22;
+      var spike   = (Math.random() < 0.04) ? (1.5 + Math.random() * 2.0) : 1.0;
+      var vol     = baseVol * intradayFactor * spike * (0.7 + Math.random() * 0.6);
+
+      // Feed through same normalizer path
+      lastQuoteVols[nodeId] = (lastQuoteVols[nodeId] || 0) + vol * 80;
+      rec.last_update = Date.now();
+    });
+
+    simTimers[source] = setTimeout(simTick, 200 + Math.random() * 300);
+  }
+  simTick();
+}
+
+// ── MASTER TICK ──────────────────────────────────────────────────────────
+// Runs every 1 second — normalizes, applies visual gravity, polls equity REST
+var TICK_INTERVAL = 1000;
+var tickTimer = null;
+var tickCount = 0;
+
+function masterTick() {
+  tickCount++;
+
+  // Normalize all accumulated data from the last second
+  normalizeAndApply();
+
+  // Apply normalized data → visual gravity
+  applyVisualGravity();
+
+  // Equity REST poll (staggered — 1 per tick, rotating)
+  var now = Date.now();
+  if (now - lastEquityPoll > EQUITY_POLL_INTERVAL) {
+    pollEquity();
+    lastEquityPoll = now;
+  }
+
+  // Update stats bar
+  var statusParts = [];
+  var liveCount = 0;
+  NODES.forEach(function(n) {
+    if (LIVE[n.id] && (Date.now() - LIVE[n.id].last_update) < 8000) liveCount++;
+  });
+  var binStatus = WS_STATUS.binance;
+  statusParts.push('Binance: ' + (binStatus === 'live' ? 'LIVE' : binStatus.toUpperCase()));
+  statusParts.push('Nodes: ' + liveCount + '/' + NODES.length);
+  statusParts.push('Vol: ' + (GLOBAL_VOL * 100).toFixed(0) + '%');
+  statusParts.push('Liq: ' + (GLOBAL_LIQ * 100).toFixed(0) + '%');
+  statusParts.push('T+' + tickCount + 's');
+
+  var statsEl = document.getElementById('stats-bar');
+  if (statsEl) statsEl.textContent = statusParts.join('  \u2022  ');
+
+  tickTimer = setTimeout(masterTick, TICK_INTERVAL);
+}
+
+// ── DATA STATUS UI ────────────────────────────────────────────────────────
+var _uiStatusCache = {};
+function updateDataStatusUI(source, status) {
+  if (_uiStatusCache[source] === status) return;
+  _uiStatusCache[source] = status;
+  WS_STATUS[source] = status;
+
+  var el = document.getElementById('data-status-' + source);
+  if (!el) return;
+  var colors = {
+    live:'rgba(80,220,100,0.85)', connecting:'rgba(220,200,60,0.7)',
+    simulated:'rgba(180,140,60,0.7)', error:'rgba(220,60,60,0.7)',
+    blocked:'rgba(160,80,60,0.7)',    timeout:'rgba(160,80,60,0.7)',
+    reconnecting:'rgba(200,160,40,0.7)'
+  };
+  el.style.color = colors[status] || 'rgba(255,255,255,0.3)';
+  el.textContent = source.charAt(0).toUpperCase() + source.slice(1) + ': ' + status.toUpperCase();
+}
+
+// ── OVERRIDE tickMarket (replace sine simulation with live data ticker) ──
+window.tickMarket = function(elapsed) {
+  // tickMarket is now a no-op — masterTick drives GLOBAL_VOL and GLOBAL_LIQ
+  // Keep as fallback if masterTick hasn't started yet
+  if (tickCount === 0) {
+    GLOBAL_VOL = 0.58 + 0.72 * Math.abs(Math.sin(elapsed * 0.045));
+    GLOBAL_LIQ = 0.50 + 0.50 * Math.cos(elapsed * 0.035 + 0.5);
+  }
+};
+
+// ── DATA PANEL UI ─────────────────────────────────────────────────────────
+// Inject a data feed status strip below the stats bar
+(function buildDataPanel() {
+  var strip = document.createElement('div');
+  strip.id  = 'data-strip';
+  strip.style.cssText = 'position:fixed;top:28px;left:50%;transform:translateX(-50%);'
+    + 'font-family:"Courier New",monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;'
+    + 'color:rgba(255,255,255,0.2);z-index:10;display:flex;gap:20px;pointer-events:none;white-space:nowrap;';
+
+  var sources = [
+    {id:'binance', label:'Binance WSS'},
+    {id:'polygon', label:'Equity REST'},
+  ];
+  sources.forEach(function(s) {
+    var span = document.createElement('span');
+    span.id  = 'data-status-' + s.id;
+    span.textContent = s.label + ': INIT';
+    strip.appendChild(span);
+  });
+
+  document.body.appendChild(strip);
+})();
+
+// ── LAUNCH SEQUENCE ──────────────────────────────────────────────────────
+// Start live feeds with a brief delay to let Three.js finish scene init
+setTimeout(function() {
+  connectBinance();
+  // Start equity polling (immediate first poll)
+  pollEquity();
+  // Start master tick loop
+  masterTick();
+}, 1200);
+
+// Public API
+window.reconnectBinance = function() {
+  if (binanceWS) binanceWS.close();
+  connectBinance();
+};
+window.getLiveNode = function(id) { return LIVE[id]; };
+window.getWSStatus = function() { return WS_STATUS; };
+window.setGravityLerp = function(v) { GRAVITY_LERP = Math.max(0.005, Math.min(0.3, v)); };
+
+
 animate(); // start loop after all setup complete
 </script>
 
