@@ -324,6 +324,26 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
   .status-bar{flex-wrap:wrap}
   .status-item{flex:0 0 50%}
 }
+
+/* ===== BERKSHIRE ===== */
+.brk-tab{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:5px 14px;border:1px solid var(--border);background:var(--bg);color:var(--ink3);cursor:pointer;transition:all 0.15s}
+.brk-tab:hover{color:var(--ink);border-color:var(--ink)}
+.brk-tab.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.brk-field-group{margin-bottom:14px}
+.brk-label{display:block;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink4);margin-bottom:5px}
+.brk-hint{display:block;font-size:11px;color:var(--ink4);margin-top:3px}
+.brk-input{width:100%;padding:8px 12px;border:1px solid var(--border);font-family:var(--sans);font-size:13px;color:var(--ink);background:var(--bg2);outline:none}
+.brk-input:focus{border-color:var(--ink)}
+textarea.brk-input{resize:vertical;min-height:72px}
+.brk-bar{position:absolute;bottom:0;cursor:pointer;transition:opacity 0.15s;background:var(--red)}
+.brk-bar:hover{opacity:0.75}
+.calc-result-row{display:flex;justify-content:space-between;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--border)}
+.calc-result-row:last-child{border-bottom:none}
+.calc-result-label{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink4)}
+.calc-result-val{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--ink)}
+.calc-result-val.highlight{color:var(--red)}
+.calc-verdict{margin-top:16px;padding:12px 16px;background:var(--bg3);border-left:3px solid var(--gold);font-size:13px;color:var(--ink2);line-height:1.7}
+
 </style>
 </head>
 <body>
@@ -360,6 +380,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
     <span style="font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);padding:0 10px;display:flex;align-items:center;white-space:nowrap">Consilience</span>
     <a class="nav-tab" href="mind.html" title="Mental models">Mind</a>
     <a class="nav-tab" href="tv.html" title="Curated knowledge">TV</a>
+    <button class="nav-tab" onclick="show('berkshire',this)" title="60 years of Berkshire">Berkshire</button>
     <div style="width:1px;background:var(--border);margin:6px 0;flex-shrink:0"></div>
     <span style="font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);padding:0 10px;display:flex;align-items:center;white-space:nowrap">Command</span>
     <button class="nav-tab" onclick="show('financials',this)" title="Know your situation">Ledger</button>
@@ -684,6 +705,275 @@ window.onload = function() {
   buildTicker();
   setDate();
 };
+
+</script>
+
+<!-- ========= BERKSHIRE VIEW ========= -->
+<div class="view" id="v-berkshire">
+  <div style="max-width:1100px;margin:0 auto">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid var(--ink)">
+      <div>
+        <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin-bottom:6px">Consilience &bull; 60-Year Study</div>
+        <div style="font-family:var(--serif);font-size:32px;font-weight:600;color:var(--ink);line-height:1">Berkshire Hathaway</div>
+        <div style="font-size:13px;color:var(--ink3);margin-top:6px">Live calculations &bull; Historical database &bull; Book companion</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="brkShowTab('timeline',this)" class="brk-tab active" id="brk-t-timeline">Timeline</button>
+        <button onclick="brkShowTab('calculator',this)" class="brk-tab" id="brk-t-calculator">Calculator</button>
+        <button onclick="brkShowTab('add',this)" class="brk-tab" id="brk-t-add">+ Add Entry</button>
+      </div>
+    </div>
+    <div id="brk-summary" style="display:grid;grid-template-columns:repeat(5,1fr);gap:0;border:1px solid var(--border);margin-bottom:24px"></div>
+    <div id="brk-panel-timeline" class="brk-panel">
+      <div style="margin-bottom:20px">
+        <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin-bottom:8px">Net Worth Progression &mdash; Red = total, Gold = key position &bull; Click any bar to inspect</div>
+        <div style="position:relative;height:200px;border-bottom:1px solid var(--border);border-left:1px solid var(--border);overflow:hidden" id="brk-chart"></div>
+        <div id="brk-chart-labels" style="display:flex;margin-top:4px;padding-left:40px"></div>
+      </div>
+      <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin-bottom:8px">Entry Log</div>
+      <table style="width:100%;border-collapse:collapse" id="brk-table">
+        <thead><tr style="border-bottom:2px solid var(--ink)">
+          <th style="text-align:left;padding:8px 12px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink4)">Year</th>
+          <th style="text-align:right;padding:8px 12px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink4)">Net Worth</th>
+          <th style="text-align:right;padding:8px 12px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink4)">BV/Share</th>
+          <th style="text-align:right;padding:8px 12px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink4)">Key Position</th>
+          <th style="text-align:right;padding:8px 12px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink4)">Concentration</th>
+          <th style="text-align:left;padding:8px 12px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink4)">Note</th>
+          <th style="padding:8px 12px"></th>
+        </tr></thead>
+        <tbody id="brk-tbody"></tbody>
+      </table>
+    </div>
+    <div id="brk-panel-calculator" class="brk-panel" style="display:none">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+        <div>
+          <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin-bottom:16px">Position Analysis Calculator</div>
+          <div class="brk-field-group"><label class="brk-label">Total Portfolio / Net Worth ($)</label><input class="brk-input" id="calc-networth" type="number" placeholder="e.g. 5300000000" oninput="brkCalc()"></div>
+          <div class="brk-field-group"><label class="brk-label">Position Size ($)</label><input class="brk-input" id="calc-position" type="number" placeholder="e.g. 700000000" oninput="brkCalc()"></div>
+          <div class="brk-field-group"><label class="brk-label">Position Type</label>
+            <select class="brk-input" id="calc-type" onchange="brkCalc()">
+              <option value="preferred">Preferred Stock</option>
+              <option value="common">Common Stock</option>
+              <option value="bond">Bond / Fixed Income</option>
+              <option value="whole">Wholly Owned Business</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="brk-field-group"><label class="brk-label">Annual Yield / Dividend Rate (%)</label><input class="brk-input" id="calc-yield" type="number" placeholder="e.g. 9" step="0.1" oninput="brkCalc()"></div>
+          <div class="brk-field-group"><label class="brk-label">Year</label><input class="brk-input" id="calc-year" type="number" placeholder="e.g. 1991" oninput="brkCalc()"></div>
+          <button onclick="brkLoadSalomon()" style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:8px 16px;background:var(--bg3);border:1px solid var(--border);color:var(--ink3);cursor:pointer;margin-top:4px">Load Salomon Example (p.16)</button>
+        </div>
+        <div id="calc-output" style="background:var(--bg2);border:1px solid var(--border);padding:24px;min-height:300px">
+          <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin-bottom:16px">Analysis</div>
+          <div style="font-size:13px;color:var(--ink4)">Enter values to calculate.</div>
+        </div>
+      </div>
+    </div>
+    <div id="brk-panel-add" class="brk-panel" style="display:none">
+      <div style="max-width:560px">
+        <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin-bottom:16px">Add Book Entry</div>
+        <div style="font-size:12px;color:var(--ink3);margin-bottom:20px;line-height:1.6">Enter data as you read. Each entry becomes a point on the timeline. Page number optional but useful for reference.</div>
+        <div class="brk-field-group"><label class="brk-label">Year *</label><input class="brk-input" id="add-year" type="number" placeholder="1991"></div>
+        <div class="brk-field-group"><label class="brk-label">Berkshire Net Worth / Book Value ($B)</label><input class="brk-input" id="add-networth" type="number" step="0.01" placeholder="5.3"><span class="brk-hint">In billions &mdash; e.g. 5.3 = $5.3B</span></div>
+        <div class="brk-field-group"><label class="brk-label">Book Value Per Share ($)</label><input class="brk-input" id="add-bvps" type="number" step="0.01" placeholder="e.g. 6437"></div>
+        <div class="brk-field-group"><label class="brk-label">Key Position Name</label><input class="brk-input" id="add-pos-name" type="text" placeholder="e.g. Salomon Inc."></div>
+        <div class="brk-field-group"><label class="brk-label">Key Position Value ($B)</label><input class="brk-input" id="add-pos-val" type="number" step="0.01" placeholder="0.7"></div>
+        <div class="brk-field-group"><label class="brk-label">Note / Quote from Book</label><textarea class="brk-input" id="add-note" rows="3" placeholder="e.g. Salomon was a giant firm on Wall Street..."></textarea></div>
+        <div class="brk-field-group"><label class="brk-label">Page Reference</label><input class="brk-input" id="add-page" type="number" placeholder="16"></div>
+        <button onclick="brkAddEntry()" style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:10px 24px;background:var(--ink);color:#fff;border:none;cursor:pointer;margin-top:8px">Add to Database</button>
+        <div id="add-confirm" style="margin-top:12px;font-family:var(--mono);font-size:10px;color:var(--green);display:none">&#10003; Entry added.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+// ========= BERKSHIRE MODULE =========
+var BRK_DATA = JSON.parse(localStorage.getItem('brk_data') || 'null');
+if (!BRK_DATA) {
+  BRK_DATA = [{year:1991,netWorth:5.3,bvps:null,posName:'Salomon Inc.',posVal:0.7,note:'Salomon was a giant firm on Wall Street and its short-term borrowings were exceeded by only one public company in the United States.',page:16}];
+  localStorage.setItem('brk_data', JSON.stringify(BRK_DATA));
+}
+
+function brkSave() { localStorage.setItem('brk_data', JSON.stringify(BRK_DATA)); }
+
+function brkShowTab(tab, btn) {
+  document.querySelectorAll('.brk-panel').forEach(function(p){ p.style.display='none'; });
+  document.querySelectorAll('.brk-tab').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('brk-panel-' + tab).style.display = 'block';
+  if (btn) btn.classList.add('active');
+  if (tab === 'timeline') brkRender();
+}
+
+function brkFmtB(val) {
+  if (val === null || val === undefined) return '\u2014';
+  if (val >= 1000) return '$' + val.toFixed(0) + 'B';
+  if (val >= 1) return '$' + val.toFixed(1) + 'B';
+  return '$' + (val * 1000).toFixed(0) + 'M';
+}
+
+function brkRender() {
+  var data = BRK_DATA.slice().sort(function(a,b){ return a.year - b.year; });
+  var latest = data[data.length - 1] || {};
+  var earliest = data[0] || {};
+  var maxNW = Math.max.apply(null, data.map(function(d){ return d.netWorth || 0; })) || 1;
+  var concArr = data.filter(function(d){ return d.posVal && d.netWorth; });
+  var avgConc = concArr.length ? (concArr.reduce(function(s,d){ return s + d.posVal/d.netWorth; }, 0) / concArr.length * 100).toFixed(1) : '\u2014';
+
+  document.getElementById('brk-summary').innerHTML = [
+    {label:'Entries', val: data.length},
+    {label:'Year Range', val: data.length > 1 ? earliest.year + '\u2013' + latest.year : (earliest.year || '\u2014')},
+    {label:'Peak Net Worth', val: brkFmtB(maxNW)},
+    {label:'Latest Net Worth', val: brkFmtB(latest.netWorth)},
+    {label:'Avg Concentration', val: avgConc + '%'}
+  ].map(function(s){
+    return '<div style="padding:14px 18px;border-right:1px solid var(--border)">'
+      + '<div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink4);margin-bottom:4px">' + s.label + '</div>'
+      + '<div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--ink)">' + s.val + '</div></div>';
+  }).join('');
+
+  var chart = document.getElementById('brk-chart');
+  var W = chart.offsetWidth || 900;
+  var barW = Math.max(18, Math.min(56, Math.floor((W - 44) / Math.max(data.length,1)) - 4));
+  var chartH = 188;
+  var barsHtml = data.map(function(d,i){
+    if (!d.netWorth) return '';
+    var h = Math.max(4, Math.round((d.netWorth / maxNW) * chartH));
+    var left = 40 + i * (barW + 4);
+    var posH = (d.posVal && d.netWorth) ? Math.round((d.posVal / d.netWorth) * h) : 0;
+    var tip = d.year + ': ' + brkFmtB(d.netWorth) + (d.posName ? ' | ' + d.posName + ' ' + brkFmtB(d.posVal) : '');
+    return '<div class="brk-bar" style="left:' + left + 'px;width:' + barW + 'px;height:' + h + 'px" title="' + tip + '" onclick="brkInspect(' + i + ')">'
+      + (posH ? '<div style="position:absolute;bottom:0;left:0;right:0;height:' + posH + 'px;background:var(--gold);opacity:0.8"></div>' : '')
+      + '</div>';
+  }).join('');
+  var yHtml = '<div style="position:absolute;left:0;top:0;height:100%;display:flex;flex-direction:column;justify-content:space-between">'
+    + '<span style="font-family:var(--mono);font-size:8px;color:var(--ink4)">' + brkFmtB(maxNW) + '</span>'
+    + '<span style="font-family:var(--mono);font-size:8px;color:var(--ink4)">$0</span></div>';
+  chart.innerHTML = yHtml + barsHtml;
+  document.getElementById('brk-chart-labels').innerHTML = data.map(function(d){
+    return '<span style="font-family:var(--mono);font-size:9px;color:var(--ink4);width:' + (barW+4) + 'px;text-align:center;display:inline-block">' + d.year + '</span>';
+  }).join('');
+
+  document.getElementById('brk-tbody').innerHTML = data.length ? data.map(function(d,i){
+    var conc = (d.posVal && d.netWorth) ? ((d.posVal/d.netWorth)*100).toFixed(1) + '%' : '\u2014';
+    var cc = (d.posVal && d.netWorth && (d.posVal/d.netWorth) > 0.1) ? 'var(--red)' : 'var(--ink)';
+    return '<tr style="border-bottom:1px solid var(--border);cursor:pointer" onclick="brkInspect(' + i + ')">'
+      + '<td style="padding:10px 12px;font-family:var(--mono);font-size:12px;font-weight:700">' + d.year + '</td>'
+      + '<td style="padding:10px 12px;font-family:var(--mono);font-size:12px;text-align:right">' + (d.netWorth ? brkFmtB(d.netWorth) : '\u2014') + '</td>'
+      + '<td style="padding:10px 12px;font-family:var(--mono);font-size:12px;text-align:right">' + (d.bvps ? '$' + Number(d.bvps).toFixed(0) : '\u2014') + '</td>'
+      + '<td style="padding:10px 12px;font-size:12px;text-align:right;color:var(--ink2)">' + (d.posName || '\u2014') + '</td>'
+      + '<td style="padding:10px 12px;font-family:var(--mono);font-size:13px;font-weight:700;text-align:right;color:' + cc + '">' + conc + '</td>'
+      + '<td style="padding:10px 12px;font-size:11px;color:var(--ink3);max-width:300px">'
+        + (d.page ? '<span style="font-family:var(--mono);font-size:9px;background:var(--bg3);padding:1px 6px;margin-right:6px">p.' + d.page + '</span>' : '')
+        + (d.note ? d.note.substring(0,80) + (d.note.length > 80 ? '...' : '') : '') + '</td>'
+      + '<td style="padding:10px 12px"><button onclick="event.stopPropagation();brkDelete(' + i + ')" style="font-family:var(--mono);font-size:8px;color:var(--ink4);background:none;border:none;cursor:pointer">\u2715</button></td>'
+      + '</tr>';
+  }).join('') : '<tr><td colspan="7" style="padding:40px;text-align:center;font-family:var(--mono);font-size:10px;color:var(--ink4)">No entries yet. Add data from the book using the + Add Entry tab.</td></tr>';
+}
+
+function brkInspect(idx) {
+  var data = BRK_DATA.slice().sort(function(a,b){ return a.year - b.year; });
+  var d = data[idx]; if (!d) return;
+  document.getElementById('calc-year').value = d.year;
+  document.getElementById('calc-networth').value = d.netWorth ? (d.netWorth * 1e9) : '';
+  document.getElementById('calc-position').value = d.posVal ? (d.posVal * 1e9) : '';
+  brkCalc();
+  brkShowTab('calculator', document.getElementById('brk-t-calculator'));
+}
+
+function brkDelete(idx) {
+  var data = BRK_DATA.slice().sort(function(a,b){ return a.year - b.year; });
+  var entry = data[idx];
+  var ri = BRK_DATA.findIndex(function(d){ return d.year === entry.year && d.note === entry.note; });
+  if (ri >= 0) { BRK_DATA.splice(ri,1); brkSave(); brkRender(); }
+}
+
+function brkAddEntry() {
+  var year = parseInt(document.getElementById('add-year').value);
+  if (!year) { alert('Year is required.'); return; }
+  BRK_DATA.push({
+    year: year,
+    netWorth: parseFloat(document.getElementById('add-networth').value) || null,
+    bvps: parseFloat(document.getElementById('add-bvps').value) || null,
+    posName: document.getElementById('add-pos-name').value.trim() || null,
+    posVal: parseFloat(document.getElementById('add-pos-val').value) || null,
+    note: document.getElementById('add-note').value.trim() || null,
+    page: parseInt(document.getElementById('add-page').value) || null
+  });
+  brkSave(); brkRender();
+  ['add-year','add-networth','add-bvps','add-pos-name','add-pos-val','add-note','add-page'].forEach(function(id){ document.getElementById(id).value=''; });
+  var c = document.getElementById('add-confirm');
+  c.style.display='block';
+  setTimeout(function(){ c.style.display='none'; }, 2000);
+  brkShowTab('timeline', document.getElementById('brk-t-timeline'));
+}
+
+function brkLoadSalomon() {
+  document.getElementById('calc-networth').value = 5300000000;
+  document.getElementById('calc-position').value = 700000000;
+  document.getElementById('calc-yield').value = 9;
+  document.getElementById('calc-year').value = 1991;
+  document.getElementById('calc-type').value = 'preferred';
+  brkCalc();
+}
+
+function brkCalc() {
+  var nw = parseFloat(document.getElementById('calc-networth').value) || 0;
+  var pos = parseFloat(document.getElementById('calc-position').value) || 0;
+  var yld = parseFloat(document.getElementById('calc-yield').value) || 0;
+  var year = document.getElementById('calc-year').value || '';
+  var type = document.getElementById('calc-type').value;
+  var out = document.getElementById('calc-output');
+  if (!nw || !pos) {
+    out.innerHTML = '<div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin-bottom:16px">Analysis</div><div style="font-size:13px;color:var(--ink4)">Enter portfolio value and position size to calculate.</div>';
+    return;
+  }
+  var conc = (pos / nw) * 100;
+  var annualIncome = yld > 0 ? pos * (yld / 100) : null;
+  var incomeOnNW = annualIncome ? (annualIncome / nw) * 100 : null;
+  var concColor = conc > 10 ? 'var(--red)' : (conc > 5 ? 'var(--gold)' : 'var(--green)');
+  var concVerdict = conc > 20
+    ? 'Highly concentrated. Berkshire-level conviction required. One position at ' + conc.toFixed(1) + '% of net worth means the company\'s fate is deeply tied to this single holding. Buffett only went this heavy when he had near-certainty about the economics and the people running it.'
+    : conc > 10
+    ? 'Significant concentration. A meaningful bet at ' + conc.toFixed(1) + '%. A 50% decline in this position would reduce total net worth by ' + (conc * 0.5).toFixed(1) + '%. This is Buffett\'s high-conviction, well-understood territory.'
+    : conc > 5
+    ? 'Notable position at ' + conc.toFixed(1) + '%. Above typical institutional weight but within conviction-investor range. A 50% decline costs ' + (conc * 0.5).toFixed(1) + '% of total net worth.'
+    : 'Moderate position at ' + conc.toFixed(1) + '%. Below 5% concentration. Manageable risk even in an adverse scenario.';
+  var typeNote = type === 'preferred'
+    ? 'Preferred stock provides fixed dividends with priority over common equity in liquidation. Buffett favored preferred in distressed situations \u2014 bond-like downside protection with equity-like upside via conversion rights.'
+    : type === 'common' ? 'Common stock. Full equity participation \u2014 upside and downside both uncapped.'
+    : type === 'bond' ? 'Fixed income. Income-certain, principal contingent on issuer solvency at maturity.'
+    : type === 'whole' ? 'Wholly owned operating business. Generates owner earnings directly. Valued on earning power, not market price.'
+    : 'Other security type.';
+  var rows = [
+    {l:'Portfolio / Net Worth', v: '$' + (nw/1e9).toFixed(2) + 'B', h: false},
+    {l:'Position Size', v: pos >= 1e9 ? '$' + (pos/1e9).toFixed(2) + 'B' : '$' + (pos/1e6).toFixed(0) + 'M', h: false},
+    {l:'Concentration', v: conc.toFixed(2) + '%', h: conc > 10},
+    {l:'Remainder of Portfolio', v: '$' + ((nw-pos)/1e9).toFixed(2) + 'B', h: false}
+  ];
+  if (annualIncome) {
+    rows.push({l:'Annual Income from Position', v: '$' + (annualIncome/1e6).toFixed(1) + 'M', h: false});
+    rows.push({l:'Income Yield on Net Worth', v: incomeOnNW.toFixed(2) + '%', h: false});
+    rows.push({l:'Years to Recover via Income', v: (100 / incomeOnNW).toFixed(1) + ' years', h: false});
+  }
+  var rowsHtml = rows.map(function(r){
+    return '<div class="calc-result-row"><span class="calc-result-label">' + r.l + '</span><span class="calc-result-val' + (r.h ? ' highlight' : '') + '">' + r.v + '</span></div>';
+  }).join('');
+  out.innerHTML = '<div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin-bottom:12px">Analysis' + (year ? ' \u2014 ' + year : '') + '</div>'
+    + rowsHtml
+    + '<div class="calc-verdict"><strong style="font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:6px;color:var(--gold)">Verdict</strong>' + concVerdict + '</div>'
+    + '<div style="margin-top:12px;padding:12px 16px;background:var(--bg3);border-left:3px solid var(--blue);font-size:12px;color:var(--ink3);line-height:1.65"><strong style="font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:5px;color:var(--blue)">Position Type Note</strong>' + typeNote + '</div>';
+}
+
+// Auto-render when Berkshire tab is first opened
+var _brkInit = false;
+var _origShow = window.show;
+window.show = function(name, btn) {
+  _origShow(name, btn);
+  if (name === 'berkshire' && !_brkInit) { _brkInit = true; brkRender(); }
+};
+
 </script>
 </body>
 </html>
