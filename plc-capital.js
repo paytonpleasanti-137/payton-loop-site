@@ -341,13 +341,105 @@ var RATES_HISTORY = {
 };
 
 var RATES_DATA = [
-  {id:'fedfunds', label:'Fed Funds Rate', value:'5.25–5.50%', source:'Federal Reserve', note:'Target range set by FOMC. Primary benchmark for all consumer rates.', dir:'flat', color:'var(--blue)'},
-  {id:'mortgage30', label:'30-yr Fixed Mortgage', value:'6.72%', source:'Freddie Mac PMMS', note:'National weekly average. At this rate, $400k home = $2,588/mo principal + interest.', dir:'down', color:'var(--red)'},
-  {id:'mortgage15', label:'15-yr Fixed Mortgage', value:'5.99%', source:'Freddie Mac PMMS', note:'Lower rate, higher monthly payment. Total interest paid is ~40% less than 30-yr.', dir:'down', color:'var(--red)'},
-  {id:'savings', label:'National Avg Savings', value:'0.59%', source:'FDIC Weekly', note:'National average. High-yield savings accounts available at 4.5%+. The gap is real money.', dir:'flat', color:'var(--gold)'},
-  {id:'treasury10', label:'10-yr Treasury', value:'4.28%', source:'U.S. Treasury', note:'Risk-free benchmark. When above Fed Funds rate, curve is normal. Inverted = recession signal.', dir:'up', color:'var(--ink)'},
-  {id:'prime', label:'Prime Rate', value:'8.50%', source:'Federal Reserve H.15', note:'Fed Funds + 3%. Basis for credit cards, HELOCs, and many business loans.', dir:'flat', color:'var(--ink3)'}
+  {id:'fedfunds',   label:'Fed Funds Target Range',  value:'Loading...', source:'Federal Reserve / FRED', note:'Target range set by FOMC. Fetched live from St. Louis Fed.', dir:'flat', color:'var(--blue)'},
+  {id:'treasury10', label:'10-yr Treasury Yield',    value:'Loading...', source:'U.S. Treasury / FRED',   note:'Risk-free benchmark. Inverted yield curve = recession signal.', dir:'flat', color:'var(--ink)'},
+  {id:'mortgage30', label:'30-yr Fixed Mortgage',    value:'Loading...', source:'Freddie Mac PMMS / FRED', note:'National weekly average. At this rate, $400k home costs ~$2,500/mo P+I.', dir:'flat', color:'var(--red)'},
+  {id:'mortgage15', label:'15-yr Fixed Mortgage',    value:'Loading...', source:'Freddie Mac PMMS / FRED', note:'Total interest paid is ~40% less than 30-yr.', dir:'flat', color:'var(--red)'},
+  {id:'savings',    label:'National Avg Savings APY', value:'Loading...', source:'FDIC / FRED',            note:'National average. High-yield savings available at 4.5%+.', dir:'flat', color:'var(--gold)'},
+  {id:'prime',      label:'Prime Rate',              value:'Loading...', source:'Federal Reserve H.15',    note:'Fed Funds upper bound + 3%. Basis for credit cards and HELOCs.', dir:'flat', color:'var(--ink3)'}
 ];
+
+// FRED series IDs for each rate
+var FRED_SERIES = {
+  fedfunds:   {upper: 'DFEDTARU', lower: 'DFEDTARL', range: true},
+  treasury10: {id: 'DGS10'},
+  mortgage30: {id: 'MORTGAGE30US'},
+  mortgage15: {id: 'MORTGAGE15US'},
+  savings:    {id: 'DEPOSIT'},
+  prime:      {id: 'DPRIME'}
+};
+
+function fetchFRED(seriesId, callback) {
+  var url = 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=' + seriesId;
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', url, true);
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState !== 4) return;
+    if (xhr.status === 200) {
+      var lines = xhr.responseText.trim().split('\n');
+      // Get last non-empty line with actual data
+      var latest = null;
+      for (var i = lines.length - 1; i >= 1; i--) {
+        var parts = lines[i].split(',');
+        if (parts.length === 2 && parts[1] !== '.' && parts[1].trim() !== '') {
+          latest = {date: parts[0].trim(), value: parseFloat(parts[1].trim())};
+          break;
+        }
+      }
+      // Build 12-month history
+      var history = [];
+      for (var j = Math.max(1, lines.length - 13); j < lines.length; j++) {
+        var p = lines[j].split(',');
+        if (p.length === 2 && p[1] !== '.' && p[1].trim() !== '') {
+          history.push({date: p[0].trim(), value: parseFloat(p[1].trim())});
+        }
+      }
+      callback(null, latest, history);
+    } else {
+      callback('HTTP ' + xhr.status);
+    }
+  };
+  xhr.send();
+}
+
+function loadLiveRates() {
+  // Fed Funds target range — fetch upper and lower bounds
+  fetchFRED('DFEDTARU', function(err, upper, upperHist) {
+    fetchFRED('DFEDTARL', function(err2, lower, lowerHist) {
+      var idx = RATES_DATA.findIndex ? RATES_DATA.findIndex(function(r){ return r.id==='fedfunds'; }) : 0;
+      for (var i = 0; i < RATES_DATA.length; i++) { if (RATES_DATA[i].id==='fedfunds') { idx=i; break; } }
+      if (upper && lower) {
+        RATES_DATA[idx].value = lower.value.toFixed(2) + '\u2013' + upper.value.toFixed(2) + '%';
+        RATES_DATA[idx].date  = upper.date;
+        RATES_DATA[idx].dir   = 'flat';
+        // Build history as upper bound
+        RATES_HISTORY['fedfunds'] = upperHist;
+      } else {
+        RATES_DATA[idx].value = 'N/A';
+      }
+      renderRates();
+    });
+  });
+
+  // All other series
+  var singles = [
+    {id:'treasury10', series:'DGS10'},
+    {id:'mortgage30', series:'MORTGAGE30US'},
+    {id:'mortgage15', series:'MORTGAGE15US'},
+    {id:'savings',    series:'DEPOSIT'},
+    {id:'prime',      series:'DPRIME'}
+  ];
+
+  singles.forEach(function(item) {
+    fetchFRED(item.series, function(err, latest, history) {
+      for (var i = 0; i < RATES_DATA.length; i++) {
+        if (RATES_DATA[i].id === item.id) {
+          if (latest) {
+            var prev = history.length > 1 ? history[history.length - 2].value : latest.value;
+            RATES_DATA[i].value = latest.value.toFixed(2) + '%';
+            RATES_DATA[i].date  = latest.date;
+            RATES_DATA[i].dir   = latest.value > prev ? 'up' : latest.value < prev ? 'down' : 'flat';
+            RATES_HISTORY[item.id] = history;
+          } else {
+            RATES_DATA[i].value = 'N/A';
+          }
+          break;
+        }
+      }
+      renderRates();
+    });
+  });
+}
 
 function renderRates() {
   var grid = document.getElementById('rates-grid');
@@ -624,7 +716,7 @@ function setDate() {
 
 window.onload = function() {
   setDate();
-  renderRates();
+  loadLiveRates();
   showSection('money', document.getElementById('sec-money'));
 };
 
