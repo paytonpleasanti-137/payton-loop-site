@@ -318,27 +318,9 @@ window.show = function(name, btn) {
 // RATES MODULE — official sources, client-side fetch
 // ═══════════════════════════════════════════
 var RATES_HISTORY = {
-  fedfunds: [
-    {y:2015,v:0.13},{y:2016,v:0.40},{y:2017,v:1.00},{y:2018,v:1.83},
-    {y:2019,v:2.16},{y:2020,v:0.36},{y:2021,v:0.08},{y:2022,v:1.68},
-    {y:2023,v:5.02},{y:2024,v:5.33},{y:2025,v:4.58}
-  ],
-  mortgage30: [
-    {y:2015,v:3.85},{y:2016,v:3.65},{y:2017,v:3.99},{y:2018,v:4.54},
-    {y:2019,v:3.94},{y:2020,v:3.11},{y:2021,v:2.96},{y:2022,v:5.34},
-    {y:2023,v:6.81},{y:2024,v:6.72},{y:2025,v:6.65}
-  ],
-  savings: [
-    {y:2015,v:0.06},{y:2016,v:0.06},{y:2017,v:0.06},{y:2018,v:0.08},
-    {y:2019,v:0.10},{y:2020,v:0.06},{y:2021,v:0.06},{y:2022,v:0.33},
-    {y:2023,v:0.58},{y:2024,v:0.61},{y:2025,v:0.59}
-  ],
-  treasury10: [
-    {y:2015,v:2.14},{y:2016,v:1.84},{y:2017,v:2.33},{y:2018,v:2.91},
-    {y:2019,v:2.14},{y:2020,v:0.89},{y:2021,v:1.45},{y:2022,v:3.96},
-    {y:2023,v:3.96},{y:2024,v:4.20},{y:2025,v:4.28}
-  ]
-};
+  fedfunds: [], treasury10: [], mortgage30: [],
+  mortgage15: [], savings: [], prime: []
+}
 
 var RATES_DATA = [
   {id:'fedfunds',   label:'Fed Funds Target Range',  value:'Loading...', source:'Federal Reserve / FRED', note:'Target range set by FOMC. Fetched live from St. Louis Fed.', dir:'flat', color:'var(--blue)'},
@@ -462,7 +444,24 @@ function renderRates() {
 function showRateChart(id) {
   var hist = RATES_HISTORY[id];
   var rateObj = RATES_DATA.filter(function(r){ return r.id === id; })[0];
-  if (!hist || !rateObj) return;
+  if (!rateObj) return;
+  if (!hist || hist.length === 0) {
+    var chartDiv = document.getElementById('rates-chart');
+    var titleEl  = document.getElementById('rates-chart-title');
+    if (titleEl) titleEl.textContent = rateObj.label;
+    if (chartDiv) {
+      chartDiv.style.display = 'block';
+      var canvas = document.getElementById('rates-canvas');
+      if (canvas) {
+        var ctx2d = canvas.getContext('2d');
+        ctx2d.clearRect(0,0,canvas.width,canvas.height);
+        ctx2d.fillStyle = '#888';
+        ctx2d.font = '12px monospace';
+        ctx2d.fillText('Loading live data from FRED...', 20, canvas.height/2);
+      }
+    }
+    return;
+  }
   document.getElementById('rates-chart-title').textContent = rateObj.label + ' (2015\u20132025, annual avg)';
   var chart = document.getElementById('rates-chart');
   var labels = document.getElementById('rates-chart-labels');
