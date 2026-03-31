@@ -335,6 +335,33 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
 .wr-mode:last-child{border-right:0}
 .wr-mode:hover{background:var(--bg3);color:var(--ink2)}
 .wr-mode.active{background:var(--ink);color:var(--bg)}
+
+/* ── FINANCIAL CALCULATORS ── */
+.calc-tab{flex:1;padding:10px 4px;font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:0;border-right:1px solid var(--border);background:transparent;color:var(--ink4)}
+.calc-tab:last-child{border-right:0}
+.calc-tab:hover{background:var(--bg3);color:var(--ink)}
+.calc-tab.active{background:var(--ink);color:var(--bg)}
+.calc-panel{border:1px solid var(--border);border-top:3px solid var(--ink);padding:24px}
+.calc-panel.hidden{display:none}
+.cp-desc{font-family:var(--serif);font-size:14px;line-height:1.8;color:var(--ink3);margin-bottom:24px;max-width:700px;border-left:3px solid var(--border);padding-left:16px}
+.cp-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px}
+.cp-inputs{}
+.cp-field{margin-bottom:16px}
+.cp-label{display:block;font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink4);margin-bottom:5px}
+.cp-input{width:100%;padding:9px 12px;border:1px solid var(--border);font-family:var(--mono);font-size:14px;font-weight:700;color:var(--ink);background:var(--bg);outline:none;box-sizing:border-box}
+.cp-input:focus{border-color:var(--ink)}
+.cp-input[type=range]{padding:6px 0;border:0;cursor:pointer}
+.cp-results{background:var(--bg2);border:1px solid var(--border)}
+.cp-result-row{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border)}
+.cp-result-row:last-child{border-bottom:0}
+.cp-result-label{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink4)}
+.cp-result-val{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--ink)}
+.cp-result-verdict{padding:14px 16px;border-top:2px solid var(--ink);font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:1px}
+.cp-legend{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap}
+.cp-leg-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink3)}
+.cp-leg-badge{display:inline-block;padding:2px 8px;font-family:var(--mono);font-size:7px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#fff}
+.cp-score-bar{height:8px;background:var(--bg);border:1px solid var(--border);margin:8px 0}
+.cp-score-fill{height:100%;transition:width 0.3s}
 </style>
 </head>
 <body>
@@ -500,151 +527,163 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
 
 <!-- FINANCIALS -->
 <div class="view" id="v-financials">
+<div style="max-width:1100px;margin:0 auto;padding-bottom:60px">
 
-<div style="max-width:1060px;margin:0 auto;padding-bottom:60px">
-
-  <!-- HEADER -->
   <div style="padding-bottom:16px;margin-bottom:24px;border-bottom:2px solid var(--ink)">
-    <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin-bottom:6px">Capital &bull; Tools</div>
-    <div style="font-family:var(--serif);font-size:34px;font-weight:600;color:var(--ink);line-height:1.1">Calculators</div>
+    <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin-bottom:6px">Capital &bull; Analysis</div>
+    <div style="font-family:var(--serif);font-size:34px;font-weight:600;color:var(--ink);line-height:1.1">Financial Calculators</div>
+    <div style="font-size:13px;color:var(--ink3);margin-top:6px">Institutional-grade metrics. Enter the numbers, get the answer.</div>
   </div>
 
-  <!-- SCOREBOARD ROW -->
-  <div class="calc-score-row">
-    <div class="calc-score-card">
-      <div class="calc-score-label">Invested</div>
-      <div class="calc-score-val" style="color:var(--red)">$221</div>
+  <!-- CALC TABS -->
+  <div style="display:flex;gap:0;border:1px solid var(--border);margin-bottom:2px" id="calc-tab-bar">
+    <button class="calc-tab active" onclick="showCalc('roic',this)">ROIC</button>
+    <button class="calc-tab" onclick="showCalc('cagr',this)">CAGR</button>
+    <button class="calc-tab" onclick="showCalc('dcf',this)">DCF</button>
+    <button class="calc-tab" onclick="showCalc('margin',this)">Margins</button>
+    <button class="calc-tab" onclick="showCalc('ev',this)">EV / EBITDA</button>
+    <button class="calc-tab" onclick="showCalc('wacc',this)">WACC</button>
+    <button class="calc-tab" onclick="showCalc('moat',this)">Moat Score</button>
+  </div>
+
+  <!-- ── ROIC ── -->
+  <div class="calc-panel" id="cp-roic">
+    <div class="cp-desc">Return on Invested Capital — the single most important metric for evaluating whether a business creates or destroys value. Buffett's north star.</div>
+    <div class="cp-grid">
+      <div class="cp-inputs">
+        <div class="cp-field"><label class="cp-label">EBIT — Earnings Before Interest &amp; Tax ($)</label><input class="cp-input" id="roic-ebit" type="number" value="500" oninput="calcROIC()"></div>
+        <div class="cp-field"><label class="cp-label">Tax Rate (%)</label><input class="cp-input" id="roic-tax" type="number" value="21" oninput="calcROIC()"></div>
+        <div class="cp-field"><label class="cp-label">Total Debt ($)</label><input class="cp-input" id="roic-debt" type="number" value="1000" oninput="calcROIC()"></div>
+        <div class="cp-field"><label class="cp-label">Total Equity ($)</label><input class="cp-input" id="roic-equity" type="number" value="3000" oninput="calcROIC()"></div>
+        <div class="cp-field"><label class="cp-label">Cash &amp; Equivalents ($)</label><input class="cp-input" id="roic-cash" type="number" value="200" oninput="calcROIC()"></div>
+      </div>
+      <div class="cp-results" id="roic-results"></div>
     </div>
-    <div class="calc-score-card">
-      <div class="calc-score-label">Earned</div>
-      <div class="calc-score-val" style="color:var(--ink4)">$0</div>
-    </div>
-    <div class="calc-score-card">
-      <div class="calc-score-label">Views</div>
-      <div class="calc-score-val" style="color:var(--green)">306</div>
-    </div>
-    <div class="calc-score-card">
-      <div class="calc-score-label">Target/mo</div>
-      <div class="calc-score-val" style="color:var(--gold)">$5,821</div>
-    </div>
-    <div class="calc-score-card">
-      <div class="calc-score-label">Progress</div>
-      <div class="calc-score-val" style="color:var(--ink4)">0%</div>
+    <div class="cp-legend">
+      <div class="cp-leg-row"><span class="cp-leg-badge" style="background:var(--green)">Strong</span><span>ROIC &gt; 15% — durable competitive advantage likely present</span></div>
+      <div class="cp-leg-row"><span class="cp-leg-badge" style="background:var(--gold)">Adequate</span><span>ROIC 8–15% — decent business, verify moat durability</span></div>
+      <div class="cp-leg-row"><span class="cp-leg-badge" style="background:var(--red)">Weak</span><span>ROIC &lt; 8% — likely destroying value; cost of capital exceeds return</span></div>
     </div>
   </div>
 
-  <!-- CALCULATOR GRID -->
-  <div class="calc-grid">
-
-    <!-- FREEDOM DAY CALCULATOR -->
-    <div class="calc-card">
-      <div class="calc-card-hdr">
-        <div class="calc-card-title">Freedom Day</div>
-        <div class="calc-card-sub">Months to $5,821/mo independence</div>
+  <!-- ── CAGR ── -->
+  <div class="calc-panel hidden" id="cp-cagr">
+    <div class="cp-desc">Compound Annual Growth Rate — strips out volatility to reveal the true annual growth rate of any metric: revenue, earnings, stock price, or portfolio value.</div>
+    <div class="cp-grid">
+      <div class="cp-inputs">
+        <div class="cp-field"><label class="cp-label">Beginning Value ($)</label><input class="cp-input" id="cagr-start" type="number" value="10000" oninput="calcCAGRpro()"></div>
+        <div class="cp-field"><label class="cp-label">Ending Value ($)</label><input class="cp-input" id="cagr-end" type="number" value="28000" oninput="calcCAGRpro()"></div>
+        <div class="cp-field"><label class="cp-label">Number of Years</label><input class="cp-input" id="cagr-years" type="number" value="10" oninput="calcCAGRpro()"></div>
+        <div class="cp-field"><label class="cp-label">Target CAGR for projection (%)</label><input class="cp-input" id="cagr-proj" type="number" value="20" oninput="calcCAGRpro()"></div>
+        <div class="cp-field"><label class="cp-label">Projection Years</label><input class="cp-input" id="cagr-projyrs" type="number" value="10" oninput="calcCAGRpro()"></div>
       </div>
-      <div class="calc-body">
-        <div class="calc-row">
-          <label class="calc-label">Monthly Revenue Now ($)</label>
-          <input class="calc-input" id="fd-current" type="number" value="0" min="0" oninput="calcFreedom()">
-        </div>
-        <div class="calc-row">
-          <label class="calc-label">Monthly Growth Rate (%)</label>
-          <input class="calc-input" id="fd-growth" type="number" value="15" min="0" max="200" oninput="calcFreedom()">
-        </div>
-        <div class="calc-row">
-          <label class="calc-label">Target Monthly ($)</label>
-          <input class="calc-input" id="fd-target" type="number" value="5821" min="1" oninput="calcFreedom()">
-        </div>
-        <div class="calc-result" id="fd-result">
-          <div class="calc-result-main" id="fd-months">—</div>
-          <div class="calc-result-sub" id="fd-date">Enter values above</div>
-        </div>
-        <div class="calc-breakdown" id="fd-table"></div>
-      </div>
+      <div class="cp-results" id="cagr-results"></div>
     </div>
+  </div>
 
-    <!-- DEBT PAYOFF CALCULATOR -->
-    <div class="calc-card">
-      <div class="calc-card-hdr">
-        <div class="calc-card-title">Debt Payoff</div>
-        <div class="calc-card-sub">Time to zero at a given monthly payment</div>
+  <!-- ── DCF ── -->
+  <div class="calc-panel hidden" id="cp-dcf">
+    <div class="cp-desc">Discounted Cash Flow — intrinsic value is the present value of future cash flows. This is the only valuation method Buffett endorses. "Intrinsic value can be defined simply: it is the discounted value of the cash that can be taken out of a business during its remaining life."</div>
+    <div class="cp-grid">
+      <div class="cp-inputs">
+        <div class="cp-field"><label class="cp-label">Current Free Cash Flow ($M)</label><input class="cp-input" id="dcf-fcf" type="number" value="100" oninput="calcDCF()"></div>
+        <div class="cp-field"><label class="cp-label">Growth Rate — Years 1–5 (%)</label><input class="cp-input" id="dcf-g1" type="number" value="15" oninput="calcDCF()"></div>
+        <div class="cp-field"><label class="cp-label">Growth Rate — Years 6–10 (%)</label><input class="cp-input" id="dcf-g2" type="number" value="8" oninput="calcDCF()"></div>
+        <div class="cp-field"><label class="cp-label">Terminal Growth Rate (%)</label><input class="cp-input" id="dcf-tg" type="number" value="3" oninput="calcDCF()"></div>
+        <div class="cp-field"><label class="cp-label">Discount Rate / WACC (%)</label><input class="cp-input" id="dcf-dr" type="number" value="10" oninput="calcDCF()"></div>
+        <div class="cp-field"><label class="cp-label">Shares Outstanding (M)</label><input class="cp-input" id="dcf-shares" type="number" value="100" oninput="calcDCF()"></div>
       </div>
-      <div class="calc-body">
-        <div class="calc-row">
-          <label class="calc-label">Total Debt ($)</label>
-          <input class="calc-input" id="dp-balance" type="number" value="100000" min="1" oninput="calcDebt()">
-        </div>
-        <div class="calc-row">
-          <label class="calc-label">Annual Interest Rate (%)</label>
-          <input class="calc-input" id="dp-rate" type="number" value="7.5" min="0" step="0.1" oninput="calcDebt()">
-        </div>
-        <div class="calc-row">
-          <label class="calc-label">Monthly Payment ($)</label>
-          <input class="calc-input" id="dp-payment" type="number" value="1500" min="1" oninput="calcDebt()">
-        </div>
-        <div class="calc-result" id="dp-result">
-          <div class="calc-result-main" id="dp-months">—</div>
-          <div class="calc-result-sub" id="dp-detail">Enter values above</div>
-        </div>
-        <div class="calc-breakdown" id="dp-table"></div>
-      </div>
+      <div class="cp-results" id="dcf-results"></div>
     </div>
+  </div>
 
-    <!-- BREAK-EVEN CALCULATOR -->
-    <div class="calc-card">
-      <div class="calc-card-hdr">
-        <div class="calc-card-title">Break-Even</div>
-        <div class="calc-card-sub">Views needed to recover total investment</div>
+  <!-- ── MARGINS ── -->
+  <div class="calc-panel hidden" id="cp-margin">
+    <div class="cp-desc">Margin analysis — gross, operating, net, and free cash flow margins side by side. Trend matters more than snapshot. A contracting gross margin is a moat erosion signal.</div>
+    <div class="cp-grid">
+      <div class="cp-inputs">
+        <div class="cp-field"><label class="cp-label">Revenue ($)</label><input class="cp-input" id="mg-rev" type="number" value="1000" oninput="calcMargins()"></div>
+        <div class="cp-field"><label class="cp-label">Cost of Goods Sold ($)</label><input class="cp-input" id="mg-cogs" type="number" value="400" oninput="calcMargins()"></div>
+        <div class="cp-field"><label class="cp-label">Operating Expenses ($)</label><input class="cp-input" id="mg-opex" type="number" value="200" oninput="calcMargins()"></div>
+        <div class="cp-field"><label class="cp-label">Interest Expense ($)</label><input class="cp-input" id="mg-int" type="number" value="30" oninput="calcMargins()"></div>
+        <div class="cp-field"><label class="cp-label">Tax Rate (%)</label><input class="cp-input" id="mg-tax" type="number" value="21" oninput="calcMargins()"></div>
+        <div class="cp-field"><label class="cp-label">CapEx ($)</label><input class="cp-input" id="mg-capex" type="number" value="50" oninput="calcMargins()"></div>
+        <div class="cp-field"><label class="cp-label">D&amp;A ($)</label><input class="cp-input" id="mg-da" type="number" value="40" oninput="calcMargins()"></div>
       </div>
-      <div class="calc-body">
-        <div class="calc-row">
-          <label class="calc-label">Total Invested ($)</label>
-          <input class="calc-input" id="be-invested" type="number" value="221" min="1" oninput="calcBreakEven()">
-        </div>
-        <div class="calc-row">
-          <label class="calc-label">RPM — Revenue per 1,000 views ($)</label>
-          <input class="calc-input" id="be-rpm" type="number" value="4" min="0.1" step="0.5" oninput="calcBreakEven()">
-        </div>
-        <div class="calc-row">
-          <label class="calc-label">Affiliate $/view</label>
-          <input class="calc-input" id="be-aff" type="number" value="0.005" min="0" step="0.001" oninput="calcBreakEven()">
-        </div>
-        <div class="calc-result">
-          <div class="calc-result-main" id="be-views">—</div>
-          <div class="calc-result-sub" id="be-detail">Enter values above</div>
-        </div>
-        <div class="calc-breakdown" id="be-table"></div>
-      </div>
+      <div class="cp-results" id="margin-results"></div>
     </div>
+  </div>
 
-    <!-- CAGR / COMPOUND GROWTH -->
-    <div class="calc-card">
-      <div class="calc-card-hdr">
-        <div class="calc-card-title">Compound Growth</div>
-        <div class="calc-card-sub">CAGR — Berkshire-style compounding model</div>
+  <!-- ── EV/EBITDA ── -->
+  <div class="calc-panel hidden" id="cp-ev">
+    <div class="cp-desc">Enterprise Value to EBITDA — the preferred acquisition multiple. Strips out capital structure differences to compare businesses on operating earnings power alone.</div>
+    <div class="cp-grid">
+      <div class="cp-inputs">
+        <div class="cp-field"><label class="cp-label">Market Cap ($M)</label><input class="cp-input" id="ev-mktcap" type="number" value="5000" oninput="calcEV()"></div>
+        <div class="cp-field"><label class="cp-label">Total Debt ($M)</label><input class="cp-input" id="ev-debt" type="number" value="800" oninput="calcEV()"></div>
+        <div class="cp-field"><label class="cp-label">Cash &amp; Equivalents ($M)</label><input class="cp-input" id="ev-cash" type="number" value="300" oninput="calcEV()"></div>
+        <div class="cp-field"><label class="cp-label">Preferred Stock ($M)</label><input class="cp-input" id="ev-pref" type="number" value="0" oninput="calcEV()"></div>
+        <div class="cp-field"><label class="cp-label">EBITDA ($M)</label><input class="cp-input" id="ev-ebitda" type="number" value="600" oninput="calcEV()"></div>
+        <div class="cp-field"><label class="cp-label">Revenue ($M)</label><input class="cp-input" id="ev-rev" type="number" value="3000" oninput="calcEV()"></div>
       </div>
-      <div class="calc-body">
-        <div class="calc-row">
-          <label class="calc-label">Starting Value ($)</label>
-          <input class="calc-input" id="cg-start" type="number" value="1000" min="1" oninput="calcCAGR()">
-        </div>
-        <div class="calc-row">
-          <label class="calc-label">Annual Growth Rate (%)</label>
-          <input class="calc-input" id="cg-rate" type="number" value="20" min="0" step="0.5" oninput="calcCAGR()">
-        </div>
-        <div class="calc-row">
-          <label class="calc-label">Years</label>
-          <input class="calc-input" id="cg-years" type="number" value="10" min="1" max="50" oninput="calcCAGR()">
-        </div>
-        <div class="calc-result">
-          <div class="calc-result-main" id="cg-final">—</div>
-          <div class="calc-result-sub" id="cg-detail">Enter values above</div>
-        </div>
-        <div class="calc-breakdown" id="cg-table"></div>
-      </div>
+      <div class="cp-results" id="ev-results"></div>
     </div>
+  </div>
 
-  </div><!-- /calc-grid -->
+  <!-- ── WACC ── -->
+  <div class="calc-panel hidden" id="cp-wacc">
+    <div class="cp-desc">Weighted Average Cost of Capital — the minimum return a business must earn to satisfy its capital providers. The hurdle rate for any investment decision.</div>
+    <div class="cp-grid">
+      <div class="cp-inputs">
+        <div class="cp-field"><label class="cp-label">Total Equity ($M)</label><input class="cp-input" id="wacc-eq" type="number" value="3000" oninput="calcWACC()"></div>
+        <div class="cp-field"><label class="cp-label">Total Debt ($M)</label><input class="cp-input" id="wacc-debt" type="number" value="1000" oninput="calcWACC()"></div>
+        <div class="cp-field"><label class="cp-label">Cost of Equity — Ke (%)</label><input class="cp-input" id="wacc-ke" type="number" value="10" oninput="calcWACC()"></div>
+        <div class="cp-field"><label class="cp-label">Cost of Debt — Kd (%)</label><input class="cp-input" id="wacc-kd" type="number" value="5" oninput="calcWACC()"></div>
+        <div class="cp-field"><label class="cp-label">Tax Rate (%)</label><input class="cp-input" id="wacc-tax" type="number" value="21" oninput="calcWACC()"></div>
+      </div>
+      <div class="cp-results" id="wacc-results"></div>
+    </div>
+  </div>
+
+  <!-- ── MOAT SCORE ── -->
+  <div class="calc-panel hidden" id="cp-moat">
+    <div class="cp-desc">Munger's Four Filters applied quantitatively. Score a business on each dimension of durable competitive advantage. Any score below 60 fails the filter.</div>
+    <div class="cp-grid">
+      <div class="cp-inputs">
+        <div class="cp-field">
+          <label class="cp-label">Pricing Power — Can they raise prices 10% with no volume loss? (0–10)</label>
+          <input class="cp-input" id="moat-pricing" type="range" min="0" max="10" value="7" oninput="calcMoat();document.getElementById('moat-pricing-val').textContent=this.value">
+          <span id="moat-pricing-val" style="font-family:var(--mono);font-size:13px;font-weight:700">7</span>
+        </div>
+        <div class="cp-field">
+          <label class="cp-label">Switching Costs — How painful is it to leave? (0–10)</label>
+          <input class="cp-input" id="moat-switch" type="range" min="0" max="10" value="6" oninput="calcMoat();document.getElementById('moat-switch-val').textContent=this.value">
+          <span id="moat-switch-val" style="font-family:var(--mono);font-size:13px;font-weight:700">6</span>
+        </div>
+        <div class="cp-field">
+          <label class="cp-label">Network Effects — Does value grow with users? (0–10)</label>
+          <input class="cp-input" id="moat-network" type="range" min="0" max="10" value="4" oninput="calcMoat();document.getElementById('moat-network-val').textContent=this.value">
+          <span id="moat-network-val" style="font-family:var(--mono);font-size:13px;font-weight:700">4</span>
+        </div>
+        <div class="cp-field">
+          <label class="cp-label">Cost Advantage — Structurally cheaper than competitors? (0–10)</label>
+          <input class="cp-input" id="moat-cost" type="range" min="0" max="10" value="5" oninput="calcMoat();document.getElementById('moat-cost-val').textContent=this.value">
+          <span id="moat-cost-val" style="font-family:var(--mono);font-size:13px;font-weight:700">5</span>
+        </div>
+        <div class="cp-field">
+          <label class="cp-label">Intangible Assets — Brand, patent, regulatory license? (0–10)</label>
+          <input class="cp-input" id="moat-intangible" type="range" min="0" max="10" value="6" oninput="calcMoat();document.getElementById('moat-intangible-val').textContent=this.value">
+          <span id="moat-intangible-val" style="font-family:var(--mono);font-size:13px;font-weight:700">6</span>
+        </div>
+        <div class="cp-field">
+          <label class="cp-label">Durability — Still dominant in 10 years? (0–10)</label>
+          <input class="cp-input" id="moat-durability" type="range" min="0" max="10" value="7" oninput="calcMoat();document.getElementById('moat-durability-val').textContent=this.value">
+          <span id="moat-durability-val" style="font-family:var(--mono);font-size:13px;font-weight:700">7</span>
+        </div>
+      </div>
+      <div class="cp-results" id="moat-results"></div>
+    </div>
+  </div>
 
 </div>
 </div>
@@ -2059,188 +2098,239 @@ setTimeout(function() { renderLetterIndex(); }, 150);
 
 
 
+
 // ═══════════════════════════════════════
-// CALCULATORS
+// FINANCIAL CALCULATORS
 // ═══════════════════════════════════════
 
-function fmt(n) {
-  return '$' + Math.round(n).toLocaleString();
-}
-function fmtN(n) {
-  return Math.round(n).toLocaleString();
-}
-
-// FREEDOM DAY
-function calcFreedom() {
-  var current = parseFloat(document.getElementById('fd-current').value) || 0;
-  var growth  = parseFloat(document.getElementById('fd-growth').value)  || 0;
-  var target  = parseFloat(document.getElementById('fd-target').value)  || 5821;
-  var rMain   = document.getElementById('fd-months');
-  var rSub    = document.getElementById('fd-date');
-  var rTbl    = document.getElementById('fd-table');
-
-  if (current >= target) {
-    rMain.textContent = 'Already Free';
-    rMain.style.color = 'var(--green)';
-    rSub.textContent  = 'Current revenue exceeds target.';
-    rTbl.innerHTML = '';
-    return;
-  }
-  if (growth <= 0) {
-    rMain.textContent = 'Never';
-    rMain.style.color = 'var(--red)';
-    rSub.textContent  = 'Add a growth rate > 0%';
-    rTbl.innerHTML = '';
-    return;
-  }
-
-  var monthly = growth / 100;
-  var rev = current;
-  var months = 0;
-  var rows = [];
-  while (rev < target && months < 360) {
-    months++;
-    rev = rev * (1 + monthly);
-    if (months <= 6 || months % 6 === 0) {
-      rows.push([months, rev]);
-    }
-  }
-
-  rMain.style.color = 'var(--green)';
-  rMain.textContent = months + ' months';
-  var d = new Date();
-  d.setMonth(d.getMonth() + months);
-  rSub.textContent = 'Freedom Day: ' + d.toLocaleDateString('en-US', {month:'long', year:'numeric'});
-
-  var html = '<table class="calc-tbl"><thead><tr><th>Month</th><th>Revenue</th><th>vs Target</th></tr></thead><tbody>';
-  rows.forEach(function(r) {
-    var pct = Math.min(100, Math.round((r[1] / target) * 100));
-    html += '<tr><td>Mo ' + r[0] + '</td><td>' + fmt(r[1]) + '</td><td>' + pct + '%</td></tr>';
-  });
-  html += '</tbody></table>';
-  rTbl.innerHTML = html;
+function showCalc(id, btn) {
+  document.querySelectorAll('.calc-panel').forEach(function(p){ p.classList.add('hidden'); });
+  document.querySelectorAll('.calc-tab').forEach(function(b){ b.classList.remove('active'); });
+  var panel = document.getElementById('cp-' + id);
+  if (panel) panel.classList.remove('hidden');
+  if (btn) btn.classList.add('active');
 }
 
-// DEBT PAYOFF
-function calcDebt() {
-  var balance = parseFloat(document.getElementById('dp-balance').value)  || 0;
-  var annual  = parseFloat(document.getElementById('dp-rate').value)     || 0;
-  var payment = parseFloat(document.getElementById('dp-payment').value)  || 0;
-  var rMain   = document.getElementById('dp-months');
-  var rDetail = document.getElementById('dp-detail');
-  var rTbl    = document.getElementById('dp-table');
+function fmtC(n) { return '$' + Number(n.toFixed(2)).toLocaleString(); }
+function fmtP(n) { return n.toFixed(2) + '%'; }
+function fmtX(n) { return n.toFixed(2) + 'x'; }
+function color(val, good, mid) { return val >= good ? 'var(--green)' : val >= mid ? 'var(--gold)' : 'var(--red)'; }
 
-  var monthlyRate = annual / 100 / 12;
-  var minPayment  = balance * monthlyRate;
-
-  if (payment <= minPayment && annual > 0) {
-    rMain.textContent = 'Never';
-    rMain.style.color = 'var(--red)';
-    rDetail.textContent = 'Payment must exceed ' + fmt(minPayment) + '/mo to reduce balance.';
-    rTbl.innerHTML = '';
-    return;
-  }
-
-  var bal = balance;
-  var months = 0;
-  var totalInterest = 0;
-  var rows = [];
-
-  while (bal > 0 && months < 600) {
-    var interest = bal * monthlyRate;
-    var principal = Math.min(payment - interest, bal);
-    totalInterest += interest;
-    bal -= principal;
-    months++;
-    if (months % 12 === 0 || months === 1) {
-      rows.push([months, bal < 0 ? 0 : bal, totalInterest]);
-    }
-  }
-
-  var years  = Math.floor(months / 12);
-  var moRem  = months % 12;
-  rMain.style.color = 'var(--green)';
-  rMain.textContent = years + 'y ' + moRem + 'mo';
-  rDetail.textContent = 'Total interest paid: ' + fmt(totalInterest) + ' | Free in ' + months + ' payments';
-
-  var html = '<table class="calc-tbl"><thead><tr><th>Year</th><th>Balance</th><th>Interest Paid</th></tr></thead><tbody>';
-  rows.forEach(function(r) {
-    html += '<tr><td>Yr ' + Math.ceil(r[0]/12) + '</td><td>' + fmt(r[1]) + '</td><td>' + fmt(r[2]) + '</td></tr>';
-  });
-  html += '</tbody></table>';
-  rTbl.innerHTML = html;
+function resultRow(label, val, col) {
+  return '<div class="cp-result-row"><span class="cp-result-label">' + label + '</span>'
+    + '<span class="cp-result-val" style="color:' + (col||'var(--ink)') + '">' + val + '</span></div>';
 }
 
-// BREAK-EVEN
-function calcBreakEven() {
-  var invested = parseFloat(document.getElementById('be-invested').value) || 221;
-  var rpm      = parseFloat(document.getElementById('be-rpm').value)      || 4;
-  var affPer   = parseFloat(document.getElementById('be-aff').value)      || 0.005;
-  var rMain    = document.getElementById('be-views');
-  var rDetail  = document.getElementById('be-detail');
-  var rTbl     = document.getElementById('be-table');
-
-  var revenuePerView = (rpm / 1000) + affPer;
-  if (revenuePerView <= 0) {
-    rMain.textContent = '—'; return;
-  }
-
-  var viewsNeeded = Math.ceil(invested / revenuePerView);
-  rMain.textContent = fmtN(viewsNeeded) + ' views';
-  rMain.style.color = 'var(--ink)';
-  rDetail.textContent = fmt(revenuePerView * 1000) + ' revenue per 1,000 views (AdSense + affiliate)';
-
-  var milestones = [1000, 5000, 10000, 25000, 50000, 100000];
-  var html = '<table class="calc-tbl"><thead><tr><th>Views</th><th>Revenue</th><th>vs Invested</th></tr></thead><tbody>';
-  milestones.forEach(function(v) {
-    var rev = v * revenuePerView;
-    var pct = Math.round((rev / invested) * 100);
-    var cls = pct >= 100 ? ' style="color:var(--green)"' : '';
-    html += '<tr' + cls + '><td>' + fmtN(v) + '</td><td>' + fmt(rev) + '</td><td>' + pct + '%</td></tr>';
-  });
-  html += '</tbody></table>';
-  rTbl.innerHTML = html;
+function verdict(txt, col) {
+  return '<div class="cp-result-verdict" style="color:' + col + '">' + txt + '</div>';
 }
 
-// CAGR / COMPOUND GROWTH
-function calcCAGR() {
-  var start = parseFloat(document.getElementById('cg-start').value) || 1000;
-  var rate  = parseFloat(document.getElementById('cg-rate').value)  || 20;
-  var years = parseInt(document.getElementById('cg-years').value)   || 10;
-  var rMain   = document.getElementById('cg-final');
-  var rDetail = document.getElementById('cg-detail');
-  var rTbl    = document.getElementById('cg-table');
+// ── ROIC
+function calcROIC() {
+  var ebit   = parseFloat(document.getElementById('roic-ebit').value)   || 0;
+  var tax    = parseFloat(document.getElementById('roic-tax').value)    || 21;
+  var debt   = parseFloat(document.getElementById('roic-debt').value)   || 0;
+  var equity = parseFloat(document.getElementById('roic-equity').value) || 1;
+  var cash   = parseFloat(document.getElementById('roic-cash').value)   || 0;
 
-  var final = start * Math.pow(1 + rate / 100, years);
-  var multiple = final / start;
+  var nopat  = ebit * (1 - tax / 100);
+  var ic     = debt + equity - cash;
+  var roic   = ic > 0 ? (nopat / ic) * 100 : 0;
 
-  rMain.textContent = fmt(final);
-  rMain.style.color = 'var(--green)';
-  rDetail.textContent = multiple.toFixed(1) + 'x return over ' + years + ' years at ' + rate + '% CAGR';
+  var col = color(roic, 15, 8);
+  var vrd = roic >= 15 ? 'PASS — Likely durable competitive advantage'
+          : roic >= 8  ? 'MARGINAL — Adequate but verify moat'
+          : 'FAIL — Value destruction; cost of capital exceeds return';
 
-  var html = '<table class="calc-tbl"><thead><tr><th>Year</th><th>Value</th><th>Gain</th></tr></thead><tbody>';
-  for (var i = 1; i <= Math.min(years, 10); i++) {
-    var val  = start * Math.pow(1 + rate / 100, i);
-    var gain = val - start;
-    html += '<tr><td>Yr ' + i + '</td><td>' + fmt(val) + '</td><td>+' + fmt(gain) + '</td></tr>';
-  }
-  if (years > 10) {
-    var vFinal = start * Math.pow(1 + rate / 100, years);
-    html += '<tr><td>Yr ' + years + '</td><td>' + fmt(vFinal) + '</td><td>+' + fmt(vFinal - start) + '</td></tr>';
-  }
-  html += '</tbody></table>';
-  rTbl.innerHTML = html;
+  document.getElementById('roic-results').innerHTML =
+    resultRow('NOPAT', fmtC(nopat))
+    + resultRow('Invested Capital', fmtC(ic))
+    + resultRow('ROIC', fmtP(roic), col)
+    + resultRow('Equity / IC', fmtP(equity / ic * 100))
+    + resultRow('Debt / IC', fmtP(debt / ic * 100))
+    + verdict(vrd, col);
 }
 
-// Auto-run all calculators on load
+// ── CAGR
+function calcCAGRpro() {
+  var start    = parseFloat(document.getElementById('cagr-start').value)    || 1;
+  var end      = parseFloat(document.getElementById('cagr-end').value)      || 1;
+  var years    = parseFloat(document.getElementById('cagr-years').value)    || 1;
+  var projRate = parseFloat(document.getElementById('cagr-proj').value)     || 20;
+  var projYrs  = parseInt(document.getElementById('cagr-projyrs').value)    || 10;
+
+  var cagr = (Math.pow(end / start, 1 / years) - 1) * 100;
+  var projVal = start * Math.pow(1 + projRate / 100, projYrs);
+  var multiple = end / start;
+
+  var rows = '';
+  for (var i = 1; i <= Math.min(projYrs, 10); i++) {
+    var v = start * Math.pow(1 + projRate / 100, i);
+    rows += resultRow('Year ' + i, fmtC(v));
+  }
+
+  document.getElementById('cagr-results').innerHTML =
+    resultRow('Historical CAGR', fmtP(cagr), color(cagr, 15, 8))
+    + resultRow('Total Return Multiple', fmtX(multiple), color(multiple, 3, 1.5))
+    + resultRow('Projected Value (' + projYrs + 'yr @ ' + projRate + '%)', fmtC(projVal), 'var(--green)')
+    + resultRow('Projected Multiple', fmtX(projVal / start), 'var(--green)')
+    + rows;
+}
+
+// ── DCF
+function calcDCF() {
+  var fcf    = parseFloat(document.getElementById('dcf-fcf').value)    || 1;
+  var g1     = parseFloat(document.getElementById('dcf-g1').value)     || 15;
+  var g2     = parseFloat(document.getElementById('dcf-g2').value)     || 8;
+  var tg     = parseFloat(document.getElementById('dcf-tg').value)     || 3;
+  var dr     = parseFloat(document.getElementById('dcf-dr').value)     || 10;
+  var shares = parseFloat(document.getElementById('dcf-shares').value) || 100;
+
+  var pv = 0;
+  var cf = fcf;
+  var rows = '';
+
+  for (var i = 1; i <= 10; i++) {
+    var rate = i <= 5 ? g1 / 100 : g2 / 100;
+    cf = cf * (1 + rate);
+    var discounted = cf / Math.pow(1 + dr / 100, i);
+    pv += discounted;
+    rows += resultRow('Year ' + i + ' FCF', fmtC(cf) + 'M');
+  }
+
+  var termVal  = (cf * (1 + tg / 100)) / ((dr - tg) / 100);
+  var pvTerminal = termVal / Math.pow(1 + dr / 100, 10);
+  var totalPV    = pv + pvTerminal;
+  var perShare   = totalPV / shares;
+
+  document.getElementById('dcf-results').innerHTML =
+    rows
+    + resultRow('PV of Cash Flows', fmtC(pv) + 'M')
+    + resultRow('Terminal Value', fmtC(termVal) + 'M')
+    + resultRow('PV of Terminal', fmtC(pvTerminal) + 'M')
+    + resultRow('Intrinsic Value (Total)', fmtC(totalPV) + 'M', 'var(--green)')
+    + resultRow('Intrinsic Value / Share', fmtC(perShare), 'var(--green)');
+}
+
+// ── MARGINS
+function calcMargins() {
+  var rev   = parseFloat(document.getElementById('mg-rev').value)   || 1;
+  var cogs  = parseFloat(document.getElementById('mg-cogs').value)  || 0;
+  var opex  = parseFloat(document.getElementById('mg-opex').value)  || 0;
+  var int_  = parseFloat(document.getElementById('mg-int').value)   || 0;
+  var tax   = parseFloat(document.getElementById('mg-tax').value)   || 21;
+  var capex = parseFloat(document.getElementById('mg-capex').value) || 0;
+  var da    = parseFloat(document.getElementById('mg-da').value)    || 0;
+
+  var gross = rev - cogs;
+  var ebitda = gross - opex + da;
+  var ebit   = gross - opex;
+  var ebt    = ebit - int_;
+  var net    = ebt * (1 - tax / 100);
+  var fcf    = net + da - capex;
+
+  var gm   = gross  / rev * 100;
+  var ebitdaM = ebitda / rev * 100;
+  var om   = ebit   / rev * 100;
+  var nm   = net    / rev * 100;
+  var fcfm = fcf    / rev * 100;
+
+  document.getElementById('margin-results').innerHTML =
+    resultRow('Gross Profit', fmtC(gross))
+    + resultRow('Gross Margin', fmtP(gm), color(gm, 40, 20))
+    + resultRow('EBITDA', fmtC(ebitda))
+    + resultRow('EBITDA Margin', fmtP(ebitdaM), color(ebitdaM, 25, 12))
+    + resultRow('Operating Income', fmtC(ebit))
+    + resultRow('Operating Margin', fmtP(om), color(om, 20, 10))
+    + resultRow('Net Income', fmtC(net))
+    + resultRow('Net Margin', fmtP(nm), color(nm, 15, 5))
+    + resultRow('Free Cash Flow', fmtC(fcf))
+    + resultRow('FCF Margin', fmtP(fcfm), color(fcfm, 10, 3));
+}
+
+// ── EV / EBITDA
+function calcEV() {
+  var mktcap = parseFloat(document.getElementById('ev-mktcap').value)  || 0;
+  var debt   = parseFloat(document.getElementById('ev-debt').value)    || 0;
+  var cash   = parseFloat(document.getElementById('ev-cash').value)    || 0;
+  var pref   = parseFloat(document.getElementById('ev-pref').value)    || 0;
+  var ebitda = parseFloat(document.getElementById('ev-ebitda').value)  || 1;
+  var rev    = parseFloat(document.getElementById('ev-rev').value)     || 1;
+
+  var ev = mktcap + debt + pref - cash;
+  var evEbitda = ev / ebitda;
+  var evRev = ev / rev;
+  var mktEbitda = mktcap / ebitda;
+
+  var col = evEbitda <= 10 ? 'var(--green)' : evEbitda <= 18 ? 'var(--gold)' : 'var(--red)';
+  var vrd = evEbitda <= 10 ? 'Potentially undervalued — check earnings quality'
+          : evEbitda <= 18 ? 'Fair range — in line with market average'
+          : 'Expensive — requires high sustained growth to justify';
+
+  document.getElementById('ev-results').innerHTML =
+    resultRow('Enterprise Value', fmtC(ev) + 'M')
+    + resultRow('EV / EBITDA', fmtX(evEbitda), col)
+    + resultRow('EV / Revenue', fmtX(evRev))
+    + resultRow('Mkt Cap / EBITDA', fmtX(mktEbitda))
+    + verdict(vrd, col);
+}
+
+// ── WACC
+function calcWACC() {
+  var eq   = parseFloat(document.getElementById('wacc-eq').value)   || 1;
+  var debt = parseFloat(document.getElementById('wacc-debt').value) || 0;
+  var ke   = parseFloat(document.getElementById('wacc-ke').value)   || 10;
+  var kd   = parseFloat(document.getElementById('wacc-kd').value)   || 5;
+  var tax  = parseFloat(document.getElementById('wacc-tax').value)  || 21;
+
+  var total  = eq + debt;
+  var we     = eq / total;
+  var wd     = debt / total;
+  var kd_at  = kd * (1 - tax / 100);
+  var wacc   = we * ke + wd * kd_at;
+
+  document.getElementById('wacc-results').innerHTML =
+    resultRow('Weight of Equity', fmtP(we * 100))
+    + resultRow('Weight of Debt', fmtP(wd * 100))
+    + resultRow('After-Tax Cost of Debt', fmtP(kd_at))
+    + resultRow('WACC', fmtP(wacc), color(0, wacc - 1, wacc))
+    + resultRow('Hurdle Rate', fmtP(wacc), 'var(--ink)')
+    + verdict('Any investment must return > ' + fmtP(wacc) + ' to create value', 'var(--ink4)');
+}
+
+// ── MOAT SCORE
+function calcMoat() {
+  var pricing    = parseInt(document.getElementById('moat-pricing').value)    || 0;
+  var switching  = parseInt(document.getElementById('moat-switch').value)     || 0;
+  var network    = parseInt(document.getElementById('moat-network').value)    || 0;
+  var cost       = parseInt(document.getElementById('moat-cost').value)       || 0;
+  var intangible = parseInt(document.getElementById('moat-intangible').value) || 0;
+  var durability = parseInt(document.getElementById('moat-durability').value) || 0;
+
+  var total = pricing + switching + network + cost + intangible + durability;
+  var pct   = Math.round(total / 60 * 100);
+  var col   = color(pct, 70, 50);
+  var vrd   = pct >= 70 ? 'Strong moat — pass Munger filter'
+            : pct >= 50 ? 'Moderate moat — investigate further'
+            : 'Weak moat — FAIL; avoid or short';
+
+  document.getElementById('moat-results').innerHTML =
+    resultRow('Pricing Power', pricing + '/10')
+    + resultRow('Switching Costs', switching + '/10')
+    + resultRow('Network Effects', network + '/10')
+    + resultRow('Cost Advantage', cost + '/10')
+    + resultRow('Intangible Assets', intangible + '/10')
+    + resultRow('Durability', durability + '/10')
+    + '<div class="cp-result-row"><span class="cp-result-label">Total Score</span>'
+    + '<span class="cp-result-val" style="color:' + col + '">' + total + '/60 (' + pct + '%)</span></div>'
+    + '<div style="padding:8px 16px"><div class="cp-score-bar"><div class="cp-score-fill" style="width:' + pct + '%;background:' + col + '"></div></div></div>'
+    + verdict(vrd, col);
+}
+
+// Auto-run on load
 setTimeout(function() {
-  calcFreedom();
-  calcDebt();
-  calcBreakEven();
-  calcCAGR();
-}, 200);
-
-
+  calcROIC(); calcCAGRpro(); calcDCF(); calcMargins(); calcEV(); calcWACC(); calcMoat();
+}, 250);
 
 
 // ═══════════════════════════════════════
