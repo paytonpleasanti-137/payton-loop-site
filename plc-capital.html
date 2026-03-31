@@ -293,6 +293,12 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
 .qlinks-wrap{display:flex;flex-wrap:wrap;gap:8px;padding:16px 0}
 .qlink{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:8px 16px;border:1px solid var(--border);color:var(--ink);text-decoration:none;background:transparent}
 .qlink:hover{background:var(--ink);color:var(--bg)}
+
+/* ── LETTER READER ── */
+.ltr-h1{font-family:var(--serif);font-size:24px;font-weight:600;color:var(--ink);margin:28px 0 12px;line-height:1.2}
+.ltr-h2{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin:24px 0 8px;border-top:1px solid var(--border);padding-top:16px}
+.ltr-h3{font-family:var(--serif);font-size:17px;font-weight:600;color:var(--ink);margin:18px 0 6px}
+.ltr-p{font-family:var(--serif);font-size:15px;line-height:1.9;color:var(--ink2);margin:0 0 14px}
 </style>
 </head>
 <body>
@@ -1780,23 +1786,65 @@ function renderLetterRow(year) {
     + '</div>';
 }
 
+function mdToHtml(text) {
+  // Escape HTML
+  var s = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // Split into lines for processing
+  var lines = s.split('\n');
+  var out = [];
+  var inPara = false;
+
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i];
+    var trimmed = line.trim();
+
+    // Skip performance table lines (mostly dots and numbers)
+    if (/^[\d\s\.\-\(\)%,]+$/.test(trimmed) && trimmed.length > 10) continue;
+    // Skip lines that are mostly dashes/dots (table rows)
+    if (/^[.\-\s\d%\(\)]{20,}$/.test(trimmed)) continue;
+
+    // Headings
+    if (/^# /.test(trimmed)) {
+      if (inPara) { out.push('</p>'); inPara = false; }
+      out.push('<h2 class="ltr-h1">' + trimmed.slice(2) + '</h2>');
+      continue;
+    }
+    if (/^## /.test(trimmed)) {
+      if (inPara) { out.push('</p>'); inPara = false; }
+      out.push('<h3 class="ltr-h2">' + trimmed.slice(3) + '</h3>');
+      continue;
+    }
+    if (/^### /.test(trimmed)) {
+      if (inPara) { out.push('</p>'); inPara = false; }
+      out.push('<h4 class="ltr-h3">' + trimmed.slice(4) + '</h4>');
+      continue;
+    }
+
+    // Empty line = paragraph break
+    if (trimmed === '') {
+      if (inPara) { out.push('</p>'); inPara = false; }
+      continue;
+    }
+
+    // Regular text line
+    var formatted = trimmed
+      .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g,'<em>$1</em>');
+
+    if (!inPara) { out.push('<p class="ltr-p">'); inPara = true; }
+    else { out.push(' '); }
+    out.push(formatted);
+  }
+
+  if (inPara) out.push('</p>');
+  return out.join('');
+}
+
 function renderLetterContent(year) {
   var text = LETTER_CACHE[year];
   if (!text) return '';
 
-  // Convert markdown to simple HTML
-  var html = text
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/^# (.+)$/gm, '<h2 style="font-family:var(--serif);font-size:22px;font-weight:600;color:var(--ink);margin:24px 0 12px">$1</h2>')
-    .replace(/^## (.+)$/gm,'<h3 style="font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin:20px 0 8px">$1</h3>')
-    .replace(/^### (.+)$/gm,'<h4 style="font-family:var(--serif);font-size:16px;font-weight:600;color:var(--ink);margin:16px 0 6px">$1</h4>')
-    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g,'<em>$1</em>')
-    .replace(/\n\n/g,'</p><p>')
-    .replace(/\n/g,' ');
-
+  var html = mdToHtml(text);
   var wordCount = text.split(/\s+/).length;
 
   return '<div style="border-bottom:1px solid var(--border);padding-bottom:12px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center">'
