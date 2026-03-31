@@ -194,6 +194,76 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
   .ff-triv-col{border-right:none;border-bottom:1px solid var(--border)}
 }
 
+
+.ltag-btn{
+  padding:5px 14px;font-family:var(--mono);font-size:8px;font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;
+  border:1px solid var(--border);background:transparent;color:var(--ink4);
+  transition:background 0.1s,color 0.1s;
+}
+.ltag-btn:hover{background:var(--bg3);color:var(--ink2)}
+.ltag-btn.active{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+.letter-card{
+  border:1px solid var(--border);margin-bottom:2px;
+  background:var(--bg);
+}
+.letter-card-header{
+  padding:16px 22px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;
+  border-bottom:1px solid transparent;transition:background 0.1s;
+}
+.letter-card-header:hover{background:var(--bg2)}
+.letter-card-header.open{border-bottom:1px solid var(--border);background:var(--bg2)}
+.letter-year{
+  font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;
+  text-transform:uppercase;color:var(--ink4);margin-bottom:5px;
+}
+.letter-title{
+  font-family:var(--serif);font-size:20px;color:var(--ink);font-weight:600;
+  line-height:1.2;margin-bottom:6px;
+}
+.letter-tags{display:flex;gap:6px;flex-wrap:wrap}
+.letter-tag{
+  font-family:var(--mono);font-size:7px;letter-spacing:1.5px;text-transform:uppercase;
+  padding:2px 8px;border:1px solid var(--border);color:var(--ink4);
+}
+.letter-tag.mistake{border-color:rgba(214,58,42,0.4);color:rgba(214,58,42,0.7)}
+.letter-tag.principle{border-color:rgba(26,58,107,0.4);color:rgba(26,58,107,0.7)}
+.letter-tag.charlie{border-color:rgba(184,134,11,0.5);color:rgba(184,134,11,0.8)}
+
+.letter-body{display:none;padding:0 22px 24px}
+.letter-body.open{display:block}
+
+.letter-quote{
+  font-family:var(--serif);font-size:16px;line-height:1.85;color:var(--ink2);
+  border-left:3px solid var(--border);padding:16px 20px;
+  margin:20px 0;background:var(--bg2);font-style:italic;
+}
+.letter-source{
+  font-family:var(--mono);font-size:9px;color:var(--ink4);
+  letter-spacing:1px;margin-top:8px;text-align:right;
+}
+
+.trivium-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border:1px solid var(--border);margin-top:20px}
+.tri-col{padding:16px 18px}
+.tri-col:not(:last-child){border-right:1px solid var(--border)}
+.tri-label{
+  font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:2px;
+  text-transform:uppercase;margin-bottom:8px;
+}
+.tri-text{font-size:12px;color:var(--ink2);line-height:1.75}
+
+.autopsy-strip{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;
+  border:1px solid var(--border);border-top:3px solid var(--red);margin-top:20px;
+}
+.autopsy-col{padding:14px 16px}
+.autopsy-col:not(:last-child){border-right:1px solid var(--border)}
+.autopsy-label{
+  font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:2px;
+  text-transform:uppercase;color:var(--ink4);margin-bottom:6px;
+}
+.autopsy-text{font-size:12px;color:var(--ink2);line-height:1.7}
 </style>
 </head>
 <body>
@@ -218,7 +288,8 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
   <a class="plc-sub" href="paladin.html">PALADIN</a>
   <a class="plc-sub" href="conductor.html">Signals</a>
   <a class="plc-sub" href="lexicon.html">Lexicon</a>
-  <button class="plc-sub" onclick="show('berkshire',this)" id="sl-berkshire">Berkshire</button>
+  <button class="plc-sub" onclick="show('letters',this)">Letters</button>
+      <button class="plc-sub" onclick="show('berkshire',this)" id="sl-berkshire">Berkshire</button>
   <button class="plc-sub" onclick="show('financials',this)" id="sl-financials">Calculator</button>
 </div>
 <div class="plc-subnav" id="sub-business" style="display:none">
@@ -733,6 +804,56 @@ function closePrivate() {
 </div>
 
 <!-- ========= BERKSHIRE VIEW v2 — MUNGER FOUR FILTERS ========= -->
+
+<!-- ========= LETTERS VIEW ========= -->
+<div class="view" id="v-letters">
+<div style="max-width:1100px;margin:0 auto;padding-bottom:60px">
+
+  <!-- HEADER -->
+  <div style="padding-bottom:18px;margin-bottom:28px;border-bottom:2px solid var(--ink)">
+    <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin-bottom:6px">Consilience &bull; Primary Sources</div>
+    <div style="font-family:var(--serif);font-size:36px;font-weight:600;color:var(--ink);line-height:1.1;margin-bottom:8px">The Letters</div>
+    <div style="font-size:13px;color:var(--ink3);line-height:1.7;max-width:700px">Warren Buffett &amp; Charlie Munger in their own words. Primary sources only &mdash; no summaries, no paraphrase. Each passage is Trivium-tagged: what was said, why it was said, and what to do with it.</div>
+  </div>
+
+  <!-- SEARCH + FILTER -->
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px;align-items:center">
+    <input id="letters-search" type="text" placeholder="Search passages, years, themes..."
+      style="flex:1;min-width:200px;padding:9px 14px;border:1px solid var(--border);font-family:var(--mono);font-size:11px;background:var(--bg2);color:var(--ink);outline:none"
+      oninput="filterLetters()">
+    <div style="display:flex;gap:6px;flex-wrap:wrap" id="letters-tag-filters">
+      <button class="ltag-btn active" data-tag="all"      onclick="setLettersTag('all',this)">All</button>
+      <button class="ltag-btn"        data-tag="principle" onclick="setLettersTag('principle',this)">Principles</button>
+      <button class="ltag-btn"        data-tag="mistake"   onclick="setLettersTag('mistake',this)">Mistakes</button>
+      <button class="ltag-btn"        data-tag="partner"   onclick="setLettersTag('partner',this)">Partnership</button>
+      <button class="ltag-btn"        data-tag="market"    onclick="setLettersTag('market',this)">Markets</button>
+      <button class="ltag-btn"        data-tag="charlie"   onclick="setLettersTag('charlie',this)">Charlie</button>
+    </div>
+  </div>
+
+  <!-- LETTERS GRID -->
+  <div id="letters-list"></div>
+
+  <!-- TRIVIUM LEGEND -->
+  <div style="display:flex;gap:0;border:1px solid var(--border);margin-top:36px">
+    <div style="flex:1;padding:14px 18px;border-right:1px solid var(--border)">
+      <div style="font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:4px">&#9632; Grammar</div>
+      <div style="font-size:11px;color:var(--ink3)">What is being said. The precise meaning of the words as written.</div>
+    </div>
+    <div style="flex:1;padding:14px 18px;border-right:1px solid var(--border)">
+      <div style="font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:4px">&#9632; Logic</div>
+      <div style="font-size:11px;color:var(--ink3)">Why it was said. The reasoning, the context, the trade-off being described.</div>
+    </div>
+    <div style="flex:1;padding:14px 18px">
+      <div style="font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:4px">&#9632; Rhetoric</div>
+      <div style="font-size:11px;color:var(--ink3)">The move. What this changes about how you act.</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+
 <div class="view" id="v-berkshire">
 <div style="max-width:1060px;margin:0 auto">
 
@@ -1533,6 +1654,326 @@ window.showSection = function(sec, btn) {
   }
 };
 
+
+
+
+
+// ════════════════════════════════════════════════════
+// LETTERS CORPUS — primary source passages
+// ════════════════════════════════════════════════════
+var LETTERS_DATA = [
+  {
+    id:'partner1956',
+    year:'1956',
+    source:'Buffett Partnership Letter, 1956',
+    author:'Warren Buffett',
+    title:'Three Categories, One Discipline',
+    tags:['principle','partner'],
+    quote:'I am not in the business of predicting general stock market or business fluctuations. If you think I can do this, or think it is essential to an investment program, you should not be in the Buffett Partnership.',
+    grammar:'Buffett is drawing a hard line at the outset of his career: the Partnership is not a market-timing vehicle. He will not predict macro conditions. He is defining scope limitation as a feature, not a weakness.',
+    logic:'In 1956, most investment managers sold themselves on market insight &mdash; the ability to call tops and bottoms. Buffett rejected this framing entirely because he knew it was unverifiable. By refusing to compete on that dimension, he anchored his value on something measurable: individual business analysis. This was a competitive moat disguised as a disclaimer.',
+    rhetoric:'Every time you find yourself making an investment decision based on where the market is going, you have left the discipline. The question is never "where is the market headed." It is always "is this business worth more than I am paying for it."',
+    autopsy:null
+  },
+  {
+    id:'partner1962',
+    year:'1962',
+    source:'Buffett Partnership Letter, January 1962',
+    author:'Warren Buffett',
+    title:'On the Folly of Performance Envy',
+    tags:['principle','partner','market'],
+    quote:'I would consider a year in which we declined 15% and the Dow declined 30% to be much superior to a year when both the Partnership and the Dow advanced 20%. Over a period of time there are going to be good and bad years; there is nothing to be gained by getting enthused or depressed about the sequence of events.',
+    grammar:'Buffett is defining performance in relative terms, not absolute. A loss that beats the index is success. A gain that trails it is failure. He is also explicitly warning against emotional reactions to year-by-year results.',
+    logic:'This reframe is critical because it immunizes the investment process against the wrong incentives. If absolute returns are the benchmark, a manager will take outsized risk in bull markets to keep up. If relative returns are the benchmark, the manager is rewarded for discipline during declines &mdash; which is exactly when discipline is hardest to maintain.',
+    rhetoric:'Measure yourself against the market, not against zero. A year you lose less than everyone else is a year you won. The partners who understood this held through the bad years and compounded. The ones who didn\'t, left at the bottom.',
+    autopsy:null
+  },
+  {
+    id:'berk1977',
+    year:'1977',
+    source:'Berkshire Hathaway Annual Letter, 1977',
+    author:'Warren Buffett',
+    title:'The Economic Goodwill Distinction',
+    tags:['principle'],
+    quote:'Businesses logically are worth far more than net tangible assets when they can be expected to produce earnings on such assets considerably in excess of market rates of return. The capitalized value of this excess return is economic Goodwill.',
+    grammar:'Buffett is defining economic goodwill: the present value of returns in excess of what a normal business earns on its assets. This is separate from accounting goodwill, which is merely the premium paid over book value in an acquisition.',
+    logic:'This distinction matters enormously. A business with $10M in assets earning $1M/year (10% return) is worth approximately book value. A business with $10M in assets earning $3M/year (30% return) is worth $30M or more, because the excess return capitalizes into a higher valuation. The source of that excess &mdash; brand, patent, customer habit &mdash; is the economic goodwill. It is not on the balance sheet but it is real.',
+    rhetoric:'When you evaluate a business, ask: what would it cost a competitor to replicate these returns? If the answer is "they can\'t," you are looking at economic goodwill. That is what you are buying. The assets are almost beside the point.',
+    autopsy:null
+  },
+  {
+    id:'berk1979',
+    year:'1979',
+    source:'Berkshire Hathaway Annual Letter, 1979',
+    author:'Warren Buffett',
+    title:'The Newspaper Franchise',
+    tags:['principle','market'],
+    quote:'A franchise arises in businesses selling products or services that are needed or desired, have no close substitute, and are not subject to price regulation. The existence of all three conditions will be demonstrated by a company\'s ability to regularly price its products and services significantly above cost and thereby earn high rates of return on capital.',
+    grammar:'Buffett is giving a three-part test for franchise identification: desired product, no substitute, unregulated pricing. All three must be present. The proof of the franchise is sustained above-average returns on capital &mdash; not market share, not brand recognition, not revenue growth.',
+    logic:'This definition is doing something subtle. It grounds franchise value in economics, not in marketing perception. A company that everyone recognizes but cannot price above cost does not have a franchise. A regional newspaper with strong local monopoly and advertiser dependency that no one outside the county has heard of may have a better franchise than a national brand. The test is pricing power, period.',
+    rhetoric:'Before you call something a franchise, ask: can they raise prices 10% tomorrow with no volume loss? If no, it is a commodity business wearing franchise clothing. Be precise about this distinction. Commodity businesses destroy capital at exactly the moment you believe them to be franchises.',
+    autopsy:null
+  },
+  {
+    id:'berk1985dexter',
+    year:'1993 / 2007',
+    source:'Berkshire Hathaway Annual Letter, 2007',
+    author:'Warren Buffett',
+    title:'Dexter Shoe: The Worst Deal I Ever Made',
+    tags:['mistake'],
+    quote:'To date, Dexter is my worst deal. In 1993 I bought Dexter Shoe for $433 million, paying with Berkshire stock. Dexter\'s value went to zero... I gave away 1.6% of a wonderful business &mdash; one now worth about $220 billion &mdash; to buy a worthless business.',
+    grammar:'The loss was not $433 million. It was 1.6% of Berkshire &mdash; because Buffett paid in stock. The stock Berkshire issued to buy Dexter would, if retained, be worth over $3.5 billion by the time Buffett wrote this letter. He is precisely quantifying the actual cost of using overvalued currency to buy an overpriced asset.',
+    logic:'Two errors compounded. First: the business had no durable competitive advantage. Cheap foreign shoe manufacturing erased Dexter\'s cost position within a decade. Second: paying in Berkshire stock amplified the mistake exponentially. Every dollar of Berkshire stock issued to make an acquisition is a dollar of Berkshire\'s future compounding given away. The hurdle rate for stock-financed acquisitions must therefore be higher than for cash deals &mdash; not equal to, higher.',
+    rhetoric:'When you pay with your own stock, you are not spending cash. You are selling a fractional interest in everything you have already built. Price that honestly before you hand it to someone else.',
+    autopsy:{
+      thesis:'Dexter Shoe had a strong regional brand and domestic manufacturing. Management was excellent.',
+      dissent:'Charlie warned the competitive moat was shallow. Domestic shoe manufacturing was structurally disadvantaged against Asian production costs.',
+      outcome:'Dexter\'s value went to zero. The stock used to buy it compounded to over $3.5 billion.',
+      lesson:'A good management team cannot overcome a bad business. And stock is never "free currency." It is a share of everything you have built.'
+    }
+  },
+  {
+    id:'berk1989usair',
+    year:'1989 / 1996',
+    source:'Berkshire Hathaway Annual Letter, 1996',
+    author:'Warren Buffett',
+    title:'USAir: Putting the Investor on the Plane',
+    tags:['mistake'],
+    quote:'Intelligent people have been investing in the airline business since Orville Wright\'s day. It has been a disaster... the Wright Brothers at Kitty Hawk gave the world a great gift, but unwittingly they also gave the short-sellers a great opportunity. The airline business has eaten up more capital than it has ever returned.',
+    grammar:'Buffett is making a structural claim: the airline industry as a whole, across its entire history, has destroyed net capital. Individual carriers may have profitable years. The industry, in aggregate, has not earned its cost of capital. This is a statement about industry economics, not management quality.',
+    logic:'Why? Airlines have high fixed costs, no pricing power, commodity product, unionized labor, and intense competition. Deregulation in 1978 made it worse. Any profitability is competed away by new entrants. Buffett invested in USAir preferred stock in 1989 and nearly lost the entire $358 million. He recovered when USAir avoided bankruptcy, but the episode confirmed what he already knew: industry structure determines outcome more than management quality.',
+    rhetoric:'Before you invest in any business, ask: if this industry became wildly profitable, what would prevent a new competitor from entering and erasing those profits? If the answer is "nothing," the industry cannot sustain above-average returns regardless of who is running it.',
+    autopsy:{
+      thesis:'Preferred stock with high yield offered downside protection. USAir had a strong route network.',
+      dissent:'Charlie and others noted the structural problems with commercial aviation economics.',
+      outcome:'USAir nearly went bankrupt. Berkshire came close to a full write-off on $358 million.',
+      lesson:'Preferred stock does not protect you from a structurally broken business. The cushion absorbs losses you should never have been exposed to.'
+    }
+  },
+  {
+    id:'berk1996moat',
+    year:'1996',
+    source:'Berkshire Hathaway Annual Letter, 1996',
+    author:'Warren Buffett',
+    title:'The Moat and the Crocodiles',
+    tags:['principle'],
+    quote:'The key to investing is not assessing how much an industry is going to affect society, or how much it will grow, but rather determining the competitive advantage of any given company and, above all, the durability of that advantage. The products or services that have wide, sustainable moats around them are the ones that deliver rewards to investors.',
+    grammar:'Competitive advantage is not sufficient. Durability of competitive advantage is the operative variable. A company with a temporary moat is a commodity business with a temporary reprieve. The question is always: does this moat widen, narrow, or hold steady over time?',
+    logic:'This reframes the entire growth-vs-value debate. High-growth industries destroy value when competition erodes margins. Slow-growth industries create enormous value when the leader holds an impregnable position. Coca-Cola grows slower than technology. It has compounded more reliably because the moat is structural. No amount of capital or intelligence can dislodge a habit held by two billion people.',
+    rhetoric:'Draw the moat on paper before you invest. Label the crocodiles: brand loyalty, switching costs, network effects, cost advantage, regulatory license. Then ask: what could drain this moat in ten years? If you cannot answer that question, you do not understand the business well enough to own it.',
+    autopsy:null
+  },
+  {
+    id:'berk1997intrinsic',
+    year:'1997',
+    source:'Berkshire Hathaway Annual Letter, 1997',
+    author:'Warren Buffett',
+    title:'Intrinsic Value: The Only Number That Matters',
+    tags:['principle'],
+    quote:'Intrinsic value is an all-important concept that offers the only logical approach to evaluating the relative attractiveness of investments and businesses. Intrinsic value can be defined simply: it is the discounted value of the cash that can be taken out of a business during its remaining life.',
+    grammar:'Intrinsic value is not earnings, not book value, not revenue. It is the present value of all future cash distributions. Everything else is a proxy. Some proxies are useful. None of them are the thing itself.',
+    logic:'This definition is elegant because it is also demanding. You cannot calculate intrinsic value precisely. You must make assumptions about growth rate, duration, and discount rate. The discipline is not in the calculation &mdash; it is in recognizing which businesses allow you to make those assumptions with high confidence, and which do not. Businesses you cannot model reliably are not investment opportunities regardless of their price.',
+    rhetoric:'Stop asking what the stock is worth. Ask what the business is worth. Then ask what the stock costs. If the cost is materially below the value, you have a margin of safety. If not, move on regardless of how much you like the company.',
+    autopsy:null
+  },
+  {
+    id:'berk2001sept11',
+    year:'2001',
+    source:'Berkshire Hathaway Annual Letter, 2001',
+    author:'Warren Buffett',
+    title:'On Insurance and Inevitable Catastrophe',
+    tags:['principle','market'],
+    quote:'We were guilty of fuzzy thinking: we knew that the World Trade Center and similar targets had always presented extraordinary risk and that we should therefore have demanded very high prices for insuring them. Instead, we simply thought of such business as "normal" commercial risk and priced accordingly. We got lucky in 1993 when the first attack on the World Trade Center did minimal damage.',
+    grammar:'Buffett is confessing to a category error. He treated a fat-tail risk as a normal distribution risk and priced accordingly. The "luck" of 1993 &mdash; a bomb that caused limited damage &mdash; reinforced the wrong model instead of correcting it.',
+    logic:'This is a textbook example of availability bias and model error operating together. Because a catastrophic World Trade Center attack had never happened, it was priced as though it could not happen &mdash; not at a low probability, but effectively at zero. The correct response to genuinely uncertain catastrophic risk is either to demand a price that compensates for the full possibility, or to decline to underwrite it.',
+    rhetoric:'Risks that have never materialized are not risks you have managed. They are risks you have been lucky to avoid. Price the possibility, not the history. When you cannot price the possibility adequately, pass.',
+    autopsy:{
+      thesis:'Large commercial properties in major cities were "normal" commercial insurance risk.',
+      dissent:'The risk of coordinated attack on symbolic targets had been demonstrated in 1993 and flagged by security analysts throughout the 1990s.',
+      outcome:'September 11 resulted in insurance losses of approximately $2.3 billion for Berkshire.',
+      lesson:'Treating a fat-tail risk as a normal risk is not conservative underwriting. It is deferred catastrophe.'
+    }
+  },
+  {
+    id:'berk2002squarz',
+    year:'2002',
+    source:'Berkshire Hathaway Annual Letter, 2002',
+    author:'Warren Buffett',
+    title:'SQUARZ: When Clever Beats Itself',
+    tags:['mistake','principle'],
+    quote:'I got intrigued with the idea of issuing a convertible bond carrying a negative interest rate; i.e., the lender would pay us interest. The offering of "SQUARZ" was a complicated way of creating a convertible bond that embodied just such a negative yield. Today negative interest rates have become common in Europe, but they were unheard of in 2002. Charlie thought it was a dumb idea for us to sell these bonds and &mdash; as usual &mdash; he was right. I\'d like to have the shares back that we issued through "conversion" of the bonds.',
+    grammar:'A SQUARZ was a unit consisting of a senior note and a warrant. The structure was engineered so that the warrant premium the buyer paid effectively created a negative yield on the note &mdash; the buyer was paying Berkshire for the privilege of lending to it. Conversion meant Buffett issued Berkshire shares at the strike price, which he now regrets because those shares have compounded enormously.',
+    logic:'Charlie\'s objection was structural. The complexity of the instrument obscured what was actually being given away: conversion rights on Berkshire shares at a fixed price. The negative yield was real. But the optionality embedded in the warrant was also real &mdash; and it was Berkshire\'s optionality, surrendered. When the structure converted, Buffett issued shares he did not want to issue. The cleverness of the negative yield was purchased with something more valuable.',
+    rhetoric:'Never let the novelty of a financial instrument distract you from what you are giving away in the fine print. Every clever structure has a counterparty who understood it better than you did. The complexity is usually working against the issuer.',
+    autopsy:{
+      thesis:'Negative-yield convertible bonds would provide free capital &mdash; Berkshire would receive interest rather than pay it.',
+      dissent:'Charlie Munger argued the complexity obscured the cost of the embedded conversion optionality. Berkshire was selling something valuable for the appearance of free money.',
+      outcome:'Bonds converted. Buffett issued Berkshire shares he wished he had retained. The converted shares compounded significantly in the years following.',
+      lesson:'Free money is never free. Find what you gave away and price it honestly before you celebrate the structure.'
+    }
+  },
+  {
+    id:'berk2008crisis',
+    year:'2008',
+    source:'Berkshire Hathaway Annual Letter, 2008',
+    author:'Warren Buffett',
+    title:'On Leverage and the Abyss',
+    tags:['principle','market','mistake'],
+    quote:'Beware of geeks bearing formulas... When we can\'t find anything exciting in which to invest, our second choice is to use cash for repurchases of our own stock... Whatever the future holds, I think it is likely that the purchase of financial instruments at recession-level prices, when all around us are panicking, will in time have been a very sound investment.',
+    grammar:'Two instructions. First: mathematical models that claim to quantify risk do not eliminate it; they often concentrate it invisibly. Second: the appropriate response to widespread panic is purchasing, not selling, provided you have the financial strength to survive the interval between purchase and recovery.',
+    logic:'The 2008 crisis was precipitated in part by quantitative models that assigned near-zero probability to systemic failure. The models were built on historical data from a period that did not include a systemic failure. Buffett\'s warning about "geeks bearing formulas" is a warning about the difference between risk modeled and risk present. His pivot to purchasing is only possible because Berkshire carries no systemic leverage &mdash; he can act when others cannot.',
+    rhetoric:'Carry enough liquidity that a crisis becomes an opportunity rather than a threat. The ability to buy when everyone else must sell is not luck. It is the payoff for years of boring financial conservatism.',
+    autopsy:null
+  },
+  {
+    id:'munger1994psychology',
+    year:'1994',
+    source:'Speech to the Harvard School of Law, 1994',
+    author:'Charlie Munger',
+    title:'The Psychology of Human Misjudgment',
+    tags:['principle','charlie'],
+    quote:'I have concluded that the most important thing to do is to develop a checklist of the things most likely to cause you to make serious errors in judgment, and then to apply that checklist every time a big decision needs to be made. The human mind is a lot like the human egg... once a sperm gets in, it shuts down so the next one can\'t get in. The mind, similarly, tends to shut down once a conclusion has been reached.',
+    grammar:'Munger is describing two things: first, a practical tool &mdash; a pre-decision checklist against known cognitive biases; second, a mechanism &mdash; confirmation bias as a structural feature of human cognition, not a correctable personality flaw.',
+    logic:'The checklist is not about intelligence. Smart people make these errors at the same rate as everyone else, sometimes more. The checklist is a mechanical override for a biological tendency. By forcing yourself to explicitly check for each bias before committing, you interrupt the automatic pattern-matching that shortcuts rational analysis. Munger applied this to every significant business decision for fifty years.',
+    rhetoric:'Before any major decision, write down the three strongest reasons NOT to proceed. If you cannot generate three honest objections, you have not thought hard enough. The objections you cannot answer are the ones that will cost you.',
+    autopsy:null
+  },
+  {
+    id:'munger1994lollapalooza',
+    year:'1994',
+    source:'Speech to the Harvard School of Law, 1994',
+    author:'Charlie Munger',
+    title:'The Lollapalooza Effect',
+    tags:['principle','charlie'],
+    quote:'When two or three of these tendencies combine, you get what I call a Lollapalooza effect &mdash; a confluence of causes leading to an extreme result, either very good or very bad. Most of the greatest disasters in business history come not from one bad decision but from several ordinary tendencies reinforcing each other simultaneously.',
+    grammar:'A Lollapalooza is not a single bias. It is the compounding of multiple biases operating simultaneously in the same direction. Munger identified it as the primary mechanism behind both catastrophic failures and exceptional successes.',
+    logic:'This is why post-mortems are difficult. If Enron collapsed from fraud alone, the lesson is "don\'t commit fraud." But Enron collapsed from confirmation bias, authority deference, social proof, incentive bias, and denial all amplifying each other simultaneously. The individual causes seem ordinary. The compound effect was catastrophic. Munger\'s point is that the conditions for a Lollapalooza are always identifiable in advance &mdash; if you know what to look for.',
+    rhetoric:'When you find yourself thinking "everyone agrees on this" at the same time you are financially incentivized to agree, and the authority figures in the room also agree, you are inside a Lollapalooza. Stop. That is the moment to apply maximum skepticism, not minimum.',
+    autopsy:null
+  },
+  {
+    id:'munger2007latticework',
+    year:'2007',
+    source:'Poor Charlie\'s Almanack, 2007',
+    author:'Charlie Munger',
+    title:'The Latticework of Mental Models',
+    tags:['principle','charlie'],
+    quote:'You must know the big ideas in the big disciplines and use them routinely &mdash; all of them, not just a few. Most people are trained in one model &mdash; economics, or engineering, or psychology &mdash; and try to solve every problem with that one model. To a man with a hammer, every problem looks like a nail. This approach will frequently lead you to the wrong answer.',
+    grammar:'Munger is prescribing intellectual cross-training. Not surface familiarity with many subjects, but working fluency with the core principles of each major discipline. The explicit warning: single-discipline thinkers apply their one model everywhere and produce systematically wrong answers in domains where that model does not apply.',
+    logic:'The business case for the latticework is pattern recognition. Markets, companies, and crises repeat across domains. A bank run and a viral pandemic share a mathematical structure. A monopoly and a species in an isolated ecosystem share a biological structure. The investor who recognizes these patterns across disciplines sees things others do not because their reference library is larger and more varied.',
+    rhetoric:'Pick three disciplines you do not currently use in your work. Read the foundational text in each. Look for one concept from each that applies to a decision you made in the last year. You will find them. The question is whether you found them before or after the decision.',
+    autopsy:null  },
+  {
+    id:'berk2014successor',
+    year:'2014',
+    source:'Berkshire Hathaway Annual Letter, 2014',
+    author:'Warren Buffett',
+    title:'The Instructions I Left for My Trustee',
+    tags:['principle','market'],
+    quote:'My advice to the trustee could not be more simple: put 10% of the cash in short-term government bonds and 90% in a very low-cost S&P 500 index fund. I believe the trust\'s long-term results from this policy will be superior to those attained by most investors &mdash; whether pension funds, institutions, or individuals &mdash; who employ high-fee managers.',
+    grammar:'For money he is leaving to a trustee to manage for his wife, Buffett recommends an index fund. Not individual stocks. Not a hedge fund. An S&P 500 index fund with low fees. This is Buffett &mdash; the world\'s most successful stock picker &mdash; saying that for most people, most of the time, stock picking is the wrong approach.',
+    logic:'The argument is about expected value, not philosophy. After fees, the average active manager underperforms the index. The spread between the best and the average active manager is not predictable in advance. Therefore, the rational strategy for a trustee managing money they did not earn and cannot actively supervise is the low-cost index. Buffett is not contradicting his own career. He is saying his career is not replicable by most people, and they should not try.',
+    rhetoric:'The question is not whether you can beat the index. The question is whether, in advance, you can identify who will beat the index and pay them before they demonstrate it. The probability is low enough that the default should be the index.',
+    autopsy:null
+  },
+  {
+    id:'berk2016salomon',
+    year:'1991 / 2016',
+    source:'Berkshire Hathaway Annual Letter, 1991',
+    author:'Warren Buffett',
+    title:'The Salomon Testimony: Reputation and the Second Bullet',
+    tags:['principle','mistake'],
+    quote:'Lose money for the firm, and I will be understanding. Lose a shred of reputation for the firm, and I will be ruthless.',
+    grammar:'Buffett said this to Salomon Brothers employees after the Treasury bid-rigging scandal, when he became interim chairman. The distinction is explicit: financial losses are recoverable. Reputational losses are not, or not easily. The word "ruthless" is deliberate.',
+    logic:'The economic logic is straightforward. A firm that loses money can raise capital. A firm that loses its reputation cannot operate. Investment banks especially live entirely on the trust of counterparties. One scandal that makes counterparties question whether the firm is dealing honestly with them can trigger a run that no amount of capital can stop. Buffett watched this happen in real time at Salomon.',
+    rhetoric:'For every decision you make, ask: would I be comfortable if this appeared on the front page tomorrow? If no, do not do it regardless of whether it is legal. The absence of a law against something is not a moral permission.',
+    autopsy:null
+  }
+];
+
+var _lettersTag = 'all';
+var _lettersSearch = '';
+
+function filterLetters() {
+  _lettersSearch = document.getElementById('letters-search').value.toLowerCase();
+  renderLetters();
+}
+
+function setLettersTag(tag, btn) {
+  _lettersTag = tag;
+  document.querySelectorAll('.ltag-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderLetters();
+}
+
+function renderLetters() {
+  var container = document.getElementById('letters-list');
+  if (!container) return;
+
+  var filtered = LETTERS_DATA.filter(function(l) {
+    var tagMatch  = _lettersTag === 'all' || l.tags.indexOf(_lettersTag) >= 0;
+    var srchMatch = !_lettersSearch ||
+      l.title.toLowerCase().indexOf(_lettersSearch) >= 0 ||
+      l.quote.toLowerCase().indexOf(_lettersSearch) >= 0 ||
+      l.year.indexOf(_lettersSearch) >= 0 ||
+      l.source.toLowerCase().indexOf(_lettersSearch) >= 0 ||
+      l.grammar.toLowerCase().indexOf(_lettersSearch) >= 0;
+    return tagMatch && srchMatch;
+  });
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div style="padding:40px;text-align:center;font-family:var(--mono);font-size:10px;color:var(--ink4);letter-spacing:2px">No passages match.</div>';
+    return;
+  }
+
+  container.innerHTML = filtered.map(function(l) {
+    var tagHtml = l.tags.map(function(t) {
+      return '<span class="letter-tag ' + t + '">' + t + '</span>';
+    }).join('');
+
+    var autopsyHtml = '';
+    if (l.autopsy) {
+      autopsyHtml = '<div class="autopsy-strip">'
+        + '<div class="autopsy-col"><div class="autopsy-label" style="color:var(--red)">The Thesis</div><div class="autopsy-text">' + l.autopsy.thesis + '</div></div>'
+        + '<div class="autopsy-col"><div class="autopsy-label" style="color:var(--gold)">The Dissent</div><div class="autopsy-text">' + l.autopsy.dissent + '</div></div>'
+        + '<div class="autopsy-col"><div class="autopsy-label" style="color:var(--ink3)">The Outcome &amp; Lesson</div><div class="autopsy-text"><strong>' + l.autopsy.outcome + '</strong><br><br>' + l.autopsy.lesson + '</div></div>'
+        + '</div>';
+    }
+
+    return '<div class="letter-card" id="lc-' + l.id + '">'
+      + '<div class="letter-card-header" onclick="toggleLetter(\'' + l.id + '\')">'
+      + '<div>'
+      + '<div class="letter-year">' + l.year + ' &nbsp;&bull;&nbsp; ' + l.author + '</div>'
+      + '<div class="letter-title">' + l.title + '</div>'
+      + '<div class="letter-tags">' + tagHtml + (l.autopsy ? '<span class="letter-tag mistake" style="border-color:rgba(214,58,42,0.6);color:rgba(214,58,42,0.9)">Decision Autopsy</span>' : '') + '</div>'
+      + '</div>'
+      + '<div style="font-family:var(--mono);font-size:10px;color:var(--ink4);margin-left:16px;flex-shrink:0">+</div>'
+      + '</div>'
+      + '<div class="letter-body" id="lb-' + l.id + '">'
+      + '<blockquote class="letter-quote">&ldquo;' + l.quote + '&rdquo;<div class="letter-source">&mdash; ' + l.source + '</div></blockquote>'
+      + '<div class="trivium-row">'
+      + '<div class="tri-col"><div class="tri-label" style="color:var(--red)">Grammar &mdash; What</div><div class="tri-text">' + l.grammar + '</div></div>'
+      + '<div class="tri-col"><div class="tri-label" style="color:var(--blue)">Logic &mdash; Why</div><div class="tri-text">' + l.logic + '</div></div>'
+      + '<div class="tri-col"><div class="tri-label" style="color:var(--gold)">Rhetoric &mdash; The Move</div><div class="tri-text">' + l.rhetoric + '</div></div>'
+      + '</div>'
+      + autopsyHtml
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function toggleLetter(id) {
+  var body   = document.getElementById('lb-' + id);
+  var header = body ? body.previousElementSibling : null;
+  if (!body) return;
+  var isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  if (header) header.classList.toggle('open', !isOpen);
+  var toggle = header ? header.querySelector('div:last-child') : null;
+  if (toggle) toggle.textContent = isOpen ? '+' : '\u2212';
+}
+
+setTimeout(function() { renderLetters(); }, 150);
 
 </script>
 </body>
