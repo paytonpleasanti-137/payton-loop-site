@@ -1,0 +1,29 @@
+name: Scrape Berkshire Letters
+
+on:
+  schedule:
+    - cron: '0 6 * * 0'  # Every Sunday 6am UTC
+  workflow_dispatch:       # Manual trigger anytime
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Run Berkshire scraper
+        run: python scripts/berkshire_scraper.py
+
+      - name: Commit scraped data
+        run: |
+          git config user.name "Ledger Bot"
+          git config user.email "ledger@paytonloop.com"
+          git add data/berkshire_letters.json
+          git diff --staged --quiet || git commit -m "Auto: scrape Berkshire letters $(date -u +%Y-%m-%d)"
+          git push
